@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>障害支援区分 更新支援ツール（80項目）</title>
+  <style>
+    :root{--bg:#f3f4f6;--card:#fff;--txt:#111827;--sub:#6b7280;--bd:#e5e7eb;--pri:#2563eb;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--txt)}
+    header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--bd);padding:10px 14px;z-index:10}
+    header .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    h1{font-size:16px;margin:0}
+    main{max-width:1100px;margin:0 auto;padding:12px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:980px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card h2{font-size:14px;margin:0 0 8px}
+    .muted{color:var(--sub);font-size:12px;line-height:1.5}
+    label{display:block;font-size:12px;color:var(--sub);margin:8px 0 4px}
+    input,select,textarea{width:100%;border:1px solid var(--bd);border-radius:10px;padding:10px;font-size:14px;background:#fff}
+    textarea{min-height:86px;resize:vertical}
+    .btns{display:flex;gap:8px;flex-wrap:wrap}
+    button{border:1px solid var(--bd);background:#fff;border-radius:10px;padding:9px 10px;font-size:13px;cursor:pointer}
+    button.primary{background:var(--pri);border-color:var(--pri);color:#fff}
+    button:active{transform:translateY(1px)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+    .pill{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);background:#fff;border-radius:999px;padding:6px 10px;font-size:12px;color:var(--sub)}
+    .items{display:flex;flex-direction:column;gap:10px}
+    .item{border:1px solid var(--bd);border-radius:12px;padding:10px}
+    .item .top{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+    .code{font-weight:700}
+    .name{font-size:13px}
+    .grp{font-size:11px;color:var(--sub)}
+    .row2{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
+    @media(min-width:760px){.row2{grid-template-columns:.55fr .45fr}}
+    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .kpi .box{border:1px solid var(--bd);border-radius:12px;padding:10px}
+    .kpi .box .v{font-size:18px;font-weight:800;margin-top:2px}
+    .warn{color:#b45309}
+    .ok{color:#047857}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  </style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1>障害支援区分 更新支援ツール（80項目）</h1>
+    <div class="btns">
+      <button id="btnSave" class="primary">保存</button>
+      <button id="btnExport">エクスポート(JSON)</button>
+      <button id="btnImport">インポート(JSON)</button>
+      <button id="btnReset">入力リセット</button>
+    </div>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2>① 基本情報・聞き取りメモ</h2>
+    <div class="toolbar">
+      <div style="flex:1;min-width:180px">
+        <label>利用者名（またはID）</label>
+        <input id="resident" placeholder="例：山田 太郎 / A-001" />
+      </div>
+      <div style="width:180px">
+        <label>更新日</label>
+        <input id="date" type="date" />
+      </div>
+      <div style="width:240px">
+        <label>比較：前回データ</label>
+        <select id="prevSelect"></select>
+      </div>
+    </div>
+
+    <label>生活状況・聞き取りメモ（自由記述）</label>
+    <textarea id="interview" placeholder="例：日中は就労B。夜間の見守り頻度、服薬管理方法、外出時の付き添い等"></textarea>
+
+    <div class="kpi" style="margin-top:10px">
+      <div class="box">
+        <div class="muted">未入力（80項目中）</div>
+        <div class="v" id="kpiMissing">0</div>
+      </div>
+      <div class="box">
+        <div class="muted">スコア合計（見える化用）</div>
+        <div class="v" id="kpiScore">0</div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px" class="muted">
+      ※本ツールは「支援量の見える化（準シミュレーター）」です。公式の一次判定ロジックそのものは実装しません。<br>
+      選択肢は資料の「身体介助/日常生活/行動障害」区分に合わせて出し分けています。:contentReference[oaicite:4]{index=4}
+    </div>
+  </section>
+
+  <aside class="card">
+    <h2>② 不足チェック・特記事項（下書き）</h2>
+
+    <div class="pill"><span>不足チェック</span> <span id="missingLabel" class="mono"></span></div>
+    <div id="missingList" class="muted" style="margin-top:8px"></div>
+
+    <label style="margin-top:12px">特記事項（下書き）</label>
+    <textarea id="draft" placeholder="ボタンで自動生成します（必要に応じて修正してください）"></textarea>
+
+    <div class="btns" style="margin-top:8px">
+      <button id="btnDraft" class="primary">特記事項 下書き生成</button>
+      <button id="btnCopyDraft">コピー</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--bd);margin:12px 0">
+
+    <h2>③ 更新前後の変化（比較）</h2>
+    <div class="muted">前回データを選ぶと、差分（上がった/下がった）を表示します。</div>
+    <div id="diffSummary" class="muted" style="margin-top:8px"></div>
+  </aside>
+
+  <section class="card" style="grid-column:1/-1">
+    <h2>④ 80項目入力</h2>
+
+    <div class="toolbar">
+      <div style="flex:1;min-width:220px">
+        <label>検索（コード/名称）</label>
+        <input id="q" placeholder="例：4-4 / 入浴 / カテーテル" />
+      </div>
+      <div style="width:230px">
+        <label>グループ</label>
+        <select id="groupFilter">
+          <option value="">すべて</option>
+        </select>
+      </div>
+      <div style="width:200px">
+        <label>表示</label>
+        <select id="showFilter">
+          <option value="all">すべて</option>
+          <option value="missing">未入力のみ</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="items" id="items"></div>
+  </section>
+</main>
+
+<script>
+/** ====== 80項目（資料の一覧をそのまま） ======
+ *  12+16+6+34+12 = 80  :contentReference[oaicite:5]{index=5}
+ */
+const ITEMS = [
+  // 1. 移動や動作等（12）
+  {code:"1-1", name:"寝返り", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-2", name:"起き上がり", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-3", name:"座位保持", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-4", name:"移乗", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-5", name:"立ち上がり", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-6", name:"両足での立位保持", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-7", name:"片足での立位保持", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-8", name:"歩行", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-9", name:"移動", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-10", name:"衣服の着脱", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-11", name:"じょくそう", group:"移動や動作（身体介助）", scale:"physical"},
+  {code:"1-12", name:"えん下", group:"移動や動作（身体介助）", scale:"physical"},
+
+  // 2. 身の回り/日常生活（16）
+  {code:"2-1", name:"食事", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-2", name:"口腔清潔", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-3", name:"入浴", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-4", name:"排尿", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-5", name:"排便", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-6", name:"健康・栄養管理", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-7", name:"薬の管理", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-8", name:"金銭の管理", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-9", name:"電話等の利用", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-10", name:"日常の意思決定", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-11", name:"危機の認識", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-12", name:"調理", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-13", name:"掃除", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-14", name:"洗濯", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-15", name:"買い物", group:"身の回り・日常生活", scale:"daily"},
+  {code:"2-16", name:"交通手段の利用", group:"身の回り・日常生活", scale:"daily"},
+
+  // 3. 意思疎通（6）
+  {code:"3-1", name:"視力", group:"意思疎通", scale:"comm"},
+  {code:"3-2", name:"聴力", group:"意思疎通", scale:"comm"},
+  {code:"3-3", name:"コミュニケーション", group:"意思疎通", scale:"comm"},
+  {code:"3-4", name:"説明の理解", group:"意思疎通", scale:"comm"},
+  {code:"3-5", name:"読み書き", group:"意思疎通", scale:"comm"},
+  {code:"3-6", name:"感覚過敏・感覚鈍麻", group:"意思疎通", scale:"comm"},
+
+  // 4. 行動障害（34）
+  {code:"4-1", name:"被害的・拒否的", group:"行動障害", scale:"behavior"},
+  {code:"4-2", name:"作話", group:"行動障害", scale:"behavior"},
+  {code:"4-3", name:"感情が不安定", group:"行動障害", scale:"behavior"},
+  {code:"4-4", name:"昼夜逆転", group:"行動障害", scale:"behavior"},
+  {code:"4-5", name:"暴言暴行", group:"行動障害", scale:"behavior"},
+  {code:"4-6", name:"同じ話をする", group:"行動障害", scale:"behavior"},
+  {code:"4-7", name:"大声・奇声を出す", group:"行動障害", scale:"behavior"},
+  {code:"4-8", name:"支援の拒否", group:"行動障害", scale:"behavior"},
+  {code:"4-9", name:"徘徊", group:"行動障害", scale:"behavior"},
+  {code:"4-10", name:"落ち着きがない", group:"行動障害", scale:"behavior"},
+  {code:"4-11", name:"外出して戻れない", group:"行動障害", scale:"behavior"},
+  {code:"4-12", name:"１人で出たがる", group:"行動障害", scale:"behavior"},
+  {code:"4-13", name:"収集癖", group:"行動障害", scale:"behavior"},
+  {code:"4-14", name:"物や衣類を壊す", group:"行動障害", scale:"behavior"},
+  {code:"4-15", name:"不潔行為", group:"行動障害", scale:"behavior"},
+  {code:"4-16", name:"異食行動", group:"行動障害", scale:"behavior"},
+  {code:"4-17", name:"ひどい物忘れ", group:"行動障害", scale:"behavior"},
+  {code:"4-18", name:"こだわり", group:"行動障害", scale:"behavior"},
+  {code:"4-19", name:"多動・行動停止", group:"行動障害", scale:"behavior"},
+  {code:"4-20", name:"不安定な行動", group:"行動障害", scale:"behavior"},
+  {code:"4-21", name:"自らを傷つける行為", group:"行動障害", scale:"behavior"},
+  {code:"4-22", name:"他人を傷つける行為", group:"行動障害", scale:"behavior"},
+  {code:"4-23", name:"不適切な行為", group:"行動障害", scale:"behavior"},
+  {code:"4-24", name:"突発的な行動", group:"行動障害", scale:"behavior"},
+  {code:"4-25", name:"過食・反すう等", group:"行動障害", scale:"behavior"},
+  {code:"4-26", name:"そう鬱状態", group:"行動障害", scale:"behavior"},
+  {code:"4-27", name:"反復的行動", group:"行動障害", scale:"behavior"},
+  {code:"4-28", name:"対人面の不安緊張", group:"行動障害", scale:"behavior"},
+  {code:"4-29", name:"意欲が乏しい", group:"行動障害", scale:"behavior"},
+  {code:"4-30", name:"話がまとまらない", group:"行動障害", scale:"behavior"},
+  {code:"4-31", name:"集中力が続かない", group:"行動障害", scale:"behavior"},
+  {code:"4-32", name:"自己の過大評価", group:"行動障害", scale:"behavior"},
+  {code:"4-33", name:"集団への不適応", group:"行動障害", scale:"behavior"},
+  {code:"4-34", name:"多飲水・過飲水", group:"行動障害", scale:"behavior"},
+
+  // 5. 特別な医療（12）
+  {code:"5-1", name:"点滴の管理", group:"特別な医療", scale:"medical"},
+  {code:"5-2", name:"中心静脈栄養", group:"特別な医療", scale:"medical"},
+  {code:"5-3", name:"透析", group:"特別な医療", scale:"medical"},
+  {code:"5-4", name:"ストーマの処置", group:"特別な医療", scale:"medical"},
+  {code:"5-5", name:"酸素療法", group:"特別な医療", scale:"medical"},
+  {code:"5-6", name:"レスピレーター", group:"特別な医療", scale:"medical"},
+  {code:"5-7", name:"気管切開の処置", group:"特別な医療", scale:"medical"},
+  {code:"5-8", name:"疼痛の看護", group:"特別な医療", scale:"medical"},
+  {code:"5-9", name:"経管栄養", group:"特別な医療", scale:"medical"},
+  {code:"5-10", name:"モニター測定", group:"特別な医療", scale:"medical"},
+  {code:"5-11", name:"じょくそうの処置", group:"特別な医療", scale:"medical"},
+  {code:"5-12", name:"カテーテル", group:"特別な医療", scale:"medical"},
+];
+
+const SCALES = {
+  // 資料の「認定調査項目の評価内容」:contentReference[oaicite:6]{index=6}
+  physical: [
+    {v:1, label:"1. 支援が不要"},
+    {v:2, label:"2. 見守り等の支援が必要"},
+    {v:3, label:"3. 部分的な支援が必要"},
+    {v:4, label:"4. 全面的な支援が必要"},
+  ],
+  daily: [
+    {v:1, label:"1. 支援が不要"},
+    {v:2, label:"2. 部分的な支援が必要"},
+    {v:3, label:"3. 全面的な支援が必要"},
+  ],
+  behavior: [
+    {v:1, label:"1. 支援が不要"},
+    {v:2, label:"2. 稀に支援が必要"},
+    {v:3, label:"3. 月に1回以上の支援が必要"},
+    {v:4, label:"4. 週に1回以上の支援が必要"},
+    {v:5, label:"5. ほぼ毎日（週に5日以上）の支援が必要"},
+  ],
+  // 意思疎通は「見る・聞く・話す・理解（もしくは判断できない）」の観点 :contentReference[oaicite:7]{index=7}
+  comm: [
+    {v:1, label:"1. できる（問題なし）"},
+    {v:2, label:"2. 一部困難（支援/配慮が必要）"},
+    {v:3, label:"3. 判断できない/著しく困難"},
+  ],
+  // 特別な医療は「ある/ない」 :contentReference[oaicite:8]{index=8}
+  medical: [
+    {v:0, label:"0. ない"},
+    {v:1, label:"1. ある"},
+  ],
+};
+
+const LS_KEY = "kubun_tool_records_v1";
+
+function loadAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch{ return []; } }
+function saveAll(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
+
+function nowDateStr(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function emptyForm(){
+  return {
+    id: crypto.randomUUID(),
+    resident:"",
+    date: nowDateStr(),
+    interview:"",
+    answers: Object.fromEntries(ITEMS.map(it=>[it.code, null])),
+    notes: Object.fromEntries(ITEMS.map(it=>[it.code, ""])),
+  };
+}
+
+let state = emptyForm();
+
+const $ = (id)=>document.getElementById(id);
+
+function buildGroupFilter(){
+  const groups = [...new Set(ITEMS.map(x=>x.group))];
+  const sel = $("groupFilter");
+  sel.innerHTML = `<option value="">すべて</option>` + groups.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+}
+
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+function renderPrevSelect(){
+  const all = loadAll();
+  const sel = $("prevSelect");
+  sel.innerHTML = `<option value="">（なし）</option>` + all
+    .filter(r=>r.resident && r.date)
+    .sort((a,b)=> (b.date||"").localeCompare(a.date||""))
+    .map(r=>`<option value="${r.id}">${escapeHtml(r.resident)} / ${escapeHtml(r.date)}</option>`)
+    .join("");
+}
+
+function scoreOf(code, val){
+  if(val==null) return 0;
+  // 見える化用：そのまま点数に（medicalは0/1）
+  return Number(val)||0;
+}
+
+function calcKPIs(){
+  const missing = ITEMS.filter(it=>state.answers[it.code]==null).length;
+  const score = ITEMS.reduce((sum,it)=> sum + scoreOf(it.code, state.answers[it.code]), 0);
+  $("kpiMissing").textContent = missing;
+  $("kpiScore").textContent = score;
+  $("missingLabel").textContent = `${missing} / 80`;
+  // 不足リスト
+  const miss = ITEMS.filter(it=>state.answers[it.code]==null)
+    .slice(0,30)
+    .map(it=>`・${it.code} ${it.name}（${it.group}）`).join("<br>");
+  $("missingList").innerHTML = miss ? miss : `<span class="ok">未入力はありません。</span>`;
+}
+
+function renderItems(){
+  const q = ($("q").value||"").trim().toLowerCase();
+  const gf = $("groupFilter").value;
+  const show = $("showFilter").value;
+
+  const list = ITEMS.filter(it=>{
+    const hit = !q || (it.code.toLowerCase().includes(q) || it.name.toLowerCase().includes(q));
+    const hitG = !gf || it.group===gf;
+    const hitShow = (show==="all") || (show==="missing" && state.answers[it.code]==null);
+    return hit && hitG && hitShow;
+  });
+
+  const wrap = $("items");
+  wrap.innerHTML = list.map(it=>{
+    const val = state.answers[it.code];
+    const note = state.notes[it.code] || "";
+    const opts = SCALES[it.scale].map(o=>`<option value="${o.v}" ${val===o.v?"selected":""}>${escapeHtml(o.label)}</option>`).join("");
+    return `
+      <div class="item" data-code="${it.code}">
+        <div class="top">
+          <div>
+            <div class="code">${escapeHtml(it.code)} <span class="name">${escapeHtml(it.name)}</span></div>
+            <div class="grp">${escapeHtml(it.group)}</div>
+          </div>
+          <div class="pill">${val==null ? `<span class="warn">未入力</span>` : `<span class="ok">入力済</span>`}</div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>選択</label>
+            <select class="ans">
+              <option value="">（未入力）</option>
+              ${opts}
+            </select>
+          </div>
+          <div>
+            <label>根拠メモ（特記事項向け）</label>
+            <input class="note" placeholder="例：夜間は2時間毎に声かけ、外出は必ず付き添い" value="${escapeHtml(note)}" />
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // bind
+  wrap.querySelectorAll(".item").forEach(el=>{
+    const code = el.getAttribute("data-code");
+    el.querySelector(".ans").addEventListener("change",(e)=>{
+      const v = e.target.value==="" ? null : Number(e.target.value);
+      state.answers[code]=v;
+      calcKPIs(); renderItems(); renderDiff();
+    });
+    el.querySelector(".note").addEventListener("input",(e)=>{
+      state.notes[code]=e.target.value||"";
+    });
+  });
+}
+
+function draftTokki(){
+  // ざっくり：高め（=支援が重い/頻度が高い）から抜粋して文章化
+  const lines = [];
+  lines.push(`【聞き取りメモ】`);
+  if(state.interview.trim()) lines.push(state.interview.trim());
+  else lines.push("（未記入）");
+
+  const pick = (pred)=> ITEMS
+    .filter(it=>state.answers[it.code]!=null && pred(it, state.answers[it.code]))
+    .map(it=>{
+      const v = state.answers[it.code];
+      const label = (SCALES[it.scale].find(o=>o.v===v)||{}).label || v;
+      const note = (state.notes[it.code]||"").trim();
+      return `・${it.code} ${it.name}：${label}${note?`（根拠：${note}）`:""}`;
+    });
+
+  lines.push("");
+  lines.push("【支援が手厚い/頻度が高いと考えられる項目（抜粋）】");
+  const a = [
+    ...pick((it,v)=> it.scale==="physical" && v>=3),
+    ...pick((it,v)=> it.scale==="daily" && v>=3),
+    ...pick((it,v)=> it.scale==="behavior" && v>=4),
+    ...pick((it,v)=> it.scale==="medical" && v>=1),
+    ...pick((it,v)=> it.scale==="comm" && v>=2),
+  ];
+  lines.push(a.length? a.join("\n") : "（該当なし / もしくは未入力が多い）");
+
+  lines.push("");
+  lines.push("【不足項目】");
+  const miss = ITEMS.filter(it=>state.answers[it.code]==null).map(it=>`${it.code} ${it.name}`);
+  lines.push(miss.length ? miss.join("、 ") : "なし");
+
+  return lines.join("\n");
+}
+
+function renderDiff(){
+  const prevId = $("prevSelect").value;
+  if(!prevId){ $("diffSummary").innerHTML = "（前回データ未選択）"; return; }
+
+  const prev = loadAll().find(r=>r.id===prevId);
+  if(!prev){ $("diffSummary").innerHTML = "（前回データが見つかりません）"; return; }
+
+  const up=[], down=[], same=[], newly=[], cleared=[];
+  for(const it of ITEMS){
+    const a = prev.answers?.[it.code] ?? null;
+    const b = state.answers?.[it.code] ?? null;
+    if(a==null && b!=null) newly.push(it);
+    else if(a!=null && b==null) cleared.push(it);
+    else if(a==null && b==null) {}
+    else if(Number(b)>Number(a)) up.push(it);
+    else if(Number(b)<Number(a)) down.push(it);
+    else same.push(it);
+  }
+
+  const fmt = (arr)=> arr.slice(0,10).map(it=>`${it.code} ${it.name}`).join(" / ") + (arr.length>10?` …(${arr.length}件)`:`${arr.length?`（${arr.length}件）`:"（0件）"}`);
+
+  $("diffSummary").innerHTML = `
+    <div class="pill">上がった（支援増/頻度増の可能性）</div>
+    <div class="muted">${escapeHtml(fmt(up))}</div>
+    <div style="height:8px"></div>
+    <div class="pill">下がった（支援減/頻度減の可能性）</div>
+    <div class="muted">${escapeHtml(fmt(down))}</div>
+    <div style="height:8px"></div>
+    <div class="pill">新規入力</div>
+    <div class="muted">${escapeHtml(fmt(newly))}</div>
+  `;
+}
+
+function hydrate(){
+  $("resident").value = state.resident || "";
+  $("date").value = state.date || nowDateStr();
+  $("interview").value = state.interview || "";
+  calcKPIs();
+  buildGroupFilter();
+  renderPrevSelect();
+  renderItems();
+  renderDiff();
+}
+
+$("date").value = nowDateStr();
+
+$("resident").addEventListener("input", e=> state.resident = e.target.value || "");
+$("date").addEventListener("change", e=> state.date = e.target.value || nowDateStr());
+$("interview").addEventListener("input", e=> state.interview = e.target.value || "");
+
+$("q").addEventListener("input", renderItems);
+$("groupFilter").addEventListener("change", renderItems);
+$("showFilter").addEventListener("change", renderItems);
+$("prevSelect").addEventListener("change", renderDiff);
+
+$("btnDraft").addEventListener("click", ()=>{
+  $("draft").value = draftTokki();
+});
+
+$("btnCopyDraft").addEventListener("click", async ()=>{
+  const t = $("draft").value || "";
+  try{ await navigator.clipboard.writeText(t); alert("コピーしました"); }catch{ alert("コピーに失敗しました"); }
+});
+
+$("btnSave").addEventListener("click", ()=>{
+  if(!state.resident.trim()){ alert("利用者名（またはID）を入力してください"); return; }
+  const all = loadAll();
+  const idx = all.findIndex(x=>x.id===state.id);
+  if(idx>=0) all[idx]=state; else all.push(state);
+  saveAll(all);
+  renderPrevSelect();
+  alert("保存しました");
+});
+
+$("btnReset").addEventListener("click", ()=>{
+  if(!confirm("入力をリセットします。よろしいですか？")) return;
+  state = emptyForm();
+  hydrate();
+});
+
+$("btnExport").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `kubun_${(state.resident||"user").replace(/\s+/g,"_")}_${state.date||nowDateStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$("btnImport").addEventListener("click", ()=>{
+  const inp = document.createElement("input");
+  inp.type="file"; inp.accept="application/json";
+  inp.onchange = async ()=>{
+    const f = inp.files?.[0]; if(!f) return;
+    const txt = await f.text();
+    try{
+      const obj = JSON.parse(txt);
+      // 軽いバリデーション
+      if(!obj.answers || typeof obj.answers!=="object") throw new Error("invalid");
+      state = {
+        ...emptyForm(),
+        ...obj,
+        id: obj.id || crypto.randomUUID(),
+        answers: Object.fromEntries(ITEMS.map(it=>[it.code, (obj.answers[it.code] ?? null)])),
+        notes: Object.fromEntries(ITEMS.map(it=>[it.code, (obj.notes?.[it.code] ?? "")])),
+      };
+      hydrate();
+      alert("インポートしました");
+    }catch{
+      alert("読み込みに失敗しました（JSON形式を確認してください）");
+    }
+  };
+  inp.click();
+});
+
+// init
+hydrate();
+</script>
+</body>
+</html>
