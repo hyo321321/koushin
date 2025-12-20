@@ -1565,6 +1565,18 @@ function itemGuideHtml(it){
 
 
 function fullQuestionDesc(it){
+  // ✅ 80項目ごとの個別ガイド（ITEM_GUIDE）があればそれを最優先で表示
+  const ghtml = itemGuideHtml(it);
+  if(ghtml){
+    return `
+      <details class="help" style="margin-top:6px">
+        <summary>この質問の見方・判断ポイント</summary>
+        <div style="margin-top:6px">${ghtml}</div>
+      </details>
+    `;
+  }
+
+  // 予備：カテゴリ共通ガイド（個別が未定義のときのみ）
   const map = CATEGORY_EXPLAIN[it.cat] || null;
   if(!map) return "";
   return `
