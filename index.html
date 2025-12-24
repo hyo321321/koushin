@@ -70,6 +70,7 @@ summary{cursor:pointer;font-weight:700}
 /* ===== PDF出力（支援ありのみ：項目名／回答／根拠メモ） ===== */
 #printArea { display:none; }
 @media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* 画面UIは全部隠して、printAreaだけ表示 */
   body > * { display:none !important; }
   #printArea { display:block !important; }
@@ -83,6 +84,14 @@ summary{cursor:pointer;font-weight:700}
   @page { size: A4 portrait; margin: 14mm; }
 }
 
+
+/* ===== 審査会サマリー（#printArea内で印刷） ===== */
+#printArea .sumTitle { font-size: 14pt; font-weight:800; margin: 0 0 4mm; }
+#printArea .sumMeta  { font-size: 10pt; color:#444; margin: 0 0 6mm; }
+#printArea .sumSec   { margin: 0 0 5mm; page-break-inside: avoid; break-inside: avoid; }
+#printArea .sumH     { font-size: 11pt; font-weight:800; margin: 0 0 2mm; }
+#printArea .sumP     { font-size: 10pt; line-height:1.55; white-space: pre-wrap; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -95,6 +104,8 @@ summary{cursor:pointer;font-weight:700}
       <button id="btnXlsx">Excelで保存</button>
       <button id="btnGlossary">用語説明</button>
         <button id="btnPdf" type="button">PDF出力</button>
+        <button id="btnSummaryAuto" type="button" onclick="summaryAutoPDF()">審査会サマリーPDF（自動）</button>
+        <button id="btnSummaryEdit" type="button" onclick="summaryEditOpen()">審査会サマリーPDF（編集可）</button>
       <button id="btnExport">エクスポート(JSON)</button>
       <button id="btnImport">インポート(JSON)</button>
       <button id="btnReset">リセット</button>
@@ -2288,5 +2299,417 @@ function exportPdfSupportOnly(){
 })();
 
 </script>
+
+<!-- ===== 審査会サマリー編集モーダル ===== -->
+<div id="summaryModal" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:9999;">
+  <div style="max-width:980px; margin:24px auto; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);">
+    <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div style="font-weight:800;">審査会向け1枚サマリー（編集）</div>
+      <button id="btnSummaryClose" type="button">閉じる</button>
+    </div>
+    <div style="font-size:12px; color:#555; margin-bottom:10px;">
+      ※この画面で文章を微調整できます。「PDF出力」でA4縦1枚として印刷（PDF保存）します。
+    </div>
+    <textarea id="summaryText" style="width:100%; min-height:340px; padding:12px; border:1px solid #ddd; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap;"></textarea>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+      <button id="btnSummaryPrint" type="button">PDF出力</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ===== 審査会向け1枚サマリー（A:自動 / B:編集可） v2 =====
+
+// ▼ グローバル関数（onclick用：イベント登録が失敗しても確実に動かす）
+function summaryAutoPDF(){
+  try{
+    if(typeof window.__buildSummaryText !== "function" || typeof window.__printSummary !== "function"){
+      alert("サマリー機能の初期化に失敗しました。ページを再読み込みしてください。");
+      return;
+    }
+    const t = window.__buildSummaryText();
+    window.__printSummary(t);
+  }catch(e){
+    console.error(e);
+    alert("サマリーPDFの作成でエラーが発生しました。コンソールを確認してください。");
+  }
+}
+function summaryEditOpen(){
+  try{
+    if(typeof window.__buildSummaryText !== "function"){
+      alert("サマリー機能の初期化に失敗しました。ページを再読み込みしてください。");
+      return;
+    }
+    const modal = document.getElementById("summaryModal");
+    const ta = document.getElementById("summaryText");
+    if(ta) ta.value = window.__buildSummaryText();
+    if(modal){
+      modal.style.display="block";
+      modal.setAttribute("aria-hidden","false");
+    }
+  }catch(e){
+    console.error(e);
+    alert("編集画面の表示でエラーが発生しました。コンソールを確認してください。");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAuto = document.getElementById("btnSummaryAuto");
+  const btnEdit = document.getElementById("btnSummaryEdit");
+  const modal   = document.getElementById("summaryModal");
+  const ta      = document.getElementById("summaryText");
+  const btnClose= document.getElementById("btnSummaryClose");
+  const btnPrint= document.getElementById("btnSummaryPrint");
+  const printArea = document.getElementById("printArea");
+
+  if(!btnAuto || !btnEdit || !printArea) return;
+
+  const esc = (typeof escapeHtml === "function")
+    ? escapeHtml
+    : (s)=>String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+  const nowDate = (typeof nowDateStr === "function") ? nowDateStr : ()=>{
+    const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0');
+    return `${y}/${m}/${dd}`;
+  };
+
+  const catForSafe = (it)=>{
+    try{ return (typeof catFor === "function") ? catFor(it) : (it.cat || "extra"); }catch(e){ return it?.cat || "extra"; }
+  };
+
+  const getLabelSafe = (cat, v, it)=>{
+    try{
+      if(typeof getAnswerLabel === "function") return getAnswerLabel(cat, v, it);
+      if(typeof LABELS !== "undefined"){
+        let labels = LABELS[cat] || LABELS.extra || [];
+        if(cat==="extra" && it && it.optCount){
+          const n = Math.max(2, Math.min(6, it.optCount));
+          labels = (LABELS.extra||[]).slice(0,n);
+        }
+        const found = labels.find(x=>String(x[0])===String(v));
+        return found ? found[1] : String(v ?? "");
+      }
+    }catch(e){}
+    return String(v ?? "");
+  };
+
+  function isSupportNeeded(cat, val){
+    if(val==null || val==="") return false;
+    const n = Number(val);
+    if(cat==="medical") return n===2;
+    return n>=2;
+  }
+
+  const KEY_NOS = [18,15,26,27,29,21,22,24,25,33,34];
+
+  function pick(no){
+    if(typeof BASE80 === "undefined") return null;
+    const it = BASE80.find(x=>Number(x.code)===Number(no));
+    if(!it) return null;
+    const key = "F"+it.row;
+    const v = (window.state && state.answers) ? state.answers[key] : "";
+    const memo = (window.state && state.memos) ? (state.memos[key]||"").trim() : "";
+    const cat = catForSafe(it);
+    const need = isSupportNeeded(cat, v);
+    if(!need && !memo) return null;
+    return { no: it.code, name: it.name, memo, label: getLabelSafe(cat, v, it) };
+  }
+
+  function buildSummaryText(){
+    const resident = (document.getElementById("resident")?.value || "").trim();
+    const date = (document.getElementById("date")?.value || "").trim() || nowDate();
+    const items = KEY_NOS.map(pick).filter(Boolean);
+
+    let needCount=0, body=0, life=0, behavior=0;
+    if(typeof BASE80 !== "undefined" && window.state && state.answers){
+      for(const it of BASE80){
+        const key="F"+it.row;
+        const v = state.answers[key];
+        const cat = catForSafe(it);
+        if(isSupportNeeded(cat, v)){
+          needCount++;
+          if(cat==="behavior") behavior++;
+          else if(cat==="life") life++;
+          else if(cat==="body") body++;
+        }
+      }
+    }
+
+    const lines = [];
+    lines.push("■ 生活全体の支援状況（要約）");
+    lines.push("生活は人的支援を前提として成り立っている。");
+    if(items.length){
+      lines.push("主な支援ポイント：");
+      for(const x of items){
+        const t = (x.memo || x.label || "").trim();
+        if(t) lines.push(`- ${String(x.no).padStart(2,'0')} ${x.name}：${t}`);
+      }
+    }
+    lines.push("");
+    lines.push("■ 支援量の概況（参考）");
+    lines.push(`支援が必要な項目数（1以外）：合計 ${needCount} 項目（身体介助 ${body}／日常生活 ${life}／行動障害 ${behavior}）`);
+    lines.push("※一次判定ロジックの再現ではなく、支援実態（頻度・継続性・人手）を要約したもの。");
+    lines.push("");
+    lines.push("■ 支援体制");
+    lines.push("グループホーム職員：日常生活支援、状態観察、声かけ、同行");
+    lines.push("（該当がある場合）訪問看護：服薬確認／保佐人：金銭管理／相談支援：調整・同行");
+    lines.push("");
+    lines.push("■ まとめ");
+    lines.push("上記の支援は一時的なものではなく、症状の波により継続的かつ反復的に必要である。現在の生活は人的支援を前提として成り立っている。");
+
+    return `【審査会向け1枚サマリー】\n利用者名：${resident||"（未入力）"}　／　作成日：${date}\n\n` + lines.join("\n");
+  }
+
+  function renderSummaryToPrintArea(text){
+    const resident = (document.getElementById("resident")?.value || "").trim();
+    const date = (document.getElementById("date")?.value || "").trim() || nowDate();
+
+    const parts = String(text||"").split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+    const blocks = parts.map(p=>{
+      const lines = p.split("\n");
+      const first = lines[0].trim();
+      const isSec = first.startsWith("■");
+      const h = isSec ? first.replace(/^■\s*/,"") : "";
+      const rest = isSec ? lines.slice(1).join("\n").trim() : p;
+      if(h){
+        return `<div class="sumSec"><div class="sumH">${esc(h)}</div><div class="sumP">${esc(rest)}</div></div>`;
+      }
+      return `<div class="sumSec"><div class="sumP">${esc(p)}</div></div>`;
+    }).join("");
+
+    return `
+      <div class="sumTitle">審査会向け1枚サマリー</div>
+      <div class="sumMeta">利用者名：${esc(resident||"（未入力）")}　／　作成日：${esc(date)}</div>
+      ${blocks}
+    `;
+  }
+
+  function printSummary(text){
+    const backup = printArea.innerHTML;
+    printArea.innerHTML = renderSummaryToPrintArea(text);
+
+    const cleanup = ()=>{ printArea.innerHTML = backup; window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+
+    window.print();
+    setTimeout(cleanup, 1200);
+  }
+
+  // expose for onclick fallback
+  window.__buildSummaryText = buildText;
+  window.__printSummary = printSummary;
+
+
+  btnAuto.addEventListener("click", (e)=>{
+    e.preventDefault();
+    printSummary(buildSummaryText());
+  });
+
+  btnEdit.addEventListener("click", (e)=>{
+    e.preventDefault();
+    const t = buildSummaryText();
+    if(ta) ta.value = t;
+    if(modal){ modal.style.display="block"; modal.setAttribute("aria-hidden","false"); }
+  });
+
+  if(btnClose && modal){
+    btnClose.addEventListener("click", ()=>{
+      modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+    });
+    modal.addEventListener("click", (ev)=>{
+      if(ev.target===modal){
+        modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+      }
+    });
+  }
+
+  if(btnPrint && modal){
+    btnPrint.addEventListener("click", ()=>{
+      const t = (ta?.value || "").trim();
+      if(!t){ alert("文章が空です。"); return; }
+      modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+      printSummary(t);
+    });
+  }
+});
+</script>
+
+
+<script>
+// ===== Robust Summary Module (independent of XLSX / other scripts) =====
+(function(){
+  const q = (id)=>document.getElementById(id);
+  const escapeHtml = (s)=>String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  const dateStr = ()=>{
+    const d=new Date();
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    return `${y}/${m}/${dd}`;
+  };
+
+  function buildSummaryText(){
+    const resident = (q("resident")?.value || "").trim();
+    const date = (q("date")?.value || "").trim() || dateStr();
+
+    const KEY_NOS = [18,15,26,27,29,21,22,24,25,33,34];
+    const bullets = [];
+
+    try{
+      if(window.BASE80 && window.state){
+        const catFor = (it)=> (typeof window.catFor==="function") ? window.catFor(it) : (it.cat||"extra");
+        const isSupportNeeded = (cat,val)=>{
+          if(val==null || val==="") return false;
+          const n = Number(val);
+          if(cat==="medical") return n===2;
+          return n>=2;
+        };
+        const getLabel = (cat,v,it)=>{
+          if(typeof window.getAnswerLabel==="function") return window.getAnswerLabel(cat,v,it);
+          if(window.LABELS){
+            let labels = window.LABELS[cat] || window.LABELS.extra || [];
+            if(cat==="extra" && it && it.optCount){
+              const n = Math.max(2, Math.min(6, it.optCount));
+              labels = (window.LABELS.extra||[]).slice(0,n);
+            }
+            const f = labels.find(x=>String(x[0])===String(v));
+            return f ? f[1] : String(v ?? "");
+          }
+          return String(v ?? "");
+        };
+        const pick = (no)=>{
+          const it = window.BASE80.find(x=>Number(x.code)===Number(no));
+          if(!it) return null;
+          const key = "F"+it.row;
+          const v = window.state?.answers?.[key];
+          const cat = catFor(it);
+          const memo = (window.state?.memos?.[key]||"").trim();
+          const need = isSupportNeeded(cat, v);
+          if(!need && !memo) return null;
+          return { no: it.code, name: it.name, memo: memo || getLabel(cat,v,it) };
+        };
+        for(const n of KEY_NOS){
+          const x = pick(n);
+          if(x){
+            bullets.push(`- ${String(x.no).padStart(2,'0')} ${x.name}：${x.memo}`);
+          }
+        }
+      }
+    }catch(e){
+      console.warn(e);
+    }
+
+    const lines = [];
+    lines.push("【審査会向け1枚サマリー】");
+    lines.push(`利用者名：${resident||"（未入力）"}　／　作成日：${date}`);
+    lines.push("");
+    lines.push("■ 生活全体の支援状況（要約）");
+    lines.push("生活は人的支援を前提として成り立っている。");
+    if(bullets.length){
+      lines.push("主な支援ポイント：");
+      lines.push(...bullets);
+    } else {
+      lines.push("主な支援ポイント：80項目の入力内容（支援あり）と根拠メモに基づき、見守り・声かけ・同行等の支援が必要。");
+    }
+    lines.push("");
+    lines.push("■ 支援体制");
+    lines.push("グループホーム職員：日常生活支援、状態観察、声かけ、同行");
+    lines.push("（該当がある場合）訪問看護：服薬確認／保佐人：金銭管理／相談支援：調整・同行");
+    lines.push("");
+    lines.push("■ まとめ");
+    lines.push("上記の支援は一時的なものではなく、症状の波により継続的かつ反復的に必要である。現在の生活は人的支援を前提として成り立っている。");
+    return lines.join("
+");
+  }
+
+  function renderToPrintArea(text){
+    const printArea = q("printArea");
+    if(!printArea){
+      alert("印刷領域（printArea）が見つかりません。");
+      return;
+    }
+    const prev = printArea.innerHTML;
+    const prevStyle = printArea.getAttribute("style") || "";
+
+    const resident = (q("resident")?.value || "").trim() || "（未入力）";
+    const date = (q("date")?.value || "").trim() || dateStr();
+
+    const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Yu Gothic','Meiryo',sans-serif;">
+      <div style="font-size:14pt;font-weight:800;margin:0 0 12px;">審査会向け1枚サマリー</div>
+      <div style="font-size:10pt;color:#444;margin:0 0 14px;">利用者名：${escapeHtml(resident)}　／　作成日：${escapeHtml(date)}</div>
+      <div style="font-size:10pt;line-height:1.55;white-space:pre-wrap;">${escapeHtml(text)}</div>
+    </div>`;
+
+    printArea.innerHTML = html;
+    printArea.setAttribute("style", prevStyle + "; display:block !important;");
+
+    window.print();
+
+    const cleanup = ()=>{
+      printArea.innerHTML = prev;
+      printArea.setAttribute("style", prevStyle);
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(cleanup, 1500);
+  }
+
+  function ensureModal(){
+    let modal = q("summaryModal");
+    if(modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id="summaryModal";
+    modal.className="modal no-print";
+    modal.setAttribute("aria-hidden","true");
+    modal.style.cssText="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; padding:16px; overflow:auto;";
+
+    modal.innerHTML = `
+      <div style="max-width:980px; margin:20px auto; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);">
+        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="font-weight:800;">審査会向け1枚サマリー（編集）</div>
+          <button id="btnSummaryClose" type="button">閉じる</button>
+        </div>
+        <div style="font-size:12px; color:#555; margin-bottom:10px;">※文章を微調整できます。「PDF出力」でA4縦1枚として印刷（PDF保存）します。</div>
+        <textarea id="summaryText" style="width:100%; min-height:340px; padding:12px; border:1px solid #ddd; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap;"></textarea>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+          <button id="btnSummaryPrint" type="button">PDF出力</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click",(e)=>{ if(e.target===modal){ modal.style.display="none"; modal.setAttribute("aria-hidden","true"); } });
+    modal.querySelector("#btnSummaryClose").addEventListener("click",()=>{ modal.style.display="none"; modal.setAttribute("aria-hidden","true"); });
+    modal.querySelector("#btnSummaryPrint").addEventListener("click",()=>{
+      const t = (modal.querySelector("#summaryText").value||"").trim();
+      if(!t){ alert("文章が空です。"); return; }
+      modal.style.display="none";
+      modal.setAttribute("aria-hidden","true");
+      renderToPrintArea(t);
+    });
+    return modal;
+  }
+
+  // Override global onclick handlers (ensure they exist even if other scripts failed)
+  window.summaryAutoPDF = function(){
+    const t = buildSummaryText();
+    renderToPrintArea(t);
+  };
+  window.summaryEditOpen = function(){
+    const modal = ensureModal();
+    modal.style.display="block";
+    modal.setAttribute("aria-hidden","false");
+    modal.querySelector("#summaryText").value = buildSummaryText();
+  };
+
+  // Expose for other code
+  window.__buildSummaryText = buildSummaryText;
+  window.__printSummary = renderToPrintArea;
+
+})();
+</script>
+
 </body>
 </html>
