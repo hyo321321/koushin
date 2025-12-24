@@ -92,6 +92,8 @@ summary{cursor:pointer;font-weight:700}
 #printArea .sumH     { font-size: 11pt; font-weight:800; margin: 0 0 2mm; }
 #printArea .sumP     { font-size: 10pt; line-height:1.55; white-space: pre-wrap; }
 
+
+    .saveStatus{font-size:12px;color:#6b7280;margin-left:10px;white-space:nowrap;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -101,6 +103,7 @@ summary{cursor:pointer;font-weight:700}
     <h1>障害支援区分：聞き取り→80項目入力→不足チェック→特記事項下書き→八咫烏015推定</h1>
     <div class="btns">
       <button id="btnSave" class="primary">保存</button>
+          <span id="saveStatus" class="saveStatus" aria-live="polite"></span>
       <button id="btnXlsx">Excelで保存</button>
       <button id="btnGlossary">用語説明</button>
         <button id="btnPdf" type="button">PDF出力</button>
@@ -229,7 +232,8 @@ const DEFINED = {"こだわり": "E53", "じょくそう": "E9", "じょくそ�
 const FORMULAS = {"E2": "=IF(F2=\"\",\"\",CHOOSE(F2,0,7.8,10.4,14.8))", "E3": "=IF(F3=\"\",\"\",CHOOSE(F3,0,6.2,8.9,15))", "E4": "=IF(F4=\"\",\"\",CHOOSE(F4,0,6.8,11.6,15.9))", "E5": "=IF(F5=\"\",\"\",CHOOSE(F5,0,7.2,9.4,14.5))", "E6": "=IF(F6=\"\",\"\",CHOOSE(F6,0,5.4,7.7,13.6))", "E7": "=IF(F7=\"\",\"\",CHOOSE(F7,0,5.1,7.7,14.8))", "B8": "=SUM(E2:E8)", "E8": "=IF(F8=\"\",\"\",CHOOSE(F8,0,2.8,3.4,11.4))", "E9": "=IF(F9=\"\",\"\",CHOOSE(F9,0,10.9))", "E10": "=IF(F10=\"\",\"\",CHOOSE(F10,0,13.5,25.2))", "E11": "=IF(F11=\"\",\"\",CHOOSE(F11,0,14.4,23.9))", "E12": "=IF(F12=\"\",\"\",CHOOSE(F12,0,11.6,20.1))", "B13": "=SUM(E9:E13)", "E13": "=IF(F13=\"\",\"\",CHOOSE(F13,0,10.9,19.9))", "E14": "=IF(F14=\"\",\"\",CHOOSE(F14,0,6.6,10.7,15.9))", "E15": "=IF(F15=\"\",\"\",CHOOSE(F15,0,5.8,10.8,17.1))", "E16": "=IF(F16=\"\",\"\",CHOOSE(F16,0,6.1, 16.2))", "E17": "=IF(F17=\"\",\"\",CHOOSE(F17,0,6.9, 15.9))", "E18": "=IF(F18=\"\",\"\",CHOOSE(F18,0 ,6.9,12,18.2))", "B19": "=SUM(E14:E19)", "E19": "=IF(F19=\"\",\"\",CHOOSE(F19,0,9.3,16.7))", "E20": "=IF(F20=\"\",\"\",CHOOSE(F20,0,2.8,7.3,25.5,28.3,48.9))", "B21": "=SUM(E20:E21)", "E21": "=IF(F21=\"\",\"\",CHOOSE(F21,0,6.4,9.1,9.1,9.1,51.1))", "E22": "=IF(F22=\"\",\"\",CHOOSE(F22,0 ,9.4,20.2))", "E23": "=IF(F23=\"\",\"\",CHOOSE(F23,0 ,6.7,20.9))", "E24": "=IF(F24=\"\",\"\",CHOOSE(F24,0 ,7 ,20.5))", "E25": "=IF(F25=\"\",\"\",CHOOSE(F25,0 ,7.9, 19.5))", "B26": "=SUM(E22:E26)", "E26": "=IF(F26=\"\",\"\",CHOOSE(F26,0 , 6.9, 18.9))", "E27": "=IF(F27=\"\",\"\",CHOOSE(F27,0 , 3.3, 11))", "E28": "=IF(F28=\"\",\"\",CHOOSE(F28,0 , 1.4, 9.5))", "E29": "=IF(F29=\"\",\"\",CHOOSE(F29,0 , 2.6, 10.7))", "E30": "=IF(F30=\"\",\"\",CHOOSE(F30,0 , 9.1, 15.6))", "E31": "=IF(F31=\"\",\"\",CHOOSE(F31,0 , 4.1, 11.7))", "E32": "=IF(F32=\"\",\"\",CHOOSE(F32,0 , 4.1, 11.7))", "E33": "=IF(F33=\"\",\"\",CHOOSE(F33,0 , 4.1, 5.5, 11, 14.5))", "B34": "=SUM(E27:E34)", "E34": "=IF(F34=\"\",\"\",CHOOSE(F34,0 , 15.3, 15.3))", "E35": "=IF(F35=\"\",\"\",CHOOSE(F35,0 , 1.9, 2.1, 3.3, 4.6))", "E36": "=IF(F36=\"\",\"\",CHOOSE(F36,0 , 2.1, 2.1, 3.9, 5.3))", "E37": "=IF(F37=\"\",\"\",CHOOSE(F37,0 , 2.1, 2.6, 3.7, 5.4))", "E38": "=IF(F38=\"\",\"\",CHOOSE(F38,0 ,2.1,2.9,3.5,3.5 ))", "E39": "=IF(F39=\"\",\"\",CHOOSE(F39,0 ,2.6,3, 4.4, 6.2 ))", "E40": "=IF(F40=\"\",\"\",CHOOSE(F40,0 ,2.1, 2.4, 3.3, 4.8 ))", "E41": "=IF(F41=\"\",\"\",CHOOSE(F41,0, 2.7, 3, 4.1, 6  ))", "E42": "=IF(F42=\"\",\"\",CHOOSE(F42,0 , 2.8, 3.4, 4.3, 5.9 ))", "E43": "=IF(F43=\"\",\"\",CHOOSE(F43,0, 3.7, 3.8, 4.4, 6  ))", "E44": "=IF(F44=\"\",\"\",CHOOSE(F44,0 ,4.4, 5, 5.5, 7 ))", "E45": "=IF(F45=\"\",\"\",CHOOSE(F45,0 ,3.3, 4.3, 4.3, 5  ))", "E46": "=IF(F46=\"\",\"\",CHOOSE(F46,0, 5, 5.4, 6.1, 7  ))", "E47": "=IF(F47=\"\",\"\",CHOOSE(F47,0, 3.8, 4.1, 4.5, 5.7  ))", "E48": "=IF(F48=\"\",\"\",CHOOSE(F48,0, 4.3, 5, 5.8, 7.1  ))", "E49": "=IF(F49=\"\",\"\",CHOOSE(F49,0, 4.9, 5.5, 5.5, 6.6  ))", "E50": "=IF(F50=\"\",\"\",CHOOSE(F50,0, 5.1, 5.1, 6.1, 6.2  ))", "E51": "=IF(F51=\"\",\"\",CHOOSE(F51,0,0.6, 0.7, 1, 2.1  ))", "B52": "=SUM(E35:E52)", "E52": "=IF(F52=\"\",\"\",CHOOSE(F52,0, 3.1, 3.4, 4.8, 5.6  ))", "E53": "=IF(F53=\"\",\"\",CHOOSE(F53,0, 1.9, 2.6, 3.6, 6.2   ))", "E54": "=IF(F54=\"\",\"\",CHOOSE(F54,0, 3.2, 3.5, 5.6, 9.1  ))", "E55": "=IF(F55=\"\",\"\",CHOOSE(F55,0, 2.3, 3.5, 6.3, 10  ))", "E56": "=IF(F56=\"\",\"\",CHOOSE(F56,0, 3.5, 4.9, 6.9, 9.2  ))", "E57": "=IF(F57=\"\",\"\",CHOOSE(F57,0, 3.5, 4.6, 7.2, 11  ))", "E58": "=IF(F58=\"\",\"\",CHOOSE(F58,0, 4.4, 5.5, 6.7, 9.9  ))", "E59": "=IF(F59=\"\",\"\",CHOOSE(F59,0, 5.5, 8.3, 10.7, 12.7  ))", "E60": "=IF(F60=\"\",\"\",CHOOSE(F60,0, 4.2, 4.5, 4.9, 7  ))", "E61": "=IF(F61=\"\",\"\",CHOOSE(F61,0, 3.6, 4.4, 6.8, 9.1  ))", "E62": "=IF(F62=\"\",\"\",CHOOSE(F62,0, 3.4, 4, 4.1, 6.7  ))", "B63": "=SUM(E53:E63)", "E63": "=IF(F63=\"\",\"\",CHOOSE(F63,0, 9.1  ))", "E64": "=IF(F64=\"\",\"\",CHOOSE(F64,0, 12.3, 14.2, 15.2, 19.1  ))", "E65": "=IF(F65=\"\",\"\",CHOOSE(F65,0, 17.3, 19, 19.6, 20.8  ))", "E66": "=IF(F66=\"\",\"\",CHOOSE(F66,0, 15.3, 15.7, 15.9, 16.2  ))", "E67": "=IF(F67=\"\",\"\",CHOOSE(F67,0, 13.4, 13.4, 13.5, 13.5  ))", "E68": "=IF(F68=\"\",\"\",CHOOSE(F68,0, 13.6, 13.6, 13.6, 13.6  ))", "B69": "=SUM(E64:E69)", "E69": "=IF(F69=\"\",\"\",CHOOSE(F69,0, 13.8, 13.9, 15.3, 16.8  ))", "E70": "=IF(F70=\"\",\"\",CHOOSE(F70,0, 5.8 ))", "E71": "=IF(F71=\"\",\"\",CHOOSE(F71,0, 16.1 ))", "E72": "=IF(F72=\"\",\"\",CHOOSE(F72,0, 0.2 ))", "E73": "=IF(F73=\"\",\"\",CHOOSE(F73,0, 1.7 ))", "E74": "=IF(F74=\"\",\"\",CHOOSE(F74,0, 10.2  ))", "E75": "=IF(F75=\"\",\"\",CHOOSE(F75,0, 16.9  ))", "E76": "=IF(F76=\"\",\"\",CHOOSE(F76,0, 14.9 ))", "E77": "=IF(F77=\"\",\"\",CHOOSE(F77,0, 1.2 ))", "E78": "=IF(F78=\"\",\"\",CHOOSE(F78,0, 8.6 ))", "E79": "=IF(F79=\"\",\"\",CHOOSE(F79,0, 15.9 ))", "E80": "=IF(F80=\"\",\"\",CHOOSE(F80,0,3.7  ))", "B81": "=SUM(E70:E81)", "E81": "=IF(F81=\"\",\"\",CHOOSE(F81,0, 4.8  ))", "E82": "=IF(F82=\"\",\"\",CHOOSE(F82,0, 2.9, 4.9, 8.2, 13.9  ))", "E83": "=IF(F83=\"\",\"\",CHOOSE(F83,0, 18.6  ))", "E84": "=IF(F84=\"\",\"\",CHOOSE(F84,0, 19.6  ))", "E85": "=IF(F85=\"\",\"\",CHOOSE(F85,0, 18 ))", "E86": "=IF(F86=\"\",\"\",CHOOSE(F86,0, 17.2  ))", "B87": "=SUM(E82:E87)", "E87": "=IF(F87=\"\",\"\",CHOOSE(F87,0, 12.7 ))", "E88": "=IF(F88=\"\",\"\",CHOOSE(F88,0, 2,3,4 ))", "E89": "=IF(F89=\"\",\"\",CHOOSE(F89,0, 2,3,4 ))", "E90": "=IF(F90=\"\",\"\",CHOOSE(F90,0, 2,3,4 ))", "E91": "=IF(F91=\"\",\"\",CHOOSE(F91,0, 2,3,4 ))", "E92": "=IF(F92=\"\",\"\",CHOOSE(F92,0, 2,3,4 ))", "E93": "=IF(F93=\"\",\"\",CHOOSE(F93,0, 2,3,4 ))", "E94": "=IF(F94=\"\",\"\",CHOOSE(F94,0, 2,3,4 ))", "E95": "=IF(F95=\"\",\"\",CHOOSE(F95,0, 2,3,4 ))", "E96": "=IF(F96=\"\",\"\",CHOOSE(F96,0, 2,3,4 ))", "E97": "=IF(F97=\"\",\"\",CHOOSE(F97,0, 2,3,4 ))", "E98": "=IF(F98=\"\",\"\",CHOOSE(F98,0, 2,3,4 ))", "E99": "=IF(F99=\"\",\"\",CHOOSE(F99,0, 2,3,4 ))", "E100": "=IF(F100=\"\",\"\",CHOOSE(F100,0, 2,3,4 ))", "E101": "=IF(F101=\"\",\"\",CHOOSE(F101,0,1, 1.5, 2 ))", "E102": "=IF(F102=\"\",\"\",CHOOSE(F102,0, 2,3,4,5,6 ))", "E103": "=IF(F103=\"\",\"\",CHOOSE(F103,0, 2,3,4,5 ))", "E104": "=IF(F104=\"\",\"\",CHOOSE(F104,0, 2,3,4,5 ))", "E105": "=IF(F105=\"\",\"\",CHOOSE(F105,0, 2,3,4,5 ))", "E106": "=IF(F106=\"\",\"\",CHOOSE(F106,0, 2,3,4,5 ))", "E107": "=IF(F107=\"\",\"\",CHOOSE(F107,0, 2,3,4,5 ))", "E108": "=IF(F108=\"\",\"\",CHOOSE(F108,0, 2,3,4,5 ))", "E109": "=IF(F109=\"\",\"\",CHOOSE(F109,0, 2,3,4,5 ))", "E110": "=IF(F110=\"\",\"\",CHOOSE(F110,0, 2,3,4,5 ))"};
 const VALUES = {"C1": "項目", "D1": "略称", "E1": "点数", "F1": "選択番号\n入力", "G1": "メ\nモ", "H1": "区分判定", "A2": 1, "B2": "起居動作", "C2": "寝返り", "D2": "寝返り", "F2": 1, "H2": "１　支援が不要", "C3": "起き上がり", "D3": "起き上がり", "F3": 1, "H3": "１　支援が不要", "C4": "座位保持", "D4": "座位保持", "F4": 1, "H4": "１　支援が不要", "C5": "両足立位", "D5": "両足立位", "F5": 1, "H5": "１　支援が不要", "C6": "歩行", "D6": "歩行", "F6": 1, "H6": "１　支援が不要", "C7": "立ち上がり", "D7": "立ち上がり", "F7": 1, "H7": "１　支援が不要", "C8": "片足立位", "D8": "片足立位", "F8": 1, "H8": "１　支援が不要", "A9": 2, "B9": "生活機能 I", "C9": "じょくそう", "D9": "じょくそう", "F9": 1, "H9": "１　ない", "C10": "嚥下", "D10": "嚥下", "F10": 1, "H10": "１　支援が不要", "C11": "食事", "D11": "食事", "F11": 1, "H11": "１　支援が不要", "C12": "排尿", "D12": "排尿", "F12": 1, "H12": "１　支援が不要", "C13": "排便", "D13": "排便", "F13": 1, "H13": "１　支援が不要", "A14": 3, "B14": "生活機能 II", "C14": "移乗", "D14": "移乗", "F14": 1, "H14": "１　支援が不要", "C15": "移動", "D15": "移動", "F15": 1, "H15": "１　支援が不要", "C16": "入浴", "D16": "入浴", "F16": 1, "H16": "１　支援が不要", "C17": "口腔清潔", "D17": "口腔清潔", "F17": 1, "H17": "１　支援が不要", "C18": "衣類の着脱", "D18": "衣類の着脱", "F18": 1, "H18": "１　支援が不要", "C19": "健康・栄養管理", "D19": "健康栄養", "F19": 1, "H19": "１　支援が不要", "A20": 4, "B20": "視聴覚", "C20": "視力", "D20": "視力", "F20": 1, "H20": "１　支障がない ", "C21": "聴力", "D21": "聴力", "F21": 1, "H21": "１　支障がない ", "A22": 5, "B22": "応用日常生活動作", "C22": "調理", "D22": "調理", "F22": 1, "H22": "１　支援が不要", "C23": "掃除", "D23": "掃除", "F23": 1, "H23": "１　支援が不要", "C24": "洗濯", "D24": "洗濯", "F24": 1, "H24": "１　支援が不要", "C25": "買い物", "D25": "買い物", "F25": 1, "H25": "１　支援が不要", "C26": "交通手段", "D26": "交通手段", "F26": 1, "H26": "１　支援が不要", "A27": 6, "B27": "認知機能", "C27": "薬の管理", "D27": "薬", "F27": 1, "H27": "１　支援が不要", "C28": "金銭の管理", "D28": "金銭", "F28": 1, "H28": "１　支援が不要", "C29": "電話等", "D29": "電話等", "F29": 1, "H29": "１　支援が不要", "C30": "日常の意思決定", "D30": "意思決定", "F30": 1, "H30": "１　支援が不要", "C31": "読み書き", "D31": "読み書き", "F31": 1, "H31": "１　支援が不要", "C32": "危険の認識", "D32": "危険の認識", "F32": 1, "H32": "１　支援が不要", "C33": "コミュニケーション", "D33": "コミュニケーション", "F33": 1, "H33": "１　支障がない ", "C34": "説明の理解", "D34": "説明の理解", "F34": 1, "H34": "１　理解できる", "A35": 7, "B35": "行動上の障害　A群", "C35": "被害的・拒否的", "D35": "被害拒否", "F35": 1, "H35": "１　支援が不要", "C36": "作話", "D36": "作話", "F36": 1, "H36": "１　支援が不要", "C37": "感情が不安定", "D37": "感情が不安定", "F37": 1, "H37": "１　支援が不要", "C38": "昼夜逆転", "D38": "昼夜逆転", "F38": 1, "H38": "１　支援が不要", "C39": "暴言暴行", "D39": "暴言暴行", "F39": 1, "H39": "１　支援が不要", "C40": "同じ話をする", "D40": "同じ話", "F40": 1, "H40": "１　支援が不要", "C41": "大声・奇声を出す", "D41": "大声奇声", "F41": 1, "H41": "１　支援が不要", "C42": "支援の拒否", "D42": "支援の拒否", "F42": 1, "H42": "１　支援が不要", "C43": "徘徊", "D43": "徘徊", "F43": 1, "H43": "１　支援が不要", "C44": "落ち着きがない", "D44": "落ち着き", "F44": 1, "H44": "１　支援が不要", "C45": "外出して戻れない", "D45": "外出して戻れない", "F45": 1, "H45": "１　支援が不要", "C46": "1人で出たがる", "D46": "ひとりで出たがる", "F46": 1, "H46": "１　支援が不要", "C47": "収集癖", "D47": "収集癖", "F47": 1, "H47": "１　支援が不要", "C48": "物や衣類を壊す", "D48": "物や衣類を壊す", "F48": 1, "H48": "１　支援が不要", "C49": "不潔行為", "D49": "不潔行為", "F49": 1, "H49": "１　支援が不要", "C50": "異食行動", "D50": "異食行動", "F50": 1, "H50": "１　支援が不要", "C51": "ひどい物忘れ", "D51": "物忘れ", "F51": 1, "H51": "１　支援が不要", "C52": "集団への不適応", "D52": "集団への不適応", "F52": 1, "H52": "１　支援が不要", "A53": 8, "B53": "行動上の障害　B群", "C53": "こだわり", "D53": "こだわり", "F53": 1, "H53": "１　支援が不要", "C54": "多動・行動停止", "D54": "多動行動停止", "F54": 1, "H54": "１　支援が不要", "C55": "不安定な行動", "D55": "不安定な行動", "F55": 1, "H55": "１　支援が不要", "C56": "自らを傷つける", "D56": "自らを傷つける", "F56": 1, "H56": "１　支援が不要", "C57": "他人を傷つける", "D57": "他人を傷つける", "F57": 1, "H57": "１　支援が不要", "C58": "不適切な行為", "D58": "不適切な行為", "F58": 1, "H58": "１　支援が不要", "C59": "突発的な行動", "D59": "突発的な行動", "F59": 1, "H59": "１　支援が不要", "C60": "過食・反すう等", "D60": "過食反すう", "F60": 1, "H60": "１　支援が不要", "C61": "多飲水・過飲水", "D61": "多飲水過飲水", "F61": 1, "H61": "１　支援が不要", "C62": "反復的行動", "D62": "反復", "F62": 1, "H62": "１　支援が不要", "C63": "感覚過敏・鈍麻", "D63": "感覚過敏鈍麻", "F63": 1, "H63": "１　ない", "A64": 9, "B64": "行動上の障害　C群", "C64": "躁うつ状態", "D64": "そううつ", "F64": 1, "H64": "１　支援が不要", "C65": "対人不安緊張", "D65": "対人不安緊張", "F65": 1, "H65": "１　支援が不要", "C66": "意欲が乏しい", "D66": "意欲", "F66": 1, "H66": "１　支援が不要", "C67": "話がまとまらない", "D67": "話がまとまらない", "F67": 1, "H67": "１　支援が不要", "C68": "集中力が続かない", "D68": "集中力", "F68": 1, "H68": "１　支援が不要", "C69": "自己の過大評価", "D69": "自己の過大評価", "F69": 1, "H69": "１　支援が不要", "A70": 10, "B70": "特別な医療", "C70": "点滴の管理", "D70": "点滴の管理", "F70": 1, "H70": "１　ない", "C71": "中心静脈栄養", "D71": "中心静脈栄養", "F71": 1, "H71": "１　ない", "C72": "透析", "D72": "透析", "F72": 1, "H72": "１　ない", "C73": "ストーマの管理", "D73": "ストーマの管理", "F73": 1, "H73": "１　ない", "C74": "酸素療法", "D74": "酸素療法", "F74": 1, "H74": "１　ない", "C75": "レスピレーター", "D75": "レスピレーター", "F75": 1, "H75": "１　ない", "C76": "気管切開の処置", "D76": "気管切開の処置", "F76": 1, "H76": "１　ない", "C77": "疼痛の看護", "D77": "疼痛の看護", "F77": 1, "H77": "１　ない", "C78": "経管栄養", "D78": "経管栄養", "F78": 1, "H78": "１　ない", "C79": "モニター測定", "D79": "モニター測定", "F79": 1, "H79": "１　ない", "C80": "じょくそうの処置", "D80": "じょくそうの処置", "F80": 1, "H80": "１　ない", "C81": "カテーテル", "D81": "カテーテル", "F81": 1, "H81": "１　ない", "A82": 11, "B82": "麻痺・拘縮", "C82": "麻痺", "D82": "麻痺", "F82": 1, "H82": "１　ない", "C83": "拘縮　肩関節", "D83": "拘縮肩", "F83": 1, "H83": "１　ない", "C84": "拘縮　肘関節", "D84": "拘縮肘", "F84": 1, "H84": "１　ない", "C85": "拘縮　股関節", "D85": "拘縮股", "F85": 1, "H85": "１　ない", "C86": "拘縮　膝関節", "D86": "拘縮膝", "F86": 1, "H86": "１　ない", "C87": "拘縮　その他", "D87": "拘縮他", "F87": 1, "H87": "１　ない", "A88": 12, "B88": "その他の医師意見書項目", "C88": "麻痺　左上肢", "D88": "麻痺左上", "F88": 1, "H88": "１　ない", "C89": "麻痺　右上肢", "D89": "麻痺右上", "F89": 1, "H89": "１　ない", "C90": "麻痺　左下肢", "D90": "麻痺左下", "F90": 1, "H90": "１　ない", "C91": "麻痺　右下肢", "D91": "麻痺右下", "F91": 1, "H91": "１　ない", "C92": "麻痺　その他", "D92": "麻痺その他", "F92": 1, "H92": "１　ない", "C93": "拘縮　肩　左", "D93": "拘縮肩左", "F93": 1, "H93": "１　ない", "C94": "拘縮　肩　右", "D94": "拘縮肩右", "F94": 1, "H94": "１　ない", "C95": "拘縮　股　左", "D95": "拘縮股左", "F95": 1, "H95": "１　ない", "C96": "拘縮　股　右", "D96": "拘縮股右", "F96": 1, "H96": "１　ない", "C97": "拘縮　肘　左", "D97": "拘縮肘左", "F97": 1, "H97": "１　ない", "C98": "拘縮　肘　右", "D98": "拘縮肘右", "F98": 1, "H98": "１　ない", "C99": "拘縮　膝　左", "D99": "拘縮膝左", "F99": 1, "H99": "１　ない", "C100": "拘縮　膝　右", "D100": "拘縮膝右", "F100": 1, "H100": "１　ない", "C101": "てんかん", "D101": "てんかん", "F101": 1, "H101": "１　ない", "C102": "二軸　精神症状", "D102": "二軸精神", "F102": 1, "H102": 1, "C103": "二軸　能力障害", "D103": "二軸能力", "F103": 1, "H103": 1, "C104": "生活　食事", "D104": "生活食事", "F104": 1, "H104": 1, "C105": "生活　生活リズム", "D105": "生活リズム", "F105": 1, "H105": 1, "C106": "生活　保清", "D106": "生活保清", "F106": 1, "H106": 1, "C107": "生活　金銭管理", "D107": "生活金銭", "F107": 1, "H107": 1, "C108": "生活　服薬管理", "D108": "生活服薬", "F108": 1, "H108": 1, "C109": "生活　対人関係", "D109": "生活対人", "F109": 1, "H109": 1, "C110": "生活　社会適応", "D110": "生活社会", "F110": 1, "H110": 1};
 
-const LS_KEY = "yatagarasu015_interview_v1";
+const LS_KEY_V1 = "yatagarasu015_interview_v1";
+const LS_KEY = "yatagarasu015_interview_v2";
 const $ = (id)=>document.getElementById(id);
 
 function nowDateStr(){
@@ -1884,12 +1888,46 @@ function buildDraft(){
   return lines.join("\n");
 }
 
+
+
+  // Enterキーで意図せず「保存」などが発火して入力が消えるのを防ぐ（textareaは除外）
+  document.addEventListener("keydown", (e)=>{
+    if (e.key !== "Enter") return;
+    const t = e.target;
+    if (!t) return;
+    const tag = (t.tagName || "").toLowerCase();
+    const isTextArea = tag === "textarea";
+    const isEditable = !!t.isContentEditable;
+    if (isTextArea || isEditable) return; // 改行OK
+    // input/select などで Enter を押したとき、既定動作でボタンが押されるケースを抑止
+    if (tag === "input" || tag === "select") {
+      e.preventDefault();
+    }
+  }, true);
+/* ====== 追加：入力→state 同期（保存で消える問題の対策） ====== */
+function syncFromTopInputs(){
+  // 画面上の入力を state に反映（保存時に空で上書きされないように）
+  const elResident = $("resident");
+  const elDate = $("date");
+  const elInterview = $("interview");
+  const elDraft = $("draft");
+  if (elResident) state.resident = (elResident.value || "").trim();
+  if (elDate) state.date = (elDate.value || "").trim() || state.date;
+  if (elInterview) state.interview = (elInterview.value || "").trim();
+  if (elDraft) state.draft = (elDraft.value || "");
+}
+
+function syncFromListInputs(){
+  // renderList() 側の oninput / onchange で都度 state を更新しているため、ここは保険。
+  // 何かあっても state を壊さないように、必要最小限にしておく。
+}
+/* ====== /追加 ====== */
+
 function updateAll(rerender=true){
-  state.resident = $("resident").value || "";
-  state.date = $("date").value || nowDateStr();
-  state.interview = $("interview").value || "";
+  syncFromTopInputs();
+  updateSaveStatus();
   if(rerender){
-    renderList(BASE80, "items80");
+renderList(BASE80, "items80");
     renderList(EXTRAS, "itemsExtra");
   }
   calcMissing();
@@ -1902,17 +1940,111 @@ $("interview").addEventListener("input", ()=>{ state.interview=$("interview").va
 $("q").addEventListener("input", ()=>updateAll(true));
 $("showFilter").addEventListener("change", ()=>updateAll(true));
 
-$("btnDraft").addEventListener("click", ()=>{ $("draft").value = buildDraft(); });
+$("btnDraft").addEventListener("click", ()=>{ const t = buildDraft(); $("draft").value = t; state.draft = t; updateSaveStatus(); });
 $("btnCopyDraft").addEventListener("click", async ()=>{
   try{ await navigator.clipboard.writeText($("draft").value||""); alert("コピーしました"); }
   catch{ alert("コピーに失敗しました"); }
 });
 
-$("btnSave").addEventListener("click", ()=>{
-  if(!state.resident.trim()) return alert("利用者名（またはID）を入力してください");
-  localStorage.setItem(LS_KEY, JSON.stringify(state));
-  alert("保存しました");
-});
+  // ----------------------------
+  // 保存/復元（ローカル保存）
+  // ----------------------------
+  function safeGet(key){
+    try { return localStorage.getItem(key); } catch(e){ return null; }
+  }
+  function safeSet(key, val){
+    try { localStorage.setItem(key, val); return true; } catch(e){ return false; }
+  }
+  function setSaveStatus(msg){
+    const el = document.getElementById("saveStatus");
+    if(!el) return;
+    el.textContent = msg || "";
+  }
+  function loadSavedState(){
+    const raw = safeGet(LS_KEY) || safeGet(LS_KEY_V1);
+    if(!raw) return null;
+    try { return JSON.parse(raw); } catch(e){ return null; }
+  }
+  function mergeSavedIntoState(saved){
+    if(!saved || typeof saved !== "object") return;
+    if(typeof saved.resident === "string") state.resident = saved.resident;
+    if(typeof saved.date === "string") state.date = saved.date;
+    if(typeof saved.interview === "string") state.interview = saved.interview;
+    if(typeof saved.draft === "string") state.draft = saved.draft;
+    if(saved.answers && typeof saved.answers === "object"){
+      state.answers = Object.assign({}, state.answers, saved.answers);
+    }
+    if(saved.memos && typeof saved.memos === "object"){
+      state.memos = Object.assign({}, state.memos, saved.memos);
+    }
+    if(typeof saved.savedAt === "string") state.savedAt = saved.savedAt;
+  }
+  function applyStateToTopInputs(){
+    const r = document.getElementById("resident");
+    const d = document.getElementById("date");
+    const i = document.getElementById("interview");
+    const ta = document.getElementById("draft");
+    if(r) r.value = state.resident || "";
+    if(d) d.value = state.date || "";
+    if(i) i.value = state.interview || "";
+    if(ta) ta.value = state.draft || "";
+  }
+  function updateSaveStatus(){
+    const saved = loadSavedState();
+    if(saved && saved.savedAt){
+      const dt = new Date(saved.savedAt);
+      if(!isNaN(dt.getTime())) setSaveStatus("最終保存: " + dt.toLocaleString());
+      else setSaveStatus("最終保存: " + saved.savedAt);
+    }else if(saved){
+      setSaveStatus("保存データあり");
+    }else{
+      setSaveStatus("");
+    }
+  }
+  function exportStateToFile(obj){
+    const payload = obj || state;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeResident = (payload.resident || "data").replace(/[\\/:*?"<>|]/g, "_");
+    const safeDate = (payload.date || "").replace(/[\\/:*?"<>|]/g, "_");
+    a.href = url;
+    a.download = `審査会サマリー_${safeResident}_${safeDate}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+  function restoreFromLocalStorage(){
+    const saved = loadSavedState();
+    if(!saved) return;
+    mergeSavedIntoState(saved);
+    applyStateToTopInputs();
+    if(saved.savedAt){
+      const dt = new Date(saved.savedAt);
+      setSaveStatus("復元しました: " + (isNaN(dt.getTime()) ? saved.savedAt : dt.toLocaleString()));
+      setTimeout(updateSaveStatus, 2500);
+    }else{
+      setSaveStatus("復元しました");
+      setTimeout(updateSaveStatus, 2500);
+    }
+  }
+
+  $("btnSave").addEventListener("click", (e) => {
+    e.preventDefault();
+    updateAll(false); // 画面→state を同期
+    const payload = Object.assign({}, state, { version: 2, savedAt: new Date().toISOString() });
+    const ok = safeSet(LS_KEY, JSON.stringify(payload));
+    if(ok){
+      const dt = new Date(payload.savedAt);
+      setSaveStatus("保存しました: " + (isNaN(dt.getTime()) ? payload.savedAt : dt.toLocaleString()));
+      setTimeout(updateSaveStatus, 2500);
+    }else{
+      // ✅ localStorage が使えない環境（ファイル直開き/制限/プライベートなど）はファイル保存にフォールバック
+      exportStateToFile(payload);
+      alert("ブラウザの保存領域が使えないため、JSONファイルとして保存しました。\n次回は「インポート(JSON)」で読み込めます。");
+    }
+  });
 
 $("btnReset").addEventListener("click", ()=>{
   if(!confirm("入力をリセットします。よろしいですか？")) return;
@@ -1924,12 +2056,14 @@ $("btnReset").addEventListener("click", ()=>{
 });
 
 $("btnExport").addEventListener("click", ()=>{
+    updateAll(false);
+
   const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download = `kubun_yatagarasu015_${(state.resident||"user").replace(/\s+/g,"_")}_${state.date||nowDateStr()}.json`;
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
 $("btnImport").addEventListener("click", ()=>{
@@ -1939,17 +2073,24 @@ $("btnImport").addEventListener("click", ()=>{
     const f=inp.files?.[0]; if(!f) return;
     try{
       const obj=JSON.parse(await f.text());
+      if(!obj || typeof obj!=="object") throw new Error("bad");
       if(!obj.answers || !obj.memos) throw new Error("bad");
-      state = obj;
-      $("resident").value=state.resident||"";
-      $("date").value=state.date||nowDateStr();
-      $("interview").value=state.interview||"";
+      // 取り込んだ内容を state に反映（const state は再代入しない）
+      mergeSavedIntoState(obj);
+      if(typeof obj.answers === "object") state.answers = obj.answers;
+      if(typeof obj.memos === "object") state.memos = obj.memos;
+      if(typeof obj.version === "string") state.version = obj.version;
+      if(typeof obj.updatedAt === "string") state.updatedAt = obj.updatedAt;
+      applyStateToTopInputs();
       updateAll(true);
       alert("インポートしました");
     }catch(e){ alert("インポートに失敗しました"); }
   };
   inp.click();
 });
+
+restoreFromLocalStorage();
+updateAll(true);
 
 // Excel出力（.xlsx、支援ありを赤）
 function getAnswerLabel(cat, v){
@@ -2549,6 +2690,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+<script>
+/* ENTER_KEY_SUBMIT_GUARD */
+(() => {
+  // Prevent form submit (Enter key) from reloading/clearing the page.
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true);
+
+  // Prevent Enter in text inputs from triggering implicit submit.
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    if (!t) return;
+
+    const tag = (t.tagName || '').toUpperCase();
+
+    // Allow Enter for multiline textarea.
+    if (tag === 'TEXTAREA') return;
+
+    // Allow Enter inside contenteditable areas (for line breaks).
+    if (t.isContentEditable) return;
+
+    // If focus is in a text-like input, stop implicit submit.
+    if (tag === 'INPUT') {
+      const type = (t.getAttribute('type') || 'text').toLowerCase();
+      const nonTextTypes = new Set([
+        'button','submit','checkbox','radio','file','range','color',
+        'date','datetime-local','time','month','week','number'
+      ]);
+      if (!nonTextTypes.has(type)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+})();
+</script>
 
 </body>
 </html>
