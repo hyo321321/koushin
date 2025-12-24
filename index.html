@@ -2251,11 +2251,13 @@ function exportPdfSupportOnly(){
     }
 
     let pa = document.getElementById("printArea");
-    if(pa) pa.remove();
-    pa = document.createElement("div");
-    pa.id="printArea";
-
-    const resident = ($("resident").value||"").trim();
+if(!pa){
+  pa = document.createElement("div");
+  pa.id="printArea";
+  document.body.appendChild(pa);
+}
+const backup = pa.innerHTML;
+const resident = ($("resident").value||"").trim();
     const date = ($("date").value||nowDateStr()).trim();
 
     const head = `障害支援区分（支援あり項目のみ）`;
@@ -2274,12 +2276,10 @@ function exportPdfSupportOnly(){
       <div class="printMeta">${escapeHtml(meta)}</div>
       ${body}
     `;
-    document.body.appendChild(pa);
 
     window.print();
-
     // 印刷後にprintAreaを消す（環境によりafterprintが動かないことがあるので保険でsetTimeoutも）
-    const cleanup = ()=>{ try{ pa.remove(); }catch(e){} window.removeEventListener("afterprint", cleanup); };
+    const cleanup = ()=>{ try{ pa.innerHTML = backup; }catch(e){} window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
     setTimeout(cleanup, 1500);
   }catch(e){
@@ -2300,12 +2300,14 @@ function exportPdfSupportOnly(){
 
 </script>
 
+<div id="printArea"></div>
+
 <!-- ===== 審査会サマリー編集モーダル ===== -->
 <div id="summaryModal" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:9999;">
   <div style="max-width:980px; margin:24px auto; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);">
     <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
       <div style="font-weight:800;">審査会向け1枚サマリー（編集）</div>
-      <button id="btnSummaryClose" type="button">閉じる</button>
+      <button id="btnSummaryClose" type="button" onclick="summaryEditClose()">閉じる</button>
     </div>
     <div style="font-size:12px; color:#555; margin-bottom:10px;">
       ※この画面で文章を微調整できます。「PDF出力」でA4縦1枚として印刷（PDF保存）します。
@@ -2351,6 +2353,14 @@ function summaryEditOpen(){
   }catch(e){
     console.error(e);
     alert("編集画面の表示でエラーが発生しました。コンソールを確認してください。");
+  }
+}
+
+function summaryEditClose(){
+  const modal = document.getElementById("summaryModal");
+  if(modal){
+    modal.style.display="none";
+    modal.setAttribute("aria-hidden","true");
   }
 }
 
@@ -2497,7 +2507,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // expose for onclick fallback
-  window.__buildSummaryText = buildText;
+  window.__buildSummaryText = buildSummaryText;
   window.__printSummary = printSummary;
 
 
@@ -2536,180 +2546,9 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 
-<script>
-// ===== Robust Summary Module (independent of XLSX / other scripts) =====
-(function(){
-  const q = (id)=>document.getElementById(id);
-  const escapeHtml = (s)=>String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
-  const dateStr = ()=>{
-    const d=new Date();
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,'0');
-    const dd=String(d.getDate()).padStart(2,'0');
-    return `${y}/${m}/${dd}`;
-  };
 
-  function buildSummaryText(){
-    const resident = (q("resident")?.value || "").trim();
-    const date = (q("date")?.value || "").trim() || dateStr();
 
-    const KEY_NOS = [18,15,26,27,29,21,22,24,25,33,34];
-    const bullets = [];
 
-    try{
-      if(window.BASE80 && window.state){
-        const catFor = (it)=> (typeof window.catFor==="function") ? window.catFor(it) : (it.cat||"extra");
-        const isSupportNeeded = (cat,val)=>{
-          if(val==null || val==="") return false;
-          const n = Number(val);
-          if(cat==="medical") return n===2;
-          return n>=2;
-        };
-        const getLabel = (cat,v,it)=>{
-          if(typeof window.getAnswerLabel==="function") return window.getAnswerLabel(cat,v,it);
-          if(window.LABELS){
-            let labels = window.LABELS[cat] || window.LABELS.extra || [];
-            if(cat==="extra" && it && it.optCount){
-              const n = Math.max(2, Math.min(6, it.optCount));
-              labels = (window.LABELS.extra||[]).slice(0,n);
-            }
-            const f = labels.find(x=>String(x[0])===String(v));
-            return f ? f[1] : String(v ?? "");
-          }
-          return String(v ?? "");
-        };
-        const pick = (no)=>{
-          const it = window.BASE80.find(x=>Number(x.code)===Number(no));
-          if(!it) return null;
-          const key = "F"+it.row;
-          const v = window.state?.answers?.[key];
-          const cat = catFor(it);
-          const memo = (window.state?.memos?.[key]||"").trim();
-          const need = isSupportNeeded(cat, v);
-          if(!need && !memo) return null;
-          return { no: it.code, name: it.name, memo: memo || getLabel(cat,v,it) };
-        };
-        for(const n of KEY_NOS){
-          const x = pick(n);
-          if(x){
-            bullets.push(`- ${String(x.no).padStart(2,'0')} ${x.name}：${x.memo}`);
-          }
-        }
-      }
-    }catch(e){
-      console.warn(e);
-    }
-
-    const lines = [];
-    lines.push("【審査会向け1枚サマリー】");
-    lines.push(`利用者名：${resident||"（未入力）"}　／　作成日：${date}`);
-    lines.push("");
-    lines.push("■ 生活全体の支援状況（要約）");
-    lines.push("生活は人的支援を前提として成り立っている。");
-    if(bullets.length){
-      lines.push("主な支援ポイント：");
-      lines.push(...bullets);
-    } else {
-      lines.push("主な支援ポイント：80項目の入力内容（支援あり）と根拠メモに基づき、見守り・声かけ・同行等の支援が必要。");
-    }
-    lines.push("");
-    lines.push("■ 支援体制");
-    lines.push("グループホーム職員：日常生活支援、状態観察、声かけ、同行");
-    lines.push("（該当がある場合）訪問看護：服薬確認／保佐人：金銭管理／相談支援：調整・同行");
-    lines.push("");
-    lines.push("■ まとめ");
-    lines.push("上記の支援は一時的なものではなく、症状の波により継続的かつ反復的に必要である。現在の生活は人的支援を前提として成り立っている。");
-    return lines.join("
-");
-  }
-
-  function renderToPrintArea(text){
-    const printArea = q("printArea");
-    if(!printArea){
-      alert("印刷領域（printArea）が見つかりません。");
-      return;
-    }
-    const prev = printArea.innerHTML;
-    const prevStyle = printArea.getAttribute("style") || "";
-
-    const resident = (q("resident")?.value || "").trim() || "（未入力）";
-    const date = (q("date")?.value || "").trim() || dateStr();
-
-    const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Yu Gothic','Meiryo',sans-serif;">
-      <div style="font-size:14pt;font-weight:800;margin:0 0 12px;">審査会向け1枚サマリー</div>
-      <div style="font-size:10pt;color:#444;margin:0 0 14px;">利用者名：${escapeHtml(resident)}　／　作成日：${escapeHtml(date)}</div>
-      <div style="font-size:10pt;line-height:1.55;white-space:pre-wrap;">${escapeHtml(text)}</div>
-    </div>`;
-
-    printArea.innerHTML = html;
-    printArea.setAttribute("style", prevStyle + "; display:block !important;");
-
-    window.print();
-
-    const cleanup = ()=>{
-      printArea.innerHTML = prev;
-      printArea.setAttribute("style", prevStyle);
-      window.removeEventListener("afterprint", cleanup);
-    };
-    window.addEventListener("afterprint", cleanup);
-    setTimeout(cleanup, 1500);
-  }
-
-  function ensureModal(){
-    let modal = q("summaryModal");
-    if(modal) return modal;
-
-    modal = document.createElement("div");
-    modal.id="summaryModal";
-    modal.className="modal no-print";
-    modal.setAttribute("aria-hidden","true");
-    modal.style.cssText="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; padding:16px; overflow:auto;";
-
-    modal.innerHTML = `
-      <div style="max-width:980px; margin:20px auto; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);">
-        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
-          <div style="font-weight:800;">審査会向け1枚サマリー（編集）</div>
-          <button id="btnSummaryClose" type="button">閉じる</button>
-        </div>
-        <div style="font-size:12px; color:#555; margin-bottom:10px;">※文章を微調整できます。「PDF出力」でA4縦1枚として印刷（PDF保存）します。</div>
-        <textarea id="summaryText" style="width:100%; min-height:340px; padding:12px; border:1px solid #ddd; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap;"></textarea>
-        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
-          <button id="btnSummaryPrint" type="button">PDF出力</button>
-        </div>
-      </div>`;
-
-    document.body.appendChild(modal);
-
-    modal.addEventListener("click",(e)=>{ if(e.target===modal){ modal.style.display="none"; modal.setAttribute("aria-hidden","true"); } });
-    modal.querySelector("#btnSummaryClose").addEventListener("click",()=>{ modal.style.display="none"; modal.setAttribute("aria-hidden","true"); });
-    modal.querySelector("#btnSummaryPrint").addEventListener("click",()=>{
-      const t = (modal.querySelector("#summaryText").value||"").trim();
-      if(!t){ alert("文章が空です。"); return; }
-      modal.style.display="none";
-      modal.setAttribute("aria-hidden","true");
-      renderToPrintArea(t);
-    });
-    return modal;
-  }
-
-  // Override global onclick handlers (ensure they exist even if other scripts failed)
-  window.summaryAutoPDF = function(){
-    const t = buildSummaryText();
-    renderToPrintArea(t);
-  };
-  window.summaryEditOpen = function(){
-    const modal = ensureModal();
-    modal.style.display="block";
-    modal.setAttribute("aria-hidden","false");
-    modal.querySelector("#summaryText").value = buildSummaryText();
-  };
-
-  // Expose for other code
-  window.__buildSummaryText = buildSummaryText;
-  window.__printSummary = renderToPrintArea;
-
-})();
-</script>
 
 </body>
 </html>
