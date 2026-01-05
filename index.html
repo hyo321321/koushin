@@ -112,6 +112,9 @@ summary{cursor:pointer;font-weight:700}
 .aboutBox ul{margin:6px 0 0 18px;padding:0}
 .aboutBox li{margin:2px 0}
 
+
+  .chip{border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+  .chip:hover{border-color:#bbb}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -172,7 +175,30 @@ summary{cursor:pointer;font-weight:700}
       </div>
     </div>
 
-    <div class="kpi" style="margin-top:10px">
+    
+<div class="toolbar" style="margin-top:8px;align-items:flex-end">
+  <div style="min-width:260px">
+    <label>一括入力（番号範囲）</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input id="bulkRange" placeholder="範囲 例：54-68,12-14（空欄=表示中）" style="width:260px" />
+      <div class="bulkQuick" style="display:flex;gap:4px;align-items:center">
+        <button type="button" class="chip" data-bulk="1">1</button>
+        <button type="button" class="chip" data-bulk="2">2</button>
+        <button type="button" class="chip" data-bulk="3">3</button>
+        <button type="button" class="chip" data-bulk="4">4</button>
+        <button type="button" class="chip" data-bulk="5">5</button>
+      </div>
+    </div>
+    <div class="muted small" style="margin-top:4px;line-height:1.6">
+      <b>数字の目安</b>：1=支援不要/該当なし　2=稀に支援（月1回未満）　3=月に1回以上　4=週に1回以上　5=ほぼ毎日（週5日以上）<br>
+      ※ボタンを押すと、指定範囲（空欄なら表示中）をまとめて入力します（上書き）。<br>
+      ※カテゴリごとに選択肢の数が違うため、範囲外の項目は自動で最大値に丸めます（例：日常生活は最大3、医療は最大2）。範囲指定は<b>1〜80</b>。複数は「,」区切り（例：<b>54-68,12-14</b>）。
+    </div>
+  </div>
+  <div style="flex:1"></div>
+</div>
+
+<div class="kpi style="margin-top:10px">
       <div class="box">
         <div class="muted">未入力（80項目中）</div>
         <div class="v" id="kpiMissing">0</div>
@@ -2090,12 +2116,163 @@ renderList(BASE80, "items80");
   scheduleAutoSave();
 }
 
+
+/* ====== 追加：一括入力（表示中の80項目） ====== */
+function getItemByRow(row){
+  return BASE80.find(x=>Number(x.row)===Number(row)) || EXTRAS.find(x=>Number(x.row)===Number(row)) || null;
+}
+function maxOptionForItem(it){
+  const cat = catFor(it);
+  if(cat==="extra" && it.optCount){
+    const n = Math.max(2, Math.min(6, Number(it.optCount)));
+    return n;
+  }
+  const labels = LABELS[cat] || LABELS.extra;
+  return labels.length || 5;
+}
+function bulkApply80(mode, desired){
+  const wrap = $("items80");
+  if(!wrap) return;
+  desired = Number(desired||0);
+  if(!Number.isFinite(desired) || desired<=0){ alert("一括入力する数字（1〜5）を選んでください"); return; }
+  const cards = Array.from(wrap.querySelectorAll(".item[data-row]"));
+  if(!cards.length){ alert("表示中の項目がありません"); return; }
+
+  let count=0;
+  for(const card of cards){
+    const row = Number(card.getAttribute("data-row"));
+    const key = "F"+row;
+    if(mode==="missing" && state.answers[key]!=null) continue;
+    const it = getItemByRow(row);
+    if(!it) continue;
+    const max = maxOptionForItem(it);
+    const v = Math.max(1, Math.min(max, desired));
+    state.answers[key]=v;
+    count++;
+  }
+  updateAll(true);
+  alert(`${count}件を一括設定しました`);
+}
+
+/* 追加：範囲指定一括入力（例：54-68,12-14） */
+function normalizeRangeSpec(s){
+  if(!s) return "";
+  // 全角数字→半角
+  s = String(s).replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30));
+  // いろいろな区切り→ハイフン
+  s = s.replace(/[－—−〜～]/g, "-").replace(/から/g, "-").replace(/to/ig, "-");
+  // 余計な空白除去
+  s = s.replace(/\s+/g, "");
+  return s;
+}
+function parseRangeCodes(spec){
+  spec = normalizeRangeSpec(spec);
+  if(!spec) return [];
+  const parts = spec.split(/[，、,;]+/).map(x=>x.trim()).filter(Boolean);
+  const set = new Set();
+  for(const p of parts){
+    if(!p) continue;
+    if(p.includes("-")){
+      const [a,b] = p.split("-").filter(Boolean);
+      let s = parseInt(a,10), e = parseInt(b,10);
+      if(!Number.isFinite(s) || !Number.isFinite(e)) continue;
+      if(s>e){ const tmp=s; s=e; e=tmp; }
+      for(let n=s; n<=e; n++) set.add(n);
+    }else{
+      const n = parseInt(p,10);
+      if(Number.isFinite(n)) set.add(n);
+    }
+  }
+  return Array.from(set).filter(n=>n>=1 && n<=80).sort((x,y)=>x-y);
+}
+function getItemByCode(codeNum){
+  const s = String(codeNum).padStart(2,"0");
+  return BASE80.find(it => it.code === s) || null;
+}
+function bulkApplyRange(mode, desired){
+  desired = Number(desired||0);
+  if(!Number.isFinite(desired) || desired<=0){ alert("一括入力する数字（1〜5）を選んでください"); return; }
+
+  const spec = ($("bulkRange")?.value || "").trim();
+  const codes = parseRangeCodes(spec);
+  if(!codes.length){ alert("範囲を入力してください（例：54-68,12-14）"); return; }
+
+  let count=0, miss=0;
+  for(const c of codes){
+    const it = getItemByCode(c);
+    if(!it){ miss++; continue; }
+    const row = Number(it.row);
+    const key = "F"+row;
+    if(mode==="missing" && state.answers[key]!=null) continue;
+    const max = maxOptionForItem(it);
+    const v = Math.max(1, Math.min(max, desired));
+    state.answers[key]=v;
+    count++;
+  }
+  updateAll(true);
+  const extra = miss? `（範囲内に存在しない番号 ${miss}件は無視しました）` : "";
+  alert(`${count}件を一括設定しました${extra}`);
+}
+/* ====== /追加 ====== */
+
+
+
 $("resident").addEventListener("input", ()=>updateAll(false));
 $("date").addEventListener("change", ()=>updateAll(false));
 $("interview").addEventListener("input", ()=>{ state.interview=$("interview").value||""; scheduleAutoSave(); });
 $("q").addEventListener("input", ()=>updateAll(true));
 $("showFilter").addEventListener("change", ()=>updateAll(true));
 
+const __btnBulkMissing = $("btnBulkMissing");
+if(__btnBulkMissing) __btnBulkMissing.addEventListener("click", ()=>bulkApply80("missing"));
+
+const __btnBulkAll = $("btnBulkAll");
+if(__btnBulkAll) __btnBulkAll.addEventListener("click", ()=>{
+  if(confirm("表示中の項目をすべて上書きします。よろしいですか？")){
+    bulkApply80("all");
+  }
+});
+
+const __btnBulkRangeMissing = $("btnBulkRangeMissing");
+if(__btnBulkRangeMissing) __btnBulkRangeMissing.addEventListener("click", ()=>bulkApplyRange("missing"));
+
+const __btnBulkRangeAll = $("btnBulkRangeAll");
+if(__btnBulkRangeAll) __btnBulkRangeAll.addEventListener("click", ()=>{
+  if(confirm("指定した範囲の項目をすべて上書きします。よろしいですか？")){
+    bulkApplyRange("all");
+  }
+});
+
+// 一括入力：数字ボタン（1〜5）で、指定範囲（空欄なら表示中）へ適用
+(function(){
+  function applyByChip(desired){
+    desired = Number(desired||0);
+    if(!Number.isFinite(desired) || desired<=0) return;
+    const spec = ($("bulkRange")?.value || "").trim();
+    const hasRange = normalizeRangeSpec(spec).length>0;
+
+    if(hasRange){
+      if(confirm(`指定した範囲を「${desired}」で上書きします。よろしいですか？`)){
+        bulkApplyRange("all", desired);
+        updateAll(true);
+        scheduleAutoSave();
+      }
+    }else{
+      if(confirm(`表示中の項目を「${desired}」で上書きします。よろしいですか？`)){
+        bulkApply80("all", desired);
+        updateAll(true);
+        scheduleAutoSave();
+      }
+    }
+  }
+
+  document.querySelectorAll("[data-bulk]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const v = Number(btn.getAttribute("data-bulk")||"");
+      applyByChip(v);
+    });
+  });
+})();
 $("btnDraft").addEventListener("click", ()=>{ const t = buildDraft(); $("draft").value = t; state.draft = t; updateSaveStatus(); scheduleAutoSave(); });
 $("btnCopyDraft").addEventListener("click", async ()=>{
   try{ await navigator.clipboard.writeText($("draft").value||""); alert("コピーしました"); }
