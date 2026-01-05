@@ -70,6 +70,9 @@ summary{cursor:pointer;font-weight:700}
 /* ===== PDF出力（支援ありのみ：項目名／回答／根拠メモ） ===== */
 #printArea { display:none; }
 @media print {
+  html, body { background:#fff !important; }
+  #printArea { background:#fff !important; }
+
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* 画面UIは全部隠して、printAreaだけ表示 */
   body > * { display:none !important; }
