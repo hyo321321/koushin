@@ -114,15 +114,13 @@ summary{cursor:pointer;font-weight:700}
   <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
     <h1>障害支援区分：聞き取り→80項目入力→不足チェック→特記事項下書き→八咫烏015推定</h1>
     <div class="btns">
-      <button id="btnSave" class="primary">保存</button>
+      <button id="btnSave" class="primary">端末保存</button>
           <span id="saveStatus" class="saveStatus" aria-live="polite"></span>
       <button id="btnXlsx">Excelで保存</button>
       <button id="btnGlossary">用語説明</button>
         <button id="btnPdf" type="button">PDF出力</button>
-        <button id="btnSummaryAuto" type="button" onclick="summaryAutoPDF()">審査会サマリーPDF（自動）</button>
-        <button id="btnSummaryEdit" type="button" onclick="summaryEditOpen()">審査会サマリーPDF（編集可）</button>
-      <button id="btnExport">エクスポート(JSON)</button>
-      <button id="btnImport">インポート(JSON)</button>
+                      <button id="btnExport">保存</button>
+      <button id="btnImport">読み込み</button>
       <button id="btnReset">リセット</button>
     </div>
   </div>
@@ -2177,7 +2175,7 @@ $("btnCopyDraft").addEventListener("click", async ()=>{
     }else{
       // ✅ localStorage が使えない環境（ファイル直開き/制限/プライベートなど）はファイル保存にフォールバック
       exportStateToFile(payload);
-      alert("ブラウザの保存領域が使えないため、JSONファイルとして保存しました。\n次回は「インポート(JSON)」で読み込めます。");
+      alert("ブラウザの保存領域が使えないため、JSONファイルとして保存しました。\n次回は「読み込み(JSON)」で読み込めます。");
     }
   });
 
@@ -2218,8 +2216,8 @@ $("btnImport").addEventListener("click", ()=>{
       if(typeof obj.updatedAt === "string") state.updatedAt = obj.updatedAt;
       applyStateToTopInputs();
       updateAll(true);
-      alert("インポートしました");
-    }catch(e){ alert("インポートに失敗しました"); }
+      alert("読み込みしました");
+    }catch(e){ alert("読み込みに失敗しました"); }
   };
   inp.click();
 });
