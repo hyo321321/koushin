@@ -77,14 +77,29 @@ summary{cursor:pointer;font-weight:700}
   /* 画面UIは全部隠して、printAreaだけ表示 */
   body > * { display:none !important; }
   #printArea { display:block !important; }
-  #printArea { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", "Meiryo", sans-serif; color:#111; }
-  #printArea .printTitle { font-size: 14pt; font-weight:700; margin: 0 0 6mm; }
-  #printArea .printMeta { font-size: 10pt; color:#444; margin: 0 0 6mm; }
-  #printArea .row { padding: 5mm 0; border-bottom: 1px solid #ddd; page-break-inside: avoid; break-inside: avoid; }
-  #printArea .line1 { font-size: 11pt; font-weight:700; margin-bottom: 2mm; }
-  #printArea .line2 { font-size: 10pt; margin-bottom: 2mm; color: #c00000; font-weight: 700; }
-  #printArea .line3 { font-size: 10pt; white-space: pre-wrap; }
-  @page { size: A4 portrait; margin: 14mm; }
+
+  /* ==== 印刷用：省スペース（支援ありのみPDF向け）==== */
+  #printArea {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", "Meiryo", sans-serif;
+    color:#111;
+    line-height: 1.25;
+  }
+  #printArea .printTitle { font-size: 12.5pt; font-weight:700; margin: 0 0 4mm; }
+  #printArea .printMeta  { font-size: 9pt; color:#444; margin: 0 0 4mm; }
+
+  /* 聞き取りメモなどのブロックの余白を詰める */
+  #printArea .sumSec, #printArea .interviewSec { margin: 0 0 4mm; }
+  #printArea .sumH { font-size: 10pt; font-weight:700; margin: 0 0 1.5mm; }
+  #printArea .sumB { font-size: 9pt; white-space: pre-wrap; }
+
+  /* 1項目あたりの高さを圧縮 */
+  #printArea .row { padding: 3mm 0; border-bottom: 1px solid #ddd; page-break-inside: avoid; break-inside: avoid; }
+  #printArea .line1 { font-size: 10pt; font-weight:700; margin-bottom: 1.5mm; }
+  #printArea .line2 { font-size: 9pt; margin-bottom: 1.5mm; color: #c00000; font-weight: 700; }
+  #printArea .line3 { font-size: 9pt; white-space: pre-wrap; }
+
+  /* 余白を少し削ってページ数を抑える */
+  @page { size: A4 portrait; margin: 9mm; }
 }
 
 
