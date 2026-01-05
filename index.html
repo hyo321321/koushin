@@ -106,6 +106,12 @@ summary{cursor:pointer;font-weight:700}
 .kv .k{font-size:12px;color:rgba(255,255,255,.7)}
 .kv .v{font-size:14px;margin-top:2px}
 
+
+.aboutBox{border:1px dashed var(--bd);border-radius:12px;padding:10px;background:#fafafa;margin-top:8px}
+.aboutBox summary{cursor:pointer;font-weight:700;color:#111827}
+.aboutBox ul{margin:6px 0 0 18px;padding:0}
+.aboutBox li{margin:2px 0}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -129,6 +135,20 @@ summary{cursor:pointer;font-weight:700}
 <main class="grid">
   <section class="card">
     <h2>① 基本情報</h2>
+
+    <details class="aboutBox" open>
+      <summary>このソフトの説明（クリックで折りたたみ）</summary>
+      <div class="muted" style="margin-top:6px">
+        障害支援区分の聞き取り内容を整理し、80項目の入力漏れチェック・特記事項の下書き・八咫烏015の推定（一次判定相当）をまとめて行うためのローカルHTMLです。
+      </div>
+      <ul class="muted">
+        <li><strong>自動保存</strong>：入力は端末内（localStorage）に自動保存されます。共有PCの場合は「読み込み／端末保存」を活用してください。</li>
+        <li><strong>保存／読み込み</strong>：JSON形式でデータを保存・復元できます（別端末へ持ち出し可）。</li>
+        <li><strong>PDF出力</strong>：審査会用に、入力内容＋聞き取りメモ（生活状況・支援実態）をPDFにまとめます。</li>
+        <li><strong>推定区分</strong>：八咫烏015のロジックに基づく参考表示です。<strong>公式判定の保証はありません</strong>（審査会・医師意見書等で変わります）。</li>
+      </ul>
+    </details>
+
     <div class="toolbar">
       <div style="flex:1;min-width:220px">
         <label>利用者名（またはID）</label>
@@ -1731,6 +1751,7 @@ function renderList(list, mountId){
     const key="F"+row;
     inp.addEventListener("input", e=>{
       state.memos[key]=e.target.value||"";
+      scheduleAutoSave();
     });
   });
 }
@@ -2023,7 +2044,7 @@ function buildDraft(){
 
 
 
-  // Enterキーで意図せず「保存」などが発火して入力が消えるのを防ぐ（textareaは除外）
+  // Enterキーで意図せず「保存」や「リセット」等が発火して入力が消えるのを防ぐ（textarea / contenteditable は除外）
   document.addEventListener("keydown", (e)=>{
     if (e.key !== "Enter") return;
     const t = e.target;
@@ -2032,11 +2053,12 @@ function buildDraft(){
     const isTextArea = tag === "textarea";
     const isEditable = !!t.isContentEditable;
     if (isTextArea || isEditable) return; // 改行OK
-    // input/select などで Enter を押したとき、既定動作でボタンが押されるケースを抑止
-    if (tag === "input" || tag === "select") {
-      e.preventDefault();
-    }
+    // Enter は「既定ボタンのクリック」や「意図しない submit」を誘発しやすいので抑止
+    e.preventDefault();
   }, true);
+
+  // もし将来 form を入れても Enter で submit されないようにする
+  document.addEventListener("submit", (e)=>{ e.preventDefault(); }, true);
 /* ====== 追加：入力→state 同期（保存で消える問題の対策） ====== */
 function syncFromTopInputs(){
   // 画面上の入力を state に反映（保存時に空で上書きされないように）
@@ -2065,15 +2087,16 @@ renderList(BASE80, "items80");
   }
   calcMissing();
   estimate();
+  scheduleAutoSave();
 }
 
 $("resident").addEventListener("input", ()=>updateAll(false));
 $("date").addEventListener("change", ()=>updateAll(false));
-$("interview").addEventListener("input", ()=>{ state.interview=$("interview").value||""; });
+$("interview").addEventListener("input", ()=>{ state.interview=$("interview").value||""; scheduleAutoSave(); });
 $("q").addEventListener("input", ()=>updateAll(true));
 $("showFilter").addEventListener("change", ()=>updateAll(true));
 
-$("btnDraft").addEventListener("click", ()=>{ const t = buildDraft(); $("draft").value = t; state.draft = t; updateSaveStatus(); });
+$("btnDraft").addEventListener("click", ()=>{ const t = buildDraft(); $("draft").value = t; state.draft = t; updateSaveStatus(); scheduleAutoSave(); });
 $("btnCopyDraft").addEventListener("click", async ()=>{
   try{ await navigator.clipboard.writeText($("draft").value||""); alert("コピーしました"); }
   catch{ alert("コピーに失敗しました"); }
@@ -2088,7 +2111,49 @@ $("btnCopyDraft").addEventListener("click", async ()=>{
   function safeSet(key, val){
     try { localStorage.setItem(key, val); return true; } catch(e){ return false; }
   }
-  function setSaveStatus(msg){
+  
+  // ----------------------------
+  // 自動保存（入力のたびにローカルへ退避）
+  // ----------------------------
+  let __autoSaveTimer = null;
+  let __autoSaveDisabled = false;
+
+  function buildSavePayload(isAuto){
+    // 画面→state 同期（トップ欄）
+    try{ syncFromTopInputs(); }catch(_){}
+    return Object.assign({}, state, {
+      version: 2,
+      savedAt: new Date().toISOString(),
+      autosaved: !!isAuto
+    });
+  }
+
+  function tryAutoSaveNow(){
+    if(__autoSaveDisabled) return false;
+    const payload = buildSavePayload(true);
+    const ok = safeSet(LS_KEY, JSON.stringify(payload));
+    if(ok){
+      // 状態側にも反映しておく（表示・エクスポートで揃える）
+      state.savedAt = payload.savedAt;
+      // 画面表示（次の updateAll で「最終保存」に戻る）
+      const dt = new Date(payload.savedAt);
+      setSaveStatus("自動保存: " + (isNaN(dt.getTime()) ? payload.savedAt : dt.toLocaleString()));
+      return true;
+    }
+    __autoSaveDisabled = true;
+    setSaveStatus("自動保存OFF（ブラウザの保存領域が使えません）");
+    return false;
+  }
+
+  function scheduleAutoSave(){
+    if(__autoSaveDisabled) return;
+    if(__autoSaveTimer) clearTimeout(__autoSaveTimer);
+    __autoSaveTimer = setTimeout(()=>{ try{ tryAutoSaveNow(); }catch(_){} }, 600);
+  }
+
+  // ページを閉じる/更新する直前にも退避
+  window.addEventListener("beforeunload", ()=>{ try{ tryAutoSaveNow(); }catch(_){} });
+function setSaveStatus(msg){
     const el = document.getElementById("saveStatus");
     if(!el) return;
     el.textContent = msg || "";
