@@ -2537,6 +2537,14 @@ const resident = ($("resident").value||"").trim();
     const head = `障害支援区分（支援あり項目のみ）`;
     const meta = `利用者：${resident||"（未入力）"}　日付：${date||nowDateStr()}　※出力内容：①項目名 ②回答 ③根拠メモ（支援不要は除外）`;
 
+
+    const interview = ($("interview")?.value || "").trim();
+    const interviewBlock = `
+      <div class="sumSec">
+        <div class="sumH">聞き取りメモ（生活状況・支援実態）</div>
+        <div class="sumP">${escapeHtml(interview || "（未入力）")}</div>
+      </div>
+    `;
     const body = rows.map(r=>`
       <div class="row">
         <div class="line1">${escapeHtml(r.code)}　${escapeHtml(r.name)}</div>
@@ -2548,9 +2556,9 @@ const resident = ($("resident").value||"").trim();
     pa.innerHTML = `
       <div class="printTitle">${escapeHtml(head)}</div>
       <div class="printMeta">${escapeHtml(meta)}</div>
+      ${interviewBlock}
       ${body}
     `;
-
     window.print();
     // 印刷後にprintAreaを消す（環境によりafterprintが動かないことがあるので保険でsetTimeoutも）
     const cleanup = ()=>{ try{ pa.innerHTML = backup; }catch(e){} window.removeEventListener("afterprint", cleanup); };
@@ -2749,6 +2757,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const resident = (document.getElementById("resident")?.value || "").trim();
     const date = (document.getElementById("date")?.value || "").trim() || nowDate();
 
+    const interview = (document.getElementById("interview")?.value || "").trim();
+    const interviewBlock = `<div class="sumSec"><div class="sumH">聞き取りメモ（生活状況・支援実態）</div><div class="sumP">${esc(interview || "（未入力）")}</div></div>`;
+
     const parts = String(text||"").split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
     const blocks = parts.map(p=>{
       const lines = p.split("\n");
@@ -2765,6 +2776,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `
       <div class="sumTitle">審査会向け1枚サマリー</div>
       <div class="sumMeta">利用者名：${esc(resident||"（未入力）")}　／　作成日：${esc(date)}</div>
+      ${interviewBlock}
       ${blocks}
     `;
   }
