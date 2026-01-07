@@ -231,7 +231,7 @@ summary{cursor:pointer;font-weight:700}
   <div style="flex:1"></div>
 </div>
 
-<div class="kpi style="margin-top:10px">
+<div class="kpi" style="margin-top:10px">
       <div class="box">
         <div class="muted">未入力（80項目中）</div>
         <div class="v" id="kpiMissing">0</div>
@@ -242,6 +242,8 @@ summary{cursor:pointer;font-weight:700}
         <div class="muted">八咫烏015 推定（一次判定相当）</div>
         <div class="v"><span id="kpiKubun">—</span> <span class="small">(推定)</span></div>
         <div class="muted">該当ロジック：<span class="mono" id="kpiLogic">—</span> / p：<span class="mono" id="kpiP">—</span></div>
+        <div class="muted" style="margin-top:6px">区分別（推定割合・参考）</div>
+        <div id="kpiDist" class="muted"></div>
         <div class="muted">※公式判定の保証はありません（審査会・医師意見書要素は別）</div>
       </div>
     </div>
@@ -1983,75 +1985,166 @@ function getVarVal(name){
   return Number(evalExpr(name))||0;
 }
 
+function clamp01(x){ return x<0?0:(x>1?1:x); }
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
 function checkCond(cond){
   const pc=parseCond(cond);
-  if(pc.type==="true") return {ok:true, dist:0, text:"1", val:null};
+  if(pc.type==="true") return {ok:true, dist:0, signed:1, scale:1, text:"1", val:null};
   if(pc.type==="expr"){
     const ok=!!evalExpr(pc.raw);
-    return {ok, dist: ok?0:1, text:pc.raw, val:null};
+    return {ok, dist: ok?0:1, signed: ok?1:-1, scale:1, text:pc.raw, val:null};
   }
   const val=getVarVal(pc.v);
   const num=pc.num;
-  let ok=false, dist=0;
-  if(pc.op==="<="){ ok = val<=num; dist = ok?0:(val-num); }
-  else if(pc.op===">="){ ok = val>=num; dist = ok?0:(num-val); }
-  else if(pc.op==="<"){ ok = val<num; dist = ok?0:(val-num); }
-  else if(pc.op===">"){ ok = val>num; dist = ok?0:(num-val); }
-  else if(pc.op==="="){ dist = Math.abs(val-num); ok = dist < 1e-9; }
-  return {ok, dist, v:pc.v, op:pc.op, num, val, text:`${pc.v}${pc.op}${num}`};
+  let ok=false, dist=0, signed=0;
+  if(pc.op==="<="){ signed = num - val; ok = signed>=0; dist = ok?0:(-signed); }
+  else if(pc.op==="<"){ signed = num - val; ok = signed>0; dist = ok?0:(-signed + 1e-9); }
+  else if(pc.op===">="){ signed = val - num; ok = signed>=0; dist = ok?0:(-signed); }
+  else if(pc.op===">"){ signed = val - num; ok = signed>0; dist = ok?0:(-signed + 1e-9); }
+  else if(pc.op==="="){ const d=Math.abs(val-num); signed = -d; ok = d < 1e-9; dist = d; }
+  const scale = Math.max(1, Math.abs(num)*0.15, 1.5);
+  return {ok, dist, signed, scale, v:pc.v, op:pc.op, num, val, text:`${pc.v}${pc.op}${num}`};
 }
+
+function condProb(info){
+  if(info.text==="1") return 1;
+  if(info.op==="="){
+    const d = Math.abs((Number(info.val)||0)-(Number(info.num)||0));
+    const s = Math.max(0.8, Math.abs(Number(info.num)||0)*0.12, 0.8);
+    return Math.exp(-d/s);
+  }
+  const x = (Number(info.signed)||0) / (Number(info.scale)||1);
+  return clamp01(sigmoid(x));
+}
+
+function scoreAllRules(){
+  // returns array of {r, okAll, unsat, avgDist, logLike, condLen, checks}
+  const scored=[];
+  for(const r of RULES){
+    const conds=(r.conds||[]).filter(x=>String(x).trim()!=="1");
+    let unsat=0, distSum=0, logLike=0;
+    const checks=[];
+    for(const c of conds){
+      const info=checkCond(c);
+      checks.push(info);
+      if(!info.ok) unsat++;
+      distSum += (Number(info.dist)||0);
+      const q = condProb(info);
+      logLike += Math.log(Math.max(1e-9, q));
+    }
+    const total=Math.max(1, conds.length);
+    const avgDist = distSum / total;
+
+    // incorporate p (区分等該当可能性): 0〜1の想定
+    const p0 = Math.max(1e-6, Math.min(1-1e-6, Number(r.p)||0));
+    const logit = Math.log(p0/(1-p0));
+    logLike += 0.35*logit;
+
+    // specificity bonus
+    logLike += 0.02*total;
+
+    scored.push({r, okAll:(unsat===0), unsat, avgDist, logLike, condLen:total, checks});
+  }
+  return scored;
+}
+
+function calcKubunPercentFromScored(scored, topN=40, temp=0.9){
+  const sumBy=Object.create(null);
+  if(!scored || !scored.length) return {};
+  const sorted=scored.slice().sort((a,b)=>b.logLike-a.logLike).slice(0, topN);
+  const max=sorted[0]?.logLike ?? 0;
+  let Z=0;
+  for(const s of sorted){
+    const w = Math.exp((s.logLike - max)/temp);
+    const k = s.r.k;
+    sumBy[k]=(sumBy[k]||0)+w;
+    Z += w;
+  }
+  const out=Object.create(null);
+  for(const k of [0,1,2,3,4,5,6]) out[k]=0;
+  for(const k of Object.keys(sumBy)){
+    out[k]= Z>0 ? (sumBy[k]/Z*100) : 0;
+  }
+  return out;
+}
+
+function renderKubunPercent(dist){
+  const levels = Object.keys(dist)
+    .map(k=>Number(k))
+    .sort((a,b)=>a-b);
+
+  const rows = levels
+    .sort((a,b)=>(dist[b]||0)-(dist[a]||0))
+    .map(k=>{
+      const p = dist[k] || 0;
+      const w = Math.max(0, Math.min(100, p));
+      return `
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+          <span style="width:52px">${(k===0) ? "非該当" : ("区分"+k)}</span>
+          <div style="flex:1;height:10px;background:var(--bd);border-radius:999px;overflow:hidden">
+            <div style="width:${w}%;height:100%;background:var(--pri)"></div>
+          </div>
+          <span class="mono" style="width:64px;text-align:right">${p.toFixed(1)}%</span>
+        </div>
+      `;
+    }).join("");
+
+  return rows || "—";
+}
+
 
 function estimate(){
   cache.clear();
 
-  // 1) 完全一致（従来どおり）
-  let best=null;
-  for(const r of RULES){
-    let ok=true;
-    for(const c of r.conds){
-      const res = evalExpr(c);
-      if(!res){ ok=false; break; }
-    }
-    if(!ok) continue;
-    if(!best || r.p>best.p || (r.p===best.p && r.n>best.n)) best=r;
+  const scored = scoreAllRules();
+  if(!scored.length){
+    $("kpiKubun").textContent = "—";
+    $("kpiLogic").textContent = "—";
+    $("kpiP").textContent = "—";
+    const distEl2 = document.getElementById("kpiDist");
+    if(distEl2) distEl2.textContent = "—";
+    $("why").innerHTML = `<span class="warn">ロジックが読み込めませんでした。</span>`;
+    return;
   }
 
-  // 2) 完全一致が無い場合：最も近いルールを採用（推定の安定性のため）
+  // 区分別（推定割合・参考）
+  const dist = calcKubunPercentFromScored(scored, 40, 0.9);
+  const distEl = document.getElementById("kpiDist");
+  if(distEl) distEl.innerHTML = renderKubunPercent(dist);
+
+  const exact = scored.filter(s=>s.okAll);
+
+  const pickBy = (arr)=> arr.slice().sort((a,b)=>{
+    const ap=Number(a.r.p)||0, bp=Number(b.r.p)||0;
+    if(bp!==ap) return bp-ap;           // ① pが高い
+    const ak=Number(a.r.k)||0, bk=Number(b.r.k)||0;
+    if(bk!==ak) return bk-ak;           // ② 同値なら支援の大きい区分（k）
+    const an=Number(a.r.n)||0, bn=Number(b.r.n)||0;
+    return bn-an;                       // ③ 同区分なら番号が大きい
+  })[0];
+
+  let bestS=null;
   let approx=false;
-  if(!best){
+
+  if(exact.length){
+    bestS = pickBy(exact);
+  } else {
     approx=true;
-    let best2=null;
-    let bestMetric=null;
-    const lexLess=(a,b)=>{
-      for(let i=0;i<a.length;i++){
-        if(a[i]!==b[i]) return a[i]<b[i];
-      }
-      return false;
-    };
-
-    for(const r of RULES){
-      const conds=r.conds.filter(x=>String(x).trim()!=="1");
-      let unsat=0;
-      let distSum=0;
-      for(const c of conds){
-        const info=checkCond(c);
-        if(!info.ok) unsat++;
-        distSum += (Number(info.dist)||0);
-      }
-      const total = Math.max(1, conds.length);
-      const avgDist = distSum / total;
-      // avgDist(小) → unsat率(小) → 条件数(多) → p(大) → n(大)
-      const metric=[avgDist, unsat/total, -total, -r.p, -r.n];
-
-      if(!best2 || lexLess(metric, bestMetric)){
-        best2=r;
-        bestMetric=metric;
-      }
-    }
-    best=best2;
+    bestS = scored.slice().sort((a,b)=>{
+      if(a.unsat!==b.unsat) return a.unsat-b.unsat;
+      if(a.avgDist!==b.avgDist) return a.avgDist-b.avgDist;
+      // 近いもの同士なら p/k/n で整列
+      const ap=Number(a.r.p)||0, bp=Number(b.r.p)||0;
+      if(bp!==ap) return bp-ap;
+      const ak=Number(a.r.k)||0, bk=Number(b.r.k)||0;
+      if(bk!==ak) return bk-ak;
+      const an=Number(a.r.n)||0, bn=Number(b.r.n)||0;
+      return bn-an;
+    })[0];
   }
 
-  if(!best){
+  if(!bestS){
     $("kpiKubun").textContent = "—";
     $("kpiLogic").textContent = "—";
     $("kpiP").textContent = "—";
@@ -2059,12 +2152,14 @@ function estimate(){
     return;
   }
 
-  $("kpiKubun").textContent = "区分" + String(best.k);
+  const best = bestS.r;
+
+  $("kpiKubun").textContent = (Number(best.k)===0) ? "非該当" : ("区分" + String(best.k));
   $("kpiLogic").textContent = `${best.n}${approx ? "（近似）" : ""}`;
-  $("kpiP").textContent = (best.p!=null? Number(best.p).toFixed(3) : "—");
+  $("kpiP").textContent = (best.p!=null ? (Number(best.p)*100).toFixed(1) + "%" : "—");
 
   // 判定根拠：各条件のOK/NGと実値
-  const conds = best.conds.filter(x=>String(x).trim()!=="1");
+  const conds = (best.conds||[]).filter(x=>String(x).trim()!=="1");
   let okCount=0;
   const rows = conds.map(c=>{
     const info=checkCond(c);
@@ -2077,7 +2172,7 @@ function estimate(){
 
   const head = approx
     ? `<div class="warn">完全一致ロジックが無かったため、最も近いロジックで推定しています（公式判定の保証はありません）。一致：${okCount}/${Math.max(1,conds.length)}</div>`
-    : `<div class="muted">該当条件：${okCount}/${Math.max(1,conds.length)}</div>`;
+    : `<div class="muted">完全一致：${exact.length}件（採用：p優先→区分→番号）／該当条件：${okCount}/${Math.max(1,conds.length)}</div>`;
 
   $("why").innerHTML = head + rows;
 
