@@ -156,7 +156,7 @@ summary{cursor:pointer;font-weight:700}
     <div class="btns">
       <button id="btnSave" class="primary">端末保存</button>
           <span id="saveStatus" class="saveStatus" aria-live="polite"></span>
-      <span id="uiLastUpdated" class="muted" style="margin-left:8px">最終更新日：2026-01-05</span>
+      <span id="uiLastUpdated" class="muted" style="margin-left:8px">サイト更新日（アップデート）：—</span>
       <button id="btnXlsx">Excelで保存</button>
       <button id="btnGlossary">用語説明</button>
         <button id="btnPdf" type="button">PDF出力</button>
@@ -332,6 +332,51 @@ function nowDateStr(){
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 $("date").value = nowDateStr();
+
+// --- Site updated date (GitHub Pages等) ---
+function formatYMD(d){
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+async function updateSiteUpdatedLabel(){
+  const el = document.getElementById("uiLastUpdated");
+  if(!el) return;
+  const label = "サイト更新日（アップデート）：";
+
+  // 1) Try document.lastModified (often backed by Last-Modified header)
+  try{
+    const lm0 = document.lastModified;
+    if(lm0){
+      const d0 = new Date(lm0);
+      if(!Number.isNaN(d0.getTime())){
+        el.textContent = label + formatYMD(d0);
+        return;
+      }
+    }
+  }catch(e){}
+
+  // 2) Fallback: HEAD request to read Last-Modified header
+  try{
+    const base = String(location.href || "").replace(/#.*$/, "");
+    const url = base + (base.includes("?") ? "&" : "?") + "v=" + Date.now();
+    const res = await fetch(url, { method: "HEAD", cache: "no-store" });
+    const lm = res.headers.get("last-modified") || res.headers.get("Last-Modified");
+    if(lm){
+      const d = new Date(lm);
+      if(!Number.isNaN(d.getTime())){
+        el.textContent = label + formatYMD(d);
+        return;
+      }
+    }
+  }catch(e){}
+
+  // 3) Last resort: show today's date (device)
+  el.textContent = label + nowDateStr();
+}
+// Run on load (non-blocking)
+updateSiteUpdatedLabel();
+
 
 const LABELS = {
   physical: [
