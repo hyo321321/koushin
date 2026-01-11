@@ -1,0 +1,3311 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>障害支援区分 80項目 聞き取り＋八咫烏015推定</title>
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--txt:#111827;--sub:#6b7280;--bd:#e5e7eb;--pri:#2563eb;--ok:#047857;--warn:#b45309;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--txt)}
+header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--bd);padding:10px 14px;z-index:10}
+h1{font-size:16px;margin:0}
+main{max-width:1180px;margin:0 auto;padding:12px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:980px){.grid{grid-template-columns:1.2fr .8fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:14px;margin:0 0 8px}
+.muted{color:var(--sub);font-size:12px;line-height:1.5}
+label{display:block;font-size:12px;color:var(--sub);margin:8px 0 4px}
+input,select,textarea{width:100%;border:1px solid var(--bd);border-radius:10px;padding:10px;font-size:14px;background:#fff}
+textarea{min-height:76px;resize:vertical}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid var(--bd);background:#fff;border-radius:10px;padding:9px 10px;font-size:13px;cursor:pointer}
+button.primary{background:var(--pri);border-color:var(--pri);color:#fff}
+button:active{transform:translateY(1px)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.pill{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);background:#fff;border-radius:999px;padding:6px 10px;font-size:12px;color:var(--sub)}
+.kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi .box{border:1px solid var(--bd);border-radius:12px;padding:10px}
+.kpi .v{font-size:18px;font-weight:900;margin-top:2px}
+.ok{color:var(--ok)} .warn{color:var(--warn)}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid var(--bd);border-radius:12px;padding:10px}
+.item .top{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.code{font-weight:800}
+.grp{font-size:11px;color:var(--sub)}
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.opt{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--bd);border-radius:12px;padding:8px}
+.opt input{width:auto;margin-top:2px}
+.opt .t{font-size:13px}
+.small{font-size:12px;color:var(--sub)}
+hr{border:none;border-top:1px solid var(--bd);margin:12px 0}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+details{border:1px solid var(--bd);border-radius:12px;padding:8px;background:#fff}
+summary{cursor:pointer;font-weight:700}
+
+.need-card{border-color:#ef4444;background:#fff1f2}
+.need-badge{border-color:#ef4444;color:#b91c1c;background:#fff1f2}
+.opt.need-opt{border-color:#fecaca;background:#fff1f2}
+.opt.need-opt .t{color:#b91c1c;font-weight:700}
+
+
+/* glossary modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:14px;z-index:50}
+.modal.open{display:flex}
+.modal .panel{max-width:920px;width:100%;max-height:86vh;overflow:auto;background:#fff;border:1px solid var(--bd);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:12px}
+.modal .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.modal h3{margin:0;font-size:14px}
+.term{border:1px solid var(--bd);border-radius:12px;padding:10px;margin-top:10px}
+.term .t{font-weight:900}
+.term .d{margin-top:6px;font-size:13px;line-height:1.6}
+.help{margin-top:6px;border-left:3px solid #e5e7eb;padding-left:10px;color:var(--sub);font-size:12px;line-height:1.6}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.badge{border:1px solid var(--bd);border-radius:999px;padding:4px 8px;font-size:11px;color:var(--sub);background:#fff}
+.item .desc{margin-top:4px;color:var(--sub);font-size:12px;line-height:1.5}
+
+
+.tabrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== PDF出力（支援ありのみ：項目名／回答／根拠メモ） ===== */
+#printArea { display:none; }
+@media print {
+  html, body { background:#fff !important; }
+  #printArea { background:#fff !important; }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 画面UIは全部隠して、printAreaだけ表示 */
+  body > * { display:none !important; }
+  #printArea { display:block !important; }
+
+  /* ==== 印刷用：省スペース（支援ありのみPDF向け）==== */
+  #printArea {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", "Meiryo", sans-serif;
+    color:#111;
+    line-height: 1.25;
+  }
+  #printArea .printTitle { font-size: 12.5pt; font-weight:700; margin: 0 0 4mm; }
+  #printArea .printMeta  { font-size: 9pt; color:#444; margin: 0 0 4mm; }
+
+  /* 聞き取りメモなどのブロックの余白を詰める */
+  #printArea .sumSec, #printArea .interviewSec { margin: 0 0 4mm; }
+  #printArea .sumH { font-size: 10pt; font-weight:700; margin: 0 0 1.5mm; }
+  #printArea .sumB { font-size: 9pt; white-space: pre-wrap; }
+
+  /* 1項目あたりの高さを圧縮 */
+  #printArea .row { padding: 3mm 0; border-bottom: 1px solid #ddd; page-break-inside: avoid; break-inside: avoid; }
+  #printArea .line1 { font-size: 10pt; font-weight:700; margin-bottom: 1.5mm; }
+  #printArea .line2 { font-size: 9pt; margin-bottom: 1.5mm; color: #c00000; font-weight: 700; }
+  #printArea .line3 { font-size: 9pt; white-space: pre-wrap; }
+
+  /* 余白を少し削ってページ数を抑える */
+  @page { size: A4 portrait; margin: 9mm; }
+}
+
+
+/* ===== 審査会サマリー（#printArea内で印刷） ===== */
+#printArea .sumTitle { font-size: 14pt; font-weight:800; margin: 0 0 4mm; }
+#printArea .sumMeta  { font-size: 10pt; color:#444; margin: 0 0 6mm; }
+#printArea .sumSec   { margin: 0 0 5mm; page-break-inside: avoid; break-inside: avoid; }
+#printArea .sumH     { font-size: 11pt; font-weight:800; margin: 0 0 2mm; }
+#printArea .sumP     { font-size: 10pt; line-height:1.55; white-space: pre-wrap; }
+
+
+    .saveStatus{font-size:12px;color:#6b7280;margin-left:10px;white-space:nowrap;}
+
+.why{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);margin:6px 0}
+.why.ok{background:rgba(64,160,90,.08)}
+.why.ng{background:rgba(220,80,80,.08)}
+.badge{font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.14)}
+.badge.ok{background:rgba(64,160,90,.18)}
+.badge.ng{background:rgba(220,80,80,.18)}
+.kvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:12px}
+.kv{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:8px 10px;background:rgba(255,255,255,.04)}
+.kv .k{font-size:12px;color:rgba(255,255,255,.7)}
+.kv .v{font-size:14px;margin-top:2px}
+
+
+.aboutBox{border:1px dashed var(--bd);border-radius:12px;padding:10px;background:#fafafa;margin-top:8px}
+.aboutBox summary{cursor:pointer;font-weight:700;color:#111827}
+.aboutBox ul{margin:6px 0 0 18px;padding:0}
+.aboutBox li{margin:2px 0}
+
+
+  .chip{border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+  .chip:hover{border-color:#bbb}
+
+/* KPI: make predicted kubun stand out */
+#kpiKubun{
+  color:#d00000;
+  font-weight:900;
+  letter-spacing:.02em;
+  display:inline-block;
+  padding:2px 10px;
+  border-radius:999px;
+  background:rgba(208,0,0,.08);
+  border:1px solid rgba(208,0,0,.25);
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+<body>
+<header>
+  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+    <h1>障害支援区分：聞き取り→80項目入力→不足チェック→特記事項下書き→八咫烏015推定</h1>
+    <div class="btns">
+      <button id="btnSave" class="primary">端末保存</button>
+          <span id="saveStatus" class="saveStatus" aria-live="polite"></span>
+      <span id="uiLastUpdated" class="muted" style="margin-left:8px">サイト更新日（アップデート）：—</span>
+      <button id="btnXlsx">Excelで保存</button>
+      <button id="btnGlossary">用語説明</button>
+        <button id="btnPdf" type="button">PDF出力</button>
+                      <button id="btnExport">保存</button>
+      <button id="btnImport">読み込み</button>
+      <button id="btnReset">リセット</button>
+    </div>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2>① 基本情報</h2>
+
+    <details class="aboutBox" open>
+      <summary>このソフトの説明（クリックで折りたたみ）</summary>
+      <div class="muted" style="margin-top:6px">
+        障害支援区分の聞き取り内容を整理し、80項目の入力漏れチェック・特記事項の下書き・八咫烏015の推定（一次判定相当）をまとめて行うためのローカルHTMLです。
+      </div>
+      <div class="muted" id="appLastUpdated" style="margin-top:6px">最終更新日：2026-01-05</div>
+      <ul class="muted">
+        <li><strong>自動保存</strong>：入力は端末内（localStorage）に自動保存されます。共有PCの場合は「読み込み／端末保存」を活用してください。</li>
+        <li><strong>保存／読み込み</strong>：JSON形式でデータを保存・復元できます（別端末へ持ち出し可）。</li>
+        <li><strong>PDF出力</strong>：審査会用に、入力内容＋聞き取りメモ（生活状況・支援実態）をPDFにまとめます。</li>
+        <li><strong>推定区分</strong>：八咫烏015のロジックに基づく参考表示です。<strong>公式判定の保証はありません</strong>（審査会・医師意見書等で変わります）。</li>
+      </ul>
+    </details>
+
+    <div class="toolbar">
+      <div style="flex:1;min-width:220px">
+        <label>利用者名（またはID）</label>
+        <input id="resident" placeholder="例：A-001 / 山田 太郎"/>
+      </div>
+      <div style="width:180px">
+        <label>日付</label>
+        <input id="date" type="date"/>
+      </div>
+      <div style="width:220px">
+        <label>表示</label>
+        <select id="showFilter">
+          <option value="all">すべて</option>
+          <option value="missing">未入力のみ</option>
+          <option value="high">支援が重い/頻度高いのみ</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <label>検索（番号/項目名）</label>
+        <input id="q" placeholder="例：05 / 入浴 / 暴言"/>
+      </div>
+    </div>
+
+    
+<div class="toolbar" style="margin-top:8px;align-items:flex-end">
+  <div style="min-width:260px">
+    <label>一括入力（番号範囲）</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input id="bulkRange" placeholder="範囲 例：54-68,12-14（空欄=表示中）" style="width:260px" />
+      <div class="bulkQuick" style="display:flex;gap:4px;align-items:center">
+        <button type="button" class="chip" data-bulk="1">1</button>
+        <button type="button" class="chip" data-bulk="2">2</button>
+        <button type="button" class="chip" data-bulk="3">3</button>
+        <button type="button" class="chip" data-bulk="4">4</button>
+        <button type="button" class="chip" data-bulk="5">5</button>
+      </div>
+    </div>
+    <div class="muted small" style="margin-top:4px;line-height:1.6">
+      <b>数字の目安</b>：1=支援不要/該当なし　2=稀に支援（月1回未満）　3=月に1回以上　4=週に1回以上　5=ほぼ毎日（週5日以上）<br>
+      ※ボタンを押すと、指定範囲（空欄なら表示中）をまとめて入力します（上書き）。<br>
+      ※カテゴリごとに選択肢の数が違うため、範囲外の項目は自動で最大値に丸めます（例：日常生活は最大3、医療は最大2）。範囲指定は<b>1〜80</b>。複数は「,」区切り（例：<b>54-68,12-14</b>）。
+    </div>
+  </div>
+  <div style="flex:1"></div>
+</div>
+
+<div class="kpi" style="margin-top:10px">
+      <div class="box">
+        <div class="muted">未入力（80項目中）</div>
+        <div class="v" id="kpiMissing">0</div>
+        <div class="muted">不足一覧（先頭30件）</div>
+        <div id="missingList" class="muted"></div>
+      </div>
+      <div class="box">
+        <div class="muted">八咫烏015 推定（一次判定相当）</div>
+        <div class="v"><span id="kpiKubun">—</span> <span class="small">(推定)</span></div>
+        <div class="muted">該当ロジック：<span class="mono" id="kpiLogic">—</span> / p：<span class="mono" id="kpiP">—</span></div>
+        <div class="muted" style="margin-top:6px">区分別（推定割合・参考）</div>
+        <div id="kpiDist" class="muted"></div>
+        <div class="muted">※公式判定の保証はありません（審査会・医師意見書要素は別）</div>
+      </div>
+    </div>
+
+    <label style="margin-top:10px">聞き取りメモ（生活状況・支援実態）</label>
+    <textarea id="interview" placeholder="例：夜間見守り頻度、外出時の付き添い、服薬管理、困りごと、事故リスク等"></textarea>
+
+    <details style="margin-top:10px" open>
+      <summary>② 80項目入力（質問テンプレ形式）</summary>
+      <div class="muted" style="margin-top:8px">
+        身体介助：1〜4／日常生活：1〜3／行動障害：1〜5 を統一表示。各項目に<strong>根拠メモ（特記事項向け）</strong>を付けられます。
+      </div>
+      <div class="items" id="items80" style="margin-top:10px"></div>
+    </details>
+
+    <details style="margin-top:10px">
+      <summary>③ 追加（八咫烏用の補足項目：麻痺/拘縮/てんかん/二軸など）</summary>
+      <div class="muted" style="margin-top:8px">
+        八咫烏015のロジックで参照されることがある補足項目です。該当がなければ既定値のままでOKです。
+      </div>
+      <div class="items" id="itemsExtra" style="margin-top:10px"></div>
+    </details>
+
+  </section>
+
+  <aside class="card">
+    <h2>④ 特記事項（下書き）</h2>
+    <div class="muted">入力内容と根拠メモから、自動で下書きを作ります（必要に応じて修正して使ってください）。</div>
+    <label style="margin-top:10px">特記事項（下書き）</label>
+    <textarea id="draft"></textarea>
+    <div class="btns" style="margin-top:8px">
+      <button id="btnDraft" class="primary">下書き生成</button>
+      <button id="btnCopyDraft">コピー</button>
+    </div>
+
+    <hr>
+
+    <h2>⑤ 推定の根拠（一致条件）</h2>
+    <div id="why" class="muted">—</div>
+
+    <hr>
+
+    <h2>保存データ</h2>
+    <div class="muted">端末内に保存（LocalStorage）します。複数人分はJSONで管理がおすすめ。</div>
+  </aside>
+</main>
+
+
+<div class="modal" id="glossaryModal" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true">
+    <div class="topbar">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <h3 style="margin-right:6px">用語説明</h3>
+        <span class="badge">A：80項目（正式名称）</span>
+      </div>
+      <div class="btns">
+        <button id="tabQuestions" class="primary">80項目</button>
+        <button id="tabTerms">用語</button>
+        <button id="btnGlossaryClose">閉じる</button>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:6px">
+      ※ここは<strong>実務で迷いやすい言葉の補助説明</strong>です。自治体・調査員の運用でニュアンスが異なることがあるため、最終的には調査票の定義・指示に合わせてください。
+    </div>
+    <label style="margin-top:10px">検索</label>
+    <input id="glossaryQ" placeholder="例：05 / 入浴 / 逸走 / 両足立位 / 見守り"/>
+    <div id="glossaryListQuestions"></div>
+    <div id="glossaryListTerms" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const BASE80 = [{"row": 2, "name": "寝返り", "group": "起居動作", "formula": "=IF(F2=\"\",\"\",CHOOSE(F2,0,7.8,10.4,14.8))", "optCount": 4, "cat": "physical", "code": "01", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 3, "name": "起き上がり", "group": "", "formula": "=IF(F3=\"\",\"\",CHOOSE(F3,0,6.2,8.9,15))", "optCount": 4, "cat": "physical", "code": "02", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 4, "name": "座位保持", "group": "", "formula": "=IF(F4=\"\",\"\",CHOOSE(F4,0,6.8,11.6,15.9))", "optCount": 4, "cat": "physical", "code": "03", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 5, "name": "両足立位", "group": "", "formula": "=IF(F5=\"\",\"\",CHOOSE(F5,0,7.2,9.4,14.5))", "optCount": 4, "cat": "physical", "code": "04", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 6, "name": "歩行", "group": "", "formula": "=IF(F6=\"\",\"\",CHOOSE(F6,0,5.4,7.7,13.6))", "optCount": 4, "cat": "physical", "code": "05", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 7, "name": "立ち上がり", "group": "", "formula": "=IF(F7=\"\",\"\",CHOOSE(F7,0,5.1,7.7,14.8))", "optCount": 4, "cat": "physical", "code": "06", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 8, "name": "片足立位", "group": "=SUM(E2:E8)", "formula": "=IF(F8=\"\",\"\",CHOOSE(F8,0,2.8,3.4,11.4))", "optCount": 4, "cat": "physical", "code": "07", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 9, "name": "じょくそう", "group": "生活機能 I", "formula": "=IF(F9=\"\",\"\",CHOOSE(F9,0,10.9))", "optCount": 2, "cat": "physical", "code": "08", "labels": ["１　ない", "２　ある"]}, {"row": 10, "name": "嚥下", "group": "", "formula": "=IF(F10=\"\",\"\",CHOOSE(F10,0,13.5,25.2))", "optCount": 3, "cat": "physical", "code": "09", "labels": ["１　支援が不要", "２　見守り等", "３　全面的な支援"]}, {"row": 11, "name": "食事", "group": "", "formula": "=IF(F11=\"\",\"\",CHOOSE(F11,0,14.4,23.9))", "optCount": 3, "cat": "physical", "code": "10", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 12, "name": "排尿", "group": "", "formula": "=IF(F12=\"\",\"\",CHOOSE(F12,0,11.6,20.1))", "optCount": 3, "cat": "physical", "code": "11", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 13, "name": "排便", "group": "=SUM(E9:E13)", "formula": "=IF(F13=\"\",\"\",CHOOSE(F13,0,10.9,19.9))", "optCount": 3, "cat": "physical", "code": "12", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 14, "name": "移乗", "group": "生活機能 II", "formula": "=IF(F14=\"\",\"\",CHOOSE(F14,0,6.6,10.7,15.9))", "optCount": 4, "cat": "physical", "code": "13", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 15, "name": "移動", "group": "", "formula": "=IF(F15=\"\",\"\",CHOOSE(F15,0,5.8,10.8,17.1))", "optCount": 4, "cat": "physical", "code": "14", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 16, "name": "入浴", "group": "", "formula": "=IF(F16=\"\",\"\",CHOOSE(F16,0,6.1, 16.2))", "optCount": 3, "cat": "physical", "code": "15", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 17, "name": "口腔清潔", "group": "", "formula": "=IF(F17=\"\",\"\",CHOOSE(F17,0,6.9, 15.9))", "optCount": 3, "cat": "physical", "code": "16", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 18, "name": "衣類の着脱", "group": "", "formula": "=IF(F18=\"\",\"\",CHOOSE(F18,0 ,6.9,12,18.2))", "optCount": 4, "cat": "physical", "code": "17", "labels": ["１　支援が不要", "２　見守り等", "３　部分的な支援", "４　全面的な支援"]}, {"row": 19, "name": "健康・栄養管理", "group": "=SUM(E14:E19)", "formula": "=IF(F19=\"\",\"\",CHOOSE(F19,0,9.3,16.7))", "optCount": 3, "cat": "physical", "code": "18", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 20, "name": "視力", "group": "視聴覚", "formula": "=IF(F20=\"\",\"\",CHOOSE(F20,0,2.8,7.3,25.5,28.3,48.9))", "optCount": 6, "cat": "comm", "code": "19", "labels": ["１　支障がない", "２　約1m見える", "３　目の前", "４　ほとんど見えない", "５　全く見えない", "６　判断不能"]}, {"row": 21, "name": "聴力", "group": "=SUM(E20:E21)", "formula": "=IF(F21=\"\",\"\",CHOOSE(F21,0,6.4,9.1,9.1,9.1,51.1))", "optCount": 6, "cat": "comm", "code": "20", "labels": ["１　支障がない", "２　普通の声", "３　かなり大声", "４　ほとんど聞こえない", "５　全く聞こえない", "６　判断不能"]}, {"row": 22, "name": "調理", "group": "応用日常生活動作", "formula": "=IF(F22=\"\",\"\",CHOOSE(F22,0 ,9.4,20.2))", "optCount": 3, "cat": "daily", "code": "21", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 23, "name": "掃除", "group": "", "formula": "=IF(F23=\"\",\"\",CHOOSE(F23,0 ,6.7,20.9))", "optCount": 3, "cat": "daily", "code": "22", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 24, "name": "洗濯", "group": "", "formula": "=IF(F24=\"\",\"\",CHOOSE(F24,0 ,7 ,20.5))", "optCount": 3, "cat": "daily", "code": "23", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 25, "name": "買い物", "group": "", "formula": "=IF(F25=\"\",\"\",CHOOSE(F25,0 ,7.9, 19.5))", "optCount": 3, "cat": "daily", "code": "24", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 26, "name": "交通手段", "group": "=SUM(E22:E26)", "formula": "=IF(F26=\"\",\"\",CHOOSE(F26,0 , 6.9, 18.9))", "optCount": 3, "cat": "daily", "code": "25", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 27, "name": "薬の管理", "group": "認知機能", "formula": "=IF(F27=\"\",\"\",CHOOSE(F27,0 , 3.3, 11))", "optCount": 3, "cat": "daily", "code": "26", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 28, "name": "金銭の管理", "group": "", "formula": "=IF(F28=\"\",\"\",CHOOSE(F28,0 , 1.4, 9.5))", "optCount": 3, "cat": "daily", "code": "27", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 29, "name": "電話等", "group": "", "formula": "=IF(F29=\"\",\"\",CHOOSE(F29,0 , 2.6, 10.7))", "optCount": 3, "cat": "daily", "code": "28", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 30, "name": "日常の意思決定", "group": "", "formula": "=IF(F30=\"\",\"\",CHOOSE(F30,0 , 9.1, 15.6))", "optCount": 3, "cat": "daily", "code": "29", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 31, "name": "読み書き", "group": "", "formula": "=IF(F31=\"\",\"\",CHOOSE(F31,0 , 4.1, 11.7))", "optCount": 3, "cat": "comm", "code": "30", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 32, "name": "危険の認識", "group": "", "formula": "=IF(F32=\"\",\"\",CHOOSE(F32,0 , 4.1, 11.7))", "optCount": 3, "cat": "daily", "code": "31", "labels": ["１　支援が不要", "２　部分的な支援", "３　全面的な支援"]}, {"row": 33, "name": "コミュニケーション", "group": "", "formula": "=IF(F33=\"\",\"\",CHOOSE(F33,0 , 4.1, 5.5, 11, 14.5))", "optCount": 5, "cat": "comm", "code": "32", "labels": ["１　支障がない", "２　特定の者のみ", "３　会話意外の方法", "４　独自の方法", "５　できない"]}, {"row": 34, "name": "説明の理解", "group": "=SUM(E27:E34)", "formula": "=IF(F34=\"\",\"\",CHOOSE(F34,0 , 15.3, 15.3))", "optCount": 3, "cat": "comm", "code": "33", "labels": ["１　理解できる", "２　理解できない", "３　判断不能"]}, {"row": 35, "name": "被害的・拒否的", "group": "行動上の障害　A群", "formula": "=IF(F35=\"\",\"\",CHOOSE(F35,0 , 1.9, 2.1, 3.3, 4.6))", "optCount": 5, "cat": "behavior", "code": "34", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 36, "name": "作話", "group": "", "formula": "=IF(F36=\"\",\"\",CHOOSE(F36,0 , 2.1, 2.1, 3.9, 5.3))", "optCount": 5, "cat": "behavior", "code": "35", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 37, "name": "感情が不安定", "group": "", "formula": "=IF(F37=\"\",\"\",CHOOSE(F37,0 , 2.1, 2.6, 3.7, 5.4))", "optCount": 5, "cat": "behavior", "code": "36", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 38, "name": "昼夜逆転", "group": "", "formula": "=IF(F38=\"\",\"\",CHOOSE(F38,0 ,2.1,2.9,3.5,3.5 ))", "optCount": 5, "cat": "behavior", "code": "37", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 39, "name": "暴言暴行", "group": "", "formula": "=IF(F39=\"\",\"\",CHOOSE(F39,0 ,2.6,3, 4.4, 6.2 ))", "optCount": 5, "cat": "behavior", "code": "38", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 40, "name": "同じ話をする", "group": "", "formula": "=IF(F40=\"\",\"\",CHOOSE(F40,0 ,2.1, 2.4, 3.3, 4.8 ))", "optCount": 5, "cat": "behavior", "code": "39", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 41, "name": "大声・奇声を出す", "group": "", "formula": "=IF(F41=\"\",\"\",CHOOSE(F41,0, 2.7, 3, 4.1, 6  ))", "optCount": 5, "cat": "behavior", "code": "40", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 42, "name": "支援の拒否", "group": "", "formula": "=IF(F42=\"\",\"\",CHOOSE(F42,0 , 2.8, 3.4, 4.3, 5.9 ))", "optCount": 5, "cat": "behavior", "code": "41", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 43, "name": "徘徊", "group": "", "formula": "=IF(F43=\"\",\"\",CHOOSE(F43,0, 3.7, 3.8, 4.4, 6  ))", "optCount": 5, "cat": "behavior", "code": "42", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 44, "name": "落ち着きがない", "group": "", "formula": "=IF(F44=\"\",\"\",CHOOSE(F44,0 ,4.4, 5, 5.5, 7 ))", "optCount": 5, "cat": "behavior", "code": "43", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 45, "name": "外出して戻れない", "group": "", "formula": "=IF(F45=\"\",\"\",CHOOSE(F45,0 ,3.3, 4.3, 4.3, 5  ))", "optCount": 5, "cat": "behavior", "code": "44", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 46, "name": "1人で出たがる", "group": "", "formula": "=IF(F46=\"\",\"\",CHOOSE(F46,0, 5, 5.4, 6.1, 7  ))", "optCount": 5, "cat": "behavior", "code": "45", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 47, "name": "収集癖", "group": "", "formula": "=IF(F47=\"\",\"\",CHOOSE(F47,0, 3.8, 4.1, 4.5, 5.7  ))", "optCount": 5, "cat": "behavior", "code": "46", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 48, "name": "物や衣類を壊す", "group": "", "formula": "=IF(F48=\"\",\"\",CHOOSE(F48,0, 4.3, 5, 5.8, 7.1  ))", "optCount": 5, "cat": "behavior", "code": "47", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 49, "name": "不潔行為", "group": "", "formula": "=IF(F49=\"\",\"\",CHOOSE(F49,0, 4.9, 5.5, 5.5, 6.6  ))", "optCount": 5, "cat": "behavior", "code": "48", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 50, "name": "異食行動", "group": "", "formula": "=IF(F50=\"\",\"\",CHOOSE(F50,0, 5.1, 5.1, 6.1, 6.2  ))", "optCount": 5, "cat": "behavior", "code": "49", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 51, "name": "ひどい物忘れ", "group": "", "formula": "=IF(F51=\"\",\"\",CHOOSE(F51,0,0.6, 0.7, 1, 2.1  ))", "optCount": 5, "cat": "behavior", "code": "50", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 52, "name": "集団への不適応", "group": "=SUM(E35:E52)", "formula": "=IF(F52=\"\",\"\",CHOOSE(F52,0, 3.1, 3.4, 4.8, 5.6  ))", "optCount": 5, "cat": "behavior", "code": "51", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 53, "name": "こだわり", "group": "行動上の障害　B群", "formula": "=IF(F53=\"\",\"\",CHOOSE(F53,0, 1.9, 2.6, 3.6, 6.2   ))", "optCount": 5, "cat": "behavior", "code": "52", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 54, "name": "多動・行動停止", "group": "", "formula": "=IF(F54=\"\",\"\",CHOOSE(F54,0, 3.2, 3.5, 5.6, 9.1  ))", "optCount": 5, "cat": "behavior", "code": "53", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 55, "name": "不安定な行動", "group": "", "formula": "=IF(F55=\"\",\"\",CHOOSE(F55,0, 2.3, 3.5, 6.3, 10  ))", "optCount": 5, "cat": "behavior", "code": "54", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 56, "name": "自らを傷つける", "group": "", "formula": "=IF(F56=\"\",\"\",CHOOSE(F56,0, 3.5, 4.9, 6.9, 9.2  ))", "optCount": 5, "cat": "behavior", "code": "55", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 57, "name": "他人を傷つける", "group": "", "formula": "=IF(F57=\"\",\"\",CHOOSE(F57,0, 3.5, 4.6, 7.2, 11  ))", "optCount": 5, "cat": "behavior", "code": "56", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 58, "name": "不適切な行為", "group": "", "formula": "=IF(F58=\"\",\"\",CHOOSE(F58,0, 4.4, 5.5, 6.7, 9.9  ))", "optCount": 5, "cat": "behavior", "code": "57", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 59, "name": "突発的な行動", "group": "", "formula": "=IF(F59=\"\",\"\",CHOOSE(F59,0, 5.5, 8.3, 10.7, 12.7  ))", "optCount": 5, "cat": "behavior", "code": "58", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 60, "name": "過食・反すう等", "group": "", "formula": "=IF(F60=\"\",\"\",CHOOSE(F60,0, 4.2, 4.5, 4.9, 7  ))", "optCount": 5, "cat": "behavior", "code": "59", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 61, "name": "多飲水・過飲水", "group": "", "formula": "=IF(F61=\"\",\"\",CHOOSE(F61,0, 3.6, 4.4, 6.8, 9.1  ))", "optCount": 5, "cat": "behavior", "code": "60", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 62, "name": "反復的行動", "group": "", "formula": "=IF(F62=\"\",\"\",CHOOSE(F62,0, 3.4, 4, 4.1, 6.7  ))", "optCount": 5, "cat": "behavior", "code": "61", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 63, "name": "感覚過敏・鈍麻", "group": "=SUM(E53:E63)", "formula": "=IF(F63=\"\",\"\",CHOOSE(F63,0, 9.1  ))", "optCount": 2, "cat": "behavior", "code": "62", "labels": ["１　ない", "２　ある"]}, {"row": 64, "name": "躁うつ状態", "group": "行動上の障害　C群", "formula": "=IF(F64=\"\",\"\",CHOOSE(F64,0, 12.3, 14.2, 15.2, 19.1  ))", "optCount": 5, "cat": "behavior", "code": "63", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 65, "name": "対人不安緊張", "group": "", "formula": "=IF(F65=\"\",\"\",CHOOSE(F65,0, 17.3, 19, 19.6, 20.8  ))", "optCount": 5, "cat": "behavior", "code": "64", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 66, "name": "意欲が乏しい", "group": "", "formula": "=IF(F66=\"\",\"\",CHOOSE(F66,0, 15.3, 15.7, 15.9, 16.2  ))", "optCount": 5, "cat": "behavior", "code": "65", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 67, "name": "話がまとまらない", "group": "", "formula": "=IF(F67=\"\",\"\",CHOOSE(F67,0, 13.4, 13.4, 13.5, 13.5  ))", "optCount": 5, "cat": "behavior", "code": "66", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 68, "name": "集中力が続かない", "group": "", "formula": "=IF(F68=\"\",\"\",CHOOSE(F68,0, 13.6, 13.6, 13.6, 13.6  ))", "optCount": 5, "cat": "behavior", "code": "67", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 69, "name": "自己の過大評価", "group": "=SUM(E64:E69)", "formula": "=IF(F69=\"\",\"\",CHOOSE(F69,0, 13.8, 13.9, 15.3, 16.8  ))", "optCount": 5, "cat": "behavior", "code": "68", "labels": ["１　支援が不要", "２　稀に支援", "３　月に1回以上", "４　週に1回以上", "５　ほぼ毎日"]}, {"row": 70, "name": "点滴の管理", "group": "特別な医療", "formula": "=IF(F70=\"\",\"\",CHOOSE(F70,0, 5.8 ))", "optCount": 2, "cat": "medical", "code": "69", "labels": ["１　ない", "２　ある"]}, {"row": 71, "name": "中心静脈栄養", "group": "", "formula": "=IF(F71=\"\",\"\",CHOOSE(F71,0, 16.1 ))", "optCount": 2, "cat": "medical", "code": "70", "labels": ["１　ない", "２　ある"]}, {"row": 72, "name": "透析", "group": "", "formula": "=IF(F72=\"\",\"\",CHOOSE(F72,0, 0.2 ))", "optCount": 2, "cat": "medical", "code": "71", "labels": ["１　ない", "２　ある"]}, {"row": 73, "name": "ストーマの管理", "group": "", "formula": "=IF(F73=\"\",\"\",CHOOSE(F73,0, 1.7 ))", "optCount": 2, "cat": "medical", "code": "72", "labels": ["１　ない", "２　ある"]}, {"row": 74, "name": "酸素療法", "group": "", "formula": "=IF(F74=\"\",\"\",CHOOSE(F74,0, 10.2  ))", "optCount": 2, "cat": "medical", "code": "73", "labels": ["１　ない", "２　ある"]}, {"row": 75, "name": "レスピレーター", "group": "", "formula": "=IF(F75=\"\",\"\",CHOOSE(F75,0, 16.9  ))", "optCount": 2, "cat": "medical", "code": "74", "labels": ["１　ない", "２　ある"]}, {"row": 76, "name": "気管切開の処置", "group": "", "formula": "=IF(F76=\"\",\"\",CHOOSE(F76,0, 14.9 ))", "optCount": 2, "cat": "medical", "code": "75", "labels": ["１　ない", "２　ある"]}, {"row": 77, "name": "疼痛の看護", "group": "", "formula": "=IF(F77=\"\",\"\",CHOOSE(F77,0, 1.2 ))", "optCount": 2, "cat": "medical", "code": "76", "labels": ["１　ない", "２　ある"]}, {"row": 78, "name": "経管栄養", "group": "", "formula": "=IF(F78=\"\",\"\",CHOOSE(F78,0, 8.6 ))", "optCount": 2, "cat": "medical", "code": "77", "labels": ["１　ない", "２　ある"]}, {"row": 79, "name": "モニター測定", "group": "", "formula": "=IF(F79=\"\",\"\",CHOOSE(F79,0, 15.9 ))", "optCount": 2, "cat": "medical", "code": "78", "labels": ["１　ない", "２　ある"]}, {"row": 80, "name": "じょくそうの処置", "group": "", "formula": "=IF(F80=\"\",\"\",CHOOSE(F80,0,3.7  ))", "optCount": 2, "cat": "medical", "code": "79", "labels": ["１　ない", "２　ある"]}, {"row": 81, "name": "カテーテル", "group": "=SUM(E70:E81)", "formula": "=IF(F81=\"\",\"\",CHOOSE(F81,0, 4.8  ))", "optCount": 2, "cat": "medical", "code": "80", "labels": ["１　ない", "２　ある"]}];
+const EXTRAS = [{"row": 82, "name": "麻痺", "group": "麻痺・拘縮", "formula": "=IF(F82=\"\",\"\",CHOOSE(F82,0, 2.9, 4.9, 8.2, 13.9  ))", "optCount": 5, "cat": "extra", "code": "", "labels": ["１　ない", "２　いずれか一肢", "３　両下肢のみ", "４　片側上下肢", "５　その他の四肢"]}, {"row": 83, "name": "拘縮　肩関節", "group": "", "formula": "=IF(F83=\"\",\"\",CHOOSE(F83,0, 18.6  ))", "optCount": 2, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある"]}, {"row": 84, "name": "拘縮　肘関節", "group": "", "formula": "=IF(F84=\"\",\"\",CHOOSE(F84,0, 19.6  ))", "optCount": 2, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある"]}, {"row": 85, "name": "拘縮　股関節", "group": "", "formula": "=IF(F85=\"\",\"\",CHOOSE(F85,0, 18 ))", "optCount": 2, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある"]}, {"row": 86, "name": "拘縮　膝関節", "group": "", "formula": "=IF(F86=\"\",\"\",CHOOSE(F86,0, 17.2  ))", "optCount": 2, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある"]}, {"row": 87, "name": "拘縮　その他", "group": "=SUM(E82:E87)", "formula": "=IF(F87=\"\",\"\",CHOOSE(F87,0, 12.7 ))", "optCount": 2, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある"]}, {"row": 88, "name": "麻痺　左上肢", "group": "その他の医師意見書項目", "formula": "=IF(F88=\"\",\"\",CHOOSE(F88,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 89, "name": "麻痺　右上肢", "group": "", "formula": "=IF(F89=\"\",\"\",CHOOSE(F89,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 90, "name": "麻痺　左下肢", "group": "", "formula": "=IF(F90=\"\",\"\",CHOOSE(F90,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 91, "name": "麻痺　右下肢", "group": "", "formula": "=IF(F91=\"\",\"\",CHOOSE(F91,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 92, "name": "麻痺　その他", "group": "", "formula": "=IF(F92=\"\",\"\",CHOOSE(F92,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 93, "name": "拘縮　肩　左", "group": "", "formula": "=IF(F93=\"\",\"\",CHOOSE(F93,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 94, "name": "拘縮　肩　右", "group": "", "formula": "=IF(F94=\"\",\"\",CHOOSE(F94,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 95, "name": "拘縮　股　左", "group": "", "formula": "=IF(F95=\"\",\"\",CHOOSE(F95,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 96, "name": "拘縮　股　右", "group": "", "formula": "=IF(F96=\"\",\"\",CHOOSE(F96,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 97, "name": "拘縮　肘　左", "group": "", "formula": "=IF(F97=\"\",\"\",CHOOSE(F97,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 98, "name": "拘縮　肘　右", "group": "", "formula": "=IF(F98=\"\",\"\",CHOOSE(F98,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 99, "name": "拘縮　膝　左", "group": "", "formula": "=IF(F99=\"\",\"\",CHOOSE(F99,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 100, "name": "拘縮　膝　右", "group": "", "formula": "=IF(F100=\"\",\"\",CHOOSE(F100,0, 2,3,4 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　ある（軽度）", "３　ある（中度）", "４　ある（重度）"]}, {"row": 101, "name": "てんかん", "group": "", "formula": "=IF(F101=\"\",\"\",CHOOSE(F101,0,1, 1.5, 2 ))", "optCount": 4, "cat": "extra", "code": "", "labels": ["１　ない", "２　年1回以上", "３　月1回以上", "４　週1回以上"]}, {"row": 102, "name": "二軸　精神症状", "group": "", "formula": "=IF(F102=\"\",\"\",CHOOSE(F102,0, 2,3,4,5,6 ))", "optCount": 6, "cat": "extra", "code": "", "labels": ["1", "2", "3", "4", "5", "6"]}, {"row": 103, "name": "二軸　能力障害", "group": "", "formula": "=IF(F103=\"\",\"\",CHOOSE(F103,0, 2,3,4,5 ))", "optCount": 5, "cat": "extra", "code": "", "labels": ["1", "2", "3", "4", "5"]}];
+const RULES = [{"k": 0, "n": 1, "p": 0.622, "conds": ["生活機能2<=23.5", "応用日常=0", "行動A=0", "行動C=0", "金銭=0", "感情=0", "麻痺<=2.9"]}, {"k": 0, "n": 2, "p": 0.824, "conds": ["応用日常=0", "行動A=0", "行動B=0", "特別医療=0", "片足立位=0", "集中力=0", "拘縮肩=0", "生活食事=0"]}, {"k": 1, "n": 3, "p": 0.64, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B=0", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 4, "p": 0.804, "conds": ["生活機能2<=23.5", "応用日常<=13", "行動A=0", "金銭>=1.4", "感情=0", "麻痺<=2.9", "二軸能力>=2"]}, {"k": 1, "n": 5, "p": 0.661, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "麻痺<=2.9", "二軸能力<=2"]}, {"k": 1, "n": 6, "p": 0.613, "conds": ["生活機能2<=23.5", "応用日常<=13", "行動A=0", "金銭>=1.4", "感情=0", "麻痺<=2.9", "二軸能力<=3"]}, {"k": 1, "n": 7, "p": 0.611, "conds": ["生活機能2<=23.5", "応用日常<=13", "行動A=0", "行動C>=0.1", "金銭=0", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 8, "p": 0.509, "conds": ["起居動作>=0.1", "生活機能2<=23.5", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 9, "p": 0.626, "conds": ["起居動作=0", "生活機能1<=15.5", "生活機能2=0", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "行動C<=12.4", "感情=0"]}, {"k": 1, "n": 10, "p": 0.5, "conds": ["起居動作=0", "生活機能2<=23.5", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C>=23.7", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 11, "p": 0.474, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "意欲=0", "麻痺<=2.9", "二軸能力>=3"]}, {"k": 1, "n": 12, "p": 0.421, "conds": ["生活機能2<=23.5", "応用日常>=0.1", "応用日常<=13", "行動A=0", "行動C=0", "金銭=0", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 13, "p": 0.64, "conds": ["起居動作=0", "生活機能2<=23.5", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C<=23.6", "感情=0", "麻痺<=2.9", "生活金銭>=4"]}, {"k": 1, "n": 14, "p": 0.591, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "認知<=10.7", "行動A>=0.1", "行動A<=14.1", "行動C<=14", "感情=0", "麻痺<=2.9"]}, {"k": 1, "n": 15, "p": 0.927, "conds": ["起居動作=0", "生活機能2<=23.5", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C<=23.6", "意思決定>=9.1", "感情=0", "麻痺<=2.9", "生活金銭<=3"]}, {"k": 1, "n": 16, "p": 0.889, "conds": ["起居動作=0", "生活機能2<=6.7", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C<=23.6", "意思決定=0", "買い物>=7.9", "感情=0", "麻痺<=2.9", "生活金銭<=3"]}, {"k": 1, "n": 17, "p": 0.741, "conds": ["起居動作=0", "生活機能2<=6.7", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C<=23.6", "意思決定=0", "買い物=0", "感情=0", "麻痺<=2.9", "生活金銭<=3"]}, {"k": 1, "n": 18, "p": 0.723, "conds": ["起居動作=0", "生活機能2>=6.8", "生活機能2<=23.5", "応用日常>=13.1", "応用日常<=36.1", "行動A=0", "行動C<=23.6", "意思決定=0", "感情=0", "麻痺<=2.9", "生活金銭<=3"]}, {"k": 1, "n": 19, "p": 0.889, "conds": ["生活機能2=0", "行動A=0", "特別医療=0", "洗濯=7", "生活金銭=3"]}, {"k": 1, "n": 20, "p": 0.966, "conds": ["生活機能2=0", "行動A=0", "金銭=1.4", "二軸能力=2", "生活対人=2"]}, {"k": 1, "n": 21, "p": 0.844, "conds": ["入浴=0", "感情=0", "二軸能力=2", "生活リズム=0", "生活服薬=2"]}, {"k": 1, "n": 22, "p": 0.829, "conds": ["生活機能2=0", "調理=9.4", "感情=0", "二軸能力=2", "生活リズム=0"]}, {"k": 1, "n": 23, "p": 0.87, "conds": ["生活機能2=0", "認知>=0.1", "認知<=13.1", "行動A=0", "金銭=1.4", "二軸能力=2"]}, {"k": 1, "n": 24, "p": 0.941, "conds": ["応用日常>=0.1", "応用日常<=32.9", "行動A=0", "洗濯=7", "生活食事=3", "生活保清=3"]}, {"k": 1, "n": 25, "p": 0.875, "conds": ["視聴覚=0", "掃除=0", "感情=0", "集中力=0", "二軸能力=2", "生活金銭=3"]}, {"k": 1, "n": 26, "p": 0.857, "conds": ["視聴覚=0", "掃除=0", "感情=0", "物忘れ=0", "二軸能力=2", "生活金銭=3"]}, {"k": 1, "n": 27, "p": 0.906, "conds": ["応用日常>=0.1", "応用日常<=32.9", "行動A=0", "洗濯=7", "二軸能力=3", "生活金銭=3"]}, {"k": 1, "n": 28, "p": 0.75, "conds": ["生活機能2<=23.5", "応用日常=0", "行動A=0", "行動C=0", "片足立位>=2.8", "片足立位<=3.4", "金銭=0", "感情=0", "麻痺<=2.9"]}, {"k": 2, "n": 29, "p": 0.685, "conds": ["生活機能2=0", "応用日常>=36.2", "応用日常<=73.2", "行動A>=20.2", "行動A<=32.7"]}, {"k": 2, "n": 30, "p": 0.67, "conds": ["生活機能2<=10.6", "応用日常<=36.1", "麻痺拘縮<=8.7", "感情=0", "麻痺>=4.9"]}, {"k": 2, "n": 31, "p": 0.616, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "行動A>=21", "調理=0", "感情>=2.1"]}, {"k": 2, "n": 32, "p": 0.605, "conds": ["起居動作<=6.8", "生活機能1<=4", "生活機能2<=23.5", "応用日常>=73.3", "行動A<=16.7"]}, {"k": 2, "n": 33, "p": 0.53, "conds": ["生活機能2>=10.7", "生活機能2<=23.5", "応用日常<=36.1", "感情=0", "麻痺>=4.9"]}, {"k": 2, "n": 34, "p": 0.909, "conds": ["生活機能2<=10.6", "応用日常<=36.1", "麻痺拘縮>=8.8", "感情=0", "麻痺>=4.9", "麻痺右下=0"]}, {"k": 2, "n": 35, "p": 0.909, "conds": ["生活機能2<=10.6", "応用日常<=36.1", "麻痺拘縮>=8.8", "感情=0", "麻痺>=4.9", "麻痺左下=0"]}, {"k": 2, "n": 36, "p": 0.8, "conds": ["生活機能2<=10.6", "応用日常<=36.1", "麻痺拘縮>=8.8", "感情=0", "麻痺>=4.9", "麻痺右下>=2"]}, {"k": 2, "n": 37, "p": 0.8, "conds": ["生活機能2<=10.6", "応用日常<=36.1", "麻痺拘縮>=8.8", "感情=0", "麻痺>=4.9", "麻痺左下>=2"]}, {"k": 2, "n": 38, "p": 0.745, "conds": ["生活機能1<=15.5", "生活機能2=0", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "感情>=2.1"]}, {"k": 2, "n": 39, "p": 0.744, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知>=0.1", "行動A<=20.9", "行動C<=38.6", "感情>=2.1"]}, {"k": 2, "n": 40, "p": 0.722, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知=0", "行動A<=20.9", "感情>=2.1", "昼夜逆転>=2.1"]}, {"k": 2, "n": 41, "p": 0.59, "conds": ["生活機能1>=15.6", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "麻痺拘縮<=7.1"]}, {"k": 2, "n": 42, "p": 0.569, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知>=0.1", "行動A<=20.9", "行動C>=38.7", "感情>=2.1"]}, {"k": 2, "n": 43, "p": 0.481, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知=0", "行動A<=20.9", "感情>=2.1", "昼夜逆転=0"]}, {"k": 2, "n": 44, "p": 0.422, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "行動A>=14.2", "感情=0", "麻痺<=2.9"]}, {"k": 2, "n": 45, "p": 0.804, "conds": ["起居動作>=0.1", "生活機能1<=15.5", "生活機能2=0", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "感情=0", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 46, "p": 0.538, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=8.4", "行動C>=38.7", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 47, "p": 0.741, "conds": ["生活機能1=0", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "行動C<=38.6", "片足立位>=11.4", "1", "1", "1", "1"]}, {"k": 2, "n": 48, "p": 0.684, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "意欲>=15.3", "麻痺<=2.9", "二軸能力>=3", "1", "1", "1", "1"]}, {"k": 2, "n": 49, "p": 0.679, "conds": ["起居動作=0", "生活機能1<=15.5", "生活機能2=0", "応用日常>=42.8", "応用日常<=73.2", "行動A<=20.1", "行動C>=12.5", "感情=0", "1", "1", "1", "1"]}, {"k": 2, "n": 50, "p": 0.589, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=32.7", "応用日常<=73.2", "認知>=20.6", "行動A<=32.7", "移乗=0", "暴言暴行=0", "1", "1", "1", "1"]}, {"k": 2, "n": 51, "p": 0.58, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "行動A>=0.1", "行動A<=14.1", "行動C>=14.1", "感情=0", "麻痺<=2.9", "1", "1", "1", "1"]}, {"k": 2, "n": 52, "p": 0.569, "conds": ["起居動作=0", "生活機能1<=15.5", "生活機能2=0", "応用日常>=36.2", "応用日常<=42.7", "行動A<=20.1", "行動C>=12.5", "感情=0", "1", "1", "1", "1"]}, {"k": 2, "n": 53, "p": 0.554, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=8.5", "行動A<=20.1", "行動C>=38.7", "1", "1", "1", "1"]}, {"k": 2, "n": 54, "p": 0.522, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位>=2.8", "1", "1", "1", "1"]}, {"k": 2, "n": 55, "p": 0.435, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "認知>=10.8", "行動A>=0.1", "行動A<=14.1", "行動C<=14", "感情=0", "麻痺<=2.9", "1", "1", "1"]}, {"k": 2, "n": 56, "p": 0.743, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位=0", "こだわり=0", "1", "1", "1"]}, {"k": 2, "n": 57, "p": 0.523, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位=0", "こだわり>=1.9", "1", "1", "1"]}, {"k": 2, "n": 58, "p": 0.485, "conds": ["生活機能1>=0.1", "生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "行動C<=38.6", "片足立位>=11.4", "1", "1", "1"]}, {"k": 2, "n": 59, "p": 0.778, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=51.6", "認知>=19", "行動A<=20.1", "行動C<=38.6", "片足立位<=3.4", "生活対人<=3", "1", "1"]}, {"k": 2, "n": 60, "p": 0.705, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=51.7", "応用日常<=73.2", "認知>=19", "行動A<=20.1", "行動C<=38.6", "片足立位<=3.4", "生活対人<=3", "1", "1"]}, {"k": 2, "n": 61, "p": 0.672, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A<=20.1", "行動C<=38.6", "移乗>=6.6", "片足立位<=3.4", "1", "1"]}, {"k": 2, "n": 62, "p": 0.525, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知>=19", "行動A<=20.1", "行動C<=38.6", "片足立位<=3.4", "生活対人>=4", "1", "1"]}, {"k": 2, "n": 63, "p": 0.959, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A<=20.1", "行動C=0", "麻痺拘縮>=0.1", "移乗=0", "片足立位<=3.4", "1"]}, {"k": 2, "n": 64, "p": 0.81, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A>=1.6", "行動A<=20.1", "行動C<=38.6", "麻痺拘縮=0", "移乗=0", "片足立位<=3.4"]}, {"k": 2, "n": 65, "p": 0.754, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A<=20.1", "行動C>=0.1", "行動C<=38.6", "麻痺拘縮>=0.1", "移乗=0", "片足立位<=3.4"]}, {"k": 2, "n": 66, "p": 0.724, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A<=1.5", "行動C<=38.6", "麻痺拘縮=0", "移乗=0", "片足立位<=3.4", "口腔清潔>=6.9"]}, {"k": 2, "n": 67, "p": 0.491, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "認知<=18.9", "行動A<=1.5", "行動C<=38.6", "麻痺拘縮=0", "移乗=0", "片足立位<=3.4", "口腔清潔=0"]}, {"k": 2, "n": 68, "p": 0.8, "conds": ["入浴=0", "交通手段=0", "麻痺右上=3"]}, {"k": 2, "n": 69, "p": 0.8, "conds": ["入浴=0", "交通手段=0", "麻痺左上=3"]}, {"k": 2, "n": 70, "p": 0.848, "conds": ["生活機能1=0", "入浴=0", "透析=0.2"]}, {"k": 2, "n": 71, "p": 0.909, "conds": ["起き上がり=0", "交通手段=0", "透析=0.2"]}, {"k": 2, "n": 72, "p": 0.809, "conds": ["生活機能1=0", "特別医療>=0.1", "特別医療<=3.7", "入浴=0", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 73, "p": 0.881, "conds": ["生活機能2>=0.1", "生活機能2<=19.5", "視聴覚>=10.7", "視聴覚<=41.1", "応用日常>=33", "応用日常<=61.5", "交通手段=18.9", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 74, "p": 0.882, "conds": ["交通手段=0", "透析=0.2", "拘縮肩=0", "拘縮股=0", "拘縮肘=0", "拘縮膝=0", "拘縮他=0", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 75, "p": 0.5, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=20.2", "行動A<=32.7", "金銭=0", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 76, "p": 0.556, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=20.2", "行動A<=32.7", "買い物=0", "1", "1", "1", "1", "1"]}, {"k": 2, "n": 77, "p": 0.825, "conds": ["生活機能2>=0.1", "生活機能2<=19.5", "応用日常>=33", "応用日常<=61.5", "認知>=0.1", "認知<=13.1", "視力>=25.5", "視力<=28.3", "1", "1", "1", "1"]}, {"k": 2, "n": 78, "p": 0.607, "conds": ["起居動作=0", "生活機能1>=21.1", "生活機能2>=23.6", "生活機能2<=34.8", "応用日常<=69.4", "行動A<=30.2", "行動C<=24.7", "移乗<=6.6", "1", "1", "1", "1"]}, {"k": 2, "n": 79, "p": 0.5, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "被害拒否=2.1", "感情=0", "意欲=0", "麻痺<=2.9", "二軸能力>=3", "1", "1", "1"]}, {"k": 2, "n": 80, "p": 0.571, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "反復=6.7", "意欲=0", "麻痺<=2.9", "二軸能力>=3", "1", "1", "1"]}, {"k": 2, "n": 81, "p": 0.519, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "意欲=0", "麻痺<=2.9", "二軸能力>=3", "生活金銭=2", "1", "1", "1"]}, {"k": 2, "n": 82, "p": 0.526, "conds": ["生活機能2=0", "応用日常<=36.1", "行動A>=0.1", "行動B>=0.1", "感情=0", "支援の拒否=2.8", "意欲=0", "麻痺<=2.9", "二軸能力>=3", "1", "1", "1"]}, {"k": 2, "n": 83, "p": 0.8, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "認知<=10.7", "行動A>=0.1", "行動A<=14.1", "行動C<=14", "感情=0", "麻痺<=2.9", "生活金銭=3", "1", "1"]}, {"k": 2, "n": 84, "p": 1.0, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "認知<=10.7", "行動A>=0.1", "行動A<=14.1", "行動C<=14", "被害拒否=1.9", "感情=0", "麻痺<=2.9", "1", "1"]}, {"k": 2, "n": 85, "p": 0.6, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "認知<=10.7", "行動A>=0.1", "行動A<=14.1", "行動C<=14", "感情=0", "麻痺<=2.9", "生活服薬=4", "1", "1"]}, {"k": 3, "n": 86, "p": 0.769, "conds": ["起居動作>=6.9", "生活機能2<=23.5", "応用日常>=73.3", "行動A<=16.7", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 87, "p": 0.563, "conds": ["生活機能2<=23.5", "応用日常>=73.3", "行動A>=16.8", "不安定な行動<=2.3", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 88, "p": 0.697, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=34.8", "応用日常<=73.2", "移乗>=6.6", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 89, "p": 0.597, "conds": ["起居動作<=6.8", "生活機能1>=4.1", "生活機能2<=23.5", "応用日常>=73.3", "行動A<=16.7", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 90, "p": 0.585, "conds": ["生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=32.8", "そううつ>=12.3", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 91, "p": 0.47, "conds": ["生活機能1<=21", "生活機能2>=34.9", "生活機能2<=50.6", "応用日常<=73.2", "移乗>=6.6", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 92, "p": 0.461, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "行動A>=21", "調理>=9.4", "感情>=2.1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 93, "p": 0.343, "conds": ["生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=32.8", "そううつ=0", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 94, "p": 0.573, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A<=14.1", "排尿>=11.6", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 95, "p": 0.528, "conds": ["生活機能1>=15.6", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "麻痺拘縮>=7.2", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 96, "p": 0.5, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A>=23.2", "生活社会=0", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 97, "p": 0.455, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A>=20.2", "行動A<=32.7", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 98, "p": 0.419, "conds": ["生活機能1>=21.1", "生活機能2>=34.9", "生活機能2<=50.6", "応用日常<=69.4", "行動A<=30.2", "移乗<=6.6", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 99, "p": 0.938, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A<=3", "麻痺拘縮>=8.8", "排尿=0", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 100, "p": 0.806, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A<=3", "麻痺拘縮<=8.7", "排尿=0", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 101, "p": 0.722, "conds": ["生活機能1>=21.1", "生活機能2>=23.6", "生活機能2<=34.8", "応用日常<=69.4", "行動A<=30.2", "行動C>=24.8", "移乗<=6.6", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 102, "p": 0.677, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A>=3.1", "行動A<=14.1", "排尿=0", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 103, "p": 0.603, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A>=14.2", "行動A<=23.1", "生活社会=0", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 104, "p": 0.525, "conds": ["生活機能1>=21.1", "生活機能2>=23.6", "生活機能2<=34.8", "応用日常<=69.4", "行動A<=30.2", "行動C<=24.7", "移乗<=6.6", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 105, "p": 0.491, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=23.9", "行動A>=32.8", "移乗=0", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 106, "p": 0.625, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知>=20.6", "行動A<=32.7", "移乗=0", "暴言暴行>=2.6", "1", "1", "1", "1"]}, {"k": 3, "n": 107, "p": 0.516, "conds": ["生活機能1<=21", "生活機能2>=32.8", "生活機能2<=50.6", "応用日常<=73.2", "認知>=20.6", "行動A<=32.7", "移乗=0", "暴言暴行=0", "1", "1", "1", "1"]}, {"k": 3, "n": 108, "p": 0.727, "conds": ["生活機能1>=21.1", "生活機能1<=35.7", "生活機能2>=23.6", "生活機能2<=41.1", "応用日常>=69.5", "行動A<=30.2", "行動B<=26.4", "移乗<=6.6", "口腔清潔>=6.9", "1", "1", "1"]}, {"k": 3, "n": 109, "p": 0.566, "conds": ["生活機能1>=21.1", "生活機能1<=35.7", "生活機能2>=23.6", "生活機能2<=41.1", "応用日常>=69.5", "行動A<=30.2", "行動B<=26.4", "移乗<=6.6", "口腔清潔=0", "1", "1", "1"]}, {"k": 3, "n": 110, "p": 0.455, "conds": ["排尿=0", "こだわり=2.6", "てんかん>=1", "1", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 111, "p": 0.44, "conds": ["排便=0", "こだわり=2.6", "てんかん>=1", "1", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 112, "p": 0.875, "conds": ["起居動作>=26.7", "起居動作<=62", "行動B=0", "移動=5.8", "排便=10.9", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 113, "p": 0.811, "conds": ["起居動作>=26.7", "起居動作<=62", "行動B=0", "排便=10.9", "麻痺左下>=2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 114, "p": 0.811, "conds": ["起居動作>=26.7", "起居動作<=62", "行動B=0", "排便=10.9", "麻痺右下>=2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 115, "p": 0.804, "conds": ["起居動作>=26.7", "起居動作<=62", "行動B=0", "排便=10.9", "拘縮他=0", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 116, "p": 0.909, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "移乗=6.6", "薬=0", "麻痺=8.2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 117, "p": 0.853, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "移乗=6.6", "調理=20.2", "麻痺=8.2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 118, "p": 0.871, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "認知=0", "移乗=6.6", "入浴=6.1", "拘縮肩右=0", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 119, "p": 0.871, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "認知=0", "移乗=6.6", "入浴=6.1", "拘縮肩左=0", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 120, "p": 0.9, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "寝返り>=7.8", "寝返り<=10.4", "移乗=6.6", "調理=9.4", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 121, "p": 0.75, "conds": ["起居動作<=6.8", "生活機能1<=4", "生活機能2<=23.5", "応用日常>=73.3", "行動A<=16.7", "移乗=6.6", "1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 122, "p": 0.83, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "寝返り>=7.8", "寝返り<=10.4", "移乗=6.6", "片足立位>=2.8", "片足立位<=3.4", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 123, "p": 0.82, "conds": ["生活機能1>=0.1", "生活機能1<=22.4", "行動A>=0.1", "行動A<=7.1", "寝返り>=7.8", "寝返り<=10.4", "移乗=6.6", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 124, "p": 1.0, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知>=0.1", "行動A<=20.9", "行動C<=38.6", "衣類の着脱=12", "感情>=2.1", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 125, "p": 1.0, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "認知>=0.1", "行動A<=20.9", "行動C<=38.6", "感情>=2.1", "集団への不適応>=5.6", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 126, "p": 0.667, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "行動A>=14.2", "感情=0", "多飲水過飲水>=4.4", "麻痺<=2.9", "1", "1", "1", "1", "1"]}, {"k": 3, "n": 127, "p": 0.833, "conds": ["生活機能2>=0.1", "生活機能2<=23.5", "応用日常<=36.1", "行動A>=14.2", "感情=0", "落ち着き>=4.4", "落ち着き<=5", "麻痺<=2.9", "1", "1", "1", "1"]}, {"k": 3, "n": 128, "p": 0.571, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=8.4", "行動C>=38.7", "拘縮他=12.7", "1", "1", "1", "1"]}, {"k": 3, "n": 129, "p": 0.625, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=8.4", "行動C>=38.7", "移乗=6.6", "1", "1", "1", "1"]}, {"k": 3, "n": 130, "p": 0.538, "conds": ["生活機能1>=21.1", "生活機能1<=35.7", "生活機能2>=41.2", "生活機能2<=50.6", "応用日常>=69.5", "行動A<=30.2", "行動B<=26.4", "移乗=0", "1", "1", "1", "1"]}, {"k": 3, "n": 131, "p": 1.0, "conds": ["生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=8.4", "行動C>=38.7", "落ち着き>=4.4", "落ち着き<=5", "1", "1", "1"]}, {"k": 3, "n": 132, "p": 0.556, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位>=2.8", "衣類の着脱=12", "1", "1", "1"]}, {"k": 3, "n": 133, "p": 0.533, "conds": ["生活機能1>=0.1", "生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "行動C<=38.6", "片足立位>=11.4", "拘縮他=12.7", "1", "1"]}, {"k": 3, "n": 134, "p": 0.571, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位>=2.8", "支援の拒否>=2.8", "支援の拒否<=3.4", "1", "1"]}, {"k": 3, "n": 135, "p": 0.75, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=32.7", "応用日常<=73.2", "認知>=20.6", "行動A<=32.7", "移乗=0", "暴言暴行=0", "落ち着き>=4.4", "落ち着き<=5", "1", "1"]}, {"k": 3, "n": 136, "p": 0.75, "conds": ["生活機能1>=0.1", "生活機能1<=15.5", "生活機能2>=0.1", "生活機能2<=23.5", "応用日常>=36.2", "応用日常<=73.2", "行動A<=20.1", "行動C<=38.6", "片足立位>=11.4", "支援の拒否>=2.8", "支援の拒否<=3.4", "1"]}, {"k": 3, "n": 137, "p": 0.75, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知<=20.5", "行動A<=32.7", "移乗=0", "片足立位=0", "落ち着き>=4.4", "落ち着き<=5", "こだわり>=1.9", "1"]}, {"k": 4, "n": 138, "p": 0.565, "conds": ["生活機能2<=23.5", "応用日常>=73.3", "行動A>=16.8", "不安定な行動>=3.5", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 139, "p": 0.509, "conds": ["生活機能1<=37.5", "生活機能2>=50.7", "生活機能2<=74", "行動A<=45.1", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 140, "p": 0.528, "conds": ["生活機能1>=21.1", "生活機能1<=40.3", "生活機能2>=23.6", "生活機能2<=50.6", "行動A>=30.3", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 141, "p": 0.465, "conds": ["生活機能1>=40.4", "生活機能2>=23.6", "生活機能2<=50.6", "行動A>=30.3", "調理<=9.4", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 142, "p": 0.626, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=73.3", "行動A>=14.2", "生活社会>=2", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 143, "p": 0.613, "conds": ["生活機能1>=35.8", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=69.5", "行動A<=30.2", "移乗<=6.6", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 144, "p": 0.55, "conds": ["生活機能1>=21.1", "生活機能1<=34.5", "生活機能2>=23.6", "生活機能2<=50.6", "行動A<=30.2", "移乗>=10.7", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 145, "p": 0.5, "conds": ["生活機能1<=21", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常<=73.2", "認知>=24", "行動A>=32.8", "移乗=0", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 146, "p": 0.554, "conds": ["生活機能1>=21.1", "生活機能1<=35.7", "生活機能2>=23.6", "生活機能2<=50.6", "応用日常>=69.5", "行動A<=30.2", "行動B>=26.5", "移乗<=6.6", "1", "1", "1", "1"]}, {"k": 4, "n": 147, "p": 0.534, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=40.2", "移乗<=6.6", "麻痺<=4.9", "生活社会<=3", "1", "1", "1", "1"]}, {"k": 4, "n": 148, "p": 0.524, "conds": ["生活機能1>=21.1", "生活機能1<=35.7", "生活機能2>=41.2", "生活機能2<=50.6", "応用日常>=69.5", "行動A<=30.2", "行動B<=26.4", "移乗<=6.6", "1", "1", "1", "1"]}, {"k": 4, "n": 149, "p": 0.806, "conds": ["生活機能2>=19.6", "生活機能2<=42.6", "ひとりで出たがる=0", "反復>=4.1", "自己の過大評価=0", "生活社会=5", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 150, "p": 0.667, "conds": ["生活機能1>=34.6", "生活機能2>=23.6", "生活機能2<=50.6", "行動A<=30.2", "移乗>=10.7", "衣類の着脱=0", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 151, "p": 0.609, "conds": ["生活機能1>=34.6", "生活機能2>=23.6", "生活機能2<=50.6", "行動A<=30.2", "移乗>=10.7", "入浴<=6.1", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 152, "p": 1.0, "conds": ["生活機能2<=23.5", "応用日常<=36.1", "行動A>=21", "調理>=9.4", "感情>=2.1", "二軸能力=5", "1", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 153, "p": 0.806, "conds": ["生活機能2>=19.6", "生活機能2<=42.6", "認知>=43.8", "認知<=85.4", "反復>=4.1", "自己の過大評価=0", "生活社会=5", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 154, "p": 0.6, "conds": ["生活機能1>=21.1", "生活機能2>=34.9", "生活機能2<=50.6", "応用日常<=69.4", "行動A<=30.2", "移乗<=6.6", "生活リズム>=4", "1", "1", "1", "1", "1"]}, {"k": 4, "n": 155, "p": 0.6, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=64.2", "行動A>=40.3", "移乗<=6.6", "衣類の着脱=0", "生活社会<=3", "1", "1", "1", "1"]}, {"k": 4, "n": 156, "p": 0.75, "conds": ["生活機能1>=37.6", "生活機能1<=42", "生活機能2>=50.7", "生活機能2<=74", "応用日常>=33", "応用日常<=61.5", "行動A<=36.6", "移乗>=10.7", "1", "1", "1", "1"]}, {"k": 5, "n": 157, "p": 0.598, "conds": ["生活機能1<=37.5", "生活機能2>=50.7", "生活機能2<=74", "行動A>=45.2", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 158, "p": 0.561, "conds": ["生活機能1>=60", "生活機能2>=50.7", "生活機能2<=70.9", "食事<=14.4", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 159, "p": 0.667, "conds": ["生活機能1<=42", "生活機能2>=78.2", "行動A<=44.4", "食事<=14.4", "他人を傷つける=0", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 160, "p": 0.517, "conds": ["生活機能1>=34.6", "生活機能2>=23.6", "生活機能2<=50.6", "行動A<=30.2", "移乗>=10.7", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 161, "p": 0.476, "conds": ["生活機能1>=40.4", "生活機能2>=23.6", "生活機能2<=50.6", "行動A>=30.3", "調理>=20.2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 162, "p": 0.464, "conds": ["生活機能1<=59.9", "生活機能2>=78.2", "行動A<=44.4", "食事<=14.4", "他人を傷つける>=3.5", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 163, "p": 0.741, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "不安定な行動<=3.5", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 164, "p": 0.421, "conds": ["生活機能1<=59.9", "生活機能2>=74.1", "生活機能2<=78.1", "行動A<=44.4", "移乗<=6.6", "食事<=14.4", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 165, "p": 0.698, "conds": ["生活機能1<=59.9", "生活機能2>=74.1", "生活機能2<=78.1", "行動A<=44.4", "移乗>=10.7", "食事<=14.4", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 166, "p": 0.597, "conds": ["生活機能1>=42.1", "生活機能1<=59.9", "生活機能2>=88.1", "行動A<=44.4", "食事<=14.4", "他人を傷つける=0", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 167, "p": 0.556, "conds": ["生活機能1>=37.6", "生活機能1<=42", "生活機能2>=50.7", "生活機能2<=74", "行動A<=36.6", "移乗>=10.7", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 168, "p": 0.485, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A>=36.7", "移乗>=10.7", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 169, "p": 0.763, "conds": ["生活機能1>=42.1", "生活機能1<=59.9", "生活機能2>=78.2", "生活機能2<=88", "行動A<=44.4", "食事<=14.4", "他人を傷つける=0", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 170, "p": 0.699, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動B<=59.2", "移乗<=6.6", "生活社会>=4", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 171, "p": 0.651, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=64.3", "生活機能2<=74", "行動A>=40.3", "移乗<=6.6", "生活社会<=3", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 172, "p": 0.636, "conds": ["生活機能1>=42.1", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=36.6", "移乗>=10.7", "食事>=23.9", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 173, "p": 0.474, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=64.2", "行動A>=40.3", "移乗<=6.6", "生活社会<=3", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 174, "p": 0.865, "conds": ["生活機能1>=42.1", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=36.6", "移乗>=10.7", "食事<=14.4", "拘縮膝>=17.2", "1", "1", "1", "1"]}, {"k": 5, "n": 175, "p": 0.667, "conds": ["生活機能1>=42.1", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=36.6", "移乗>=10.7", "食事<=14.4", "拘縮膝=0", "1", "1", "1", "1"]}, {"k": 5, "n": 176, "p": 0.604, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "認知<=65.7", "行動B>=59.3", "移乗<=6.6", "生活社会>=4", "1", "1", "1", "1"]}, {"k": 5, "n": 177, "p": 0.55, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=40.2", "移乗<=6.6", "麻痺>=8.2", "生活社会<=3", "1", "1", "1", "1"]}, {"k": 5, "n": 178, "p": 0.477, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "認知>=65.8", "行動B>=59.3", "移乗<=6.6", "生活社会>=4", "1", "1", "1", "1"]}, {"k": 5, "n": 179, "p": 0.818, "conds": ["生活機能1>=40.1", "生活機能1<=61.1", "そううつ>=15.2", "麻痺左下=4", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 180, "p": 0.818, "conds": ["生活機能1>=40.1", "生活機能1<=61.1", "そううつ>=15.2", "麻痺右下=4", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 181, "p": 0.903, "conds": ["生活機能1>=40.1", "生活機能1<=61.1", "麻痺その他>=2", "拘縮股=18", "二軸能力=3", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 182, "p": 0.882, "conds": ["生活機能1>=40.1", "生活機能1<=61.1", "交通手段=18.9", "拘縮股=18", "二軸能力=3", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 183, "p": 0.865, "conds": ["生活機能2>=42.7", "生活機能2<=69.2", "起き上がり=15", "移乗=10.7", "買い物=19.5", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 184, "p": 0.824, "conds": ["生活機能2>=42.7", "生活機能2<=69.2", "起き上がり=15", "移乗=10.7", "麻痺右下>=2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 185, "p": 0.824, "conds": ["生活機能2>=42.7", "生活機能2<=69.2", "起き上がり=15", "移乗=10.7", "麻痺左下>=2", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 186, "p": 0.8, "conds": ["生活機能2>=42.7", "生活機能2<=69.2", "起き上がり=15", "移乗=10.7", "排尿=20.1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 187, "p": 1.0, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "掃除=6.7", "不安定な行動<=3.5", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 188, "p": 0.641, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "麻痺拘縮=0", "移乗<=6.6", "食事<=14.4", "不安定な行動<=3.5", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 189, "p": 0.9, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "薬=3.3", "不安定な行動<=3.5", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 190, "p": 0.833, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "説明の理解=0", "不安定な行動<=3.5", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 191, "p": 0.717, "conds": ["生活機能1>=60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "不安定な行動<=3.5", "自らを傷つける=0", "1", "1", "1", "1", "1"]}, {"k": 5, "n": 192, "p": 0.6, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=40.2", "移乗<=6.6", "食事=23.9", "麻痺<=4.9", "生活社会<=3", "1", "1", "1"]}, {"k": 5, "n": 193, "p": 0.65, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2<=74", "行動A<=40.2", "行動B>=48.1", "移乗<=6.6", "麻痺<=4.9", "生活社会<=3", "1", "1", "1"]}, {"k": 6, "n": 194, "p": 0.968, "conds": ["生活機能1>=60", "生活機能2>=50.7", "食事>=23.9", "1", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 195, "p": 0.546, "conds": ["食事>=23.9", "生活機能1<=59.9", "生活機能2>=74.1", "1", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 196, "p": 0.84, "conds": ["食事<=14.4", "生活機能1 >= 60", "生活機能2>=71", "行動A>=50.7", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 197, "p": 0.591, "conds": ["食事<=14.4", "生活機能1<=59.9", "生活機能2>=74.1", "行動A>=44.5", "1", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 198, "p": 0.687, "conds": ["生活機能1 >= 60", "生活機能2>=71", "行動A<=50.6", "移乗>=10.7", "食事<=14.4", "1", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 199, "p": 0.531, "conds": ["生活機能1 >= 60", "生活機能2>=71", "行動A<=50.6", "移乗<=6.6", "食事<=14.4", "不安定な行動>=6.3", "1", "1", "1", "1", "1", "1"]}, {"k": 6, "n": 200, "p": 0.985, "conds": ["食事=23.9", "二軸精神=4"]}, {"k": 6, "n": 201, "p": 1.0, "conds": ["食事=23.9", "ひとりで出たがる >=6.1"]}, {"k": 6, "n": 202, "p": 0.98, "conds": ["食事=23.9", "拘縮他=12.7"]}, {"k": 6, "n": 203, "p": 0.985, "conds": ["食事=23.9", "視力 =2.8"]}, {"k": 6, "n": 204, "p": 1.0, "conds": ["食事=23.9", "大声奇声=6"]}, {"k": 6, "n": 205, "p": 0.98, "conds": ["食事=23.9", "拘縮股左 =2"]}, {"k": 6, "n": 206, "p": 0.98, "conds": ["食事=23.9", "拘縮股右=2"]}, {"k": 6, "n": 207, "p": 0.992, "conds": ["認知>=85.5", "特別医療>=10.3"]}, {"k": 6, "n": 208, "p": 1.0, "conds": ["説明の理解=15.3", "気管切開の処置=14.9"]}, {"k": 6, "n": 209, "p": 1.0, "conds": ["気管切開の処置=14.9", "麻痺左上=4"]}, {"k": 6, "n": 210, "p": 1.0, "conds": ["気管切開の処置=14.9", "麻痺右上=4"]}, {"k": 6, "n": 211, "p": 1.0, "conds": ["生活機能1>=61.2", "レスピレーター=16.9"]}, {"k": 6, "n": 212, "p": 0.95, "conds": ["座位保持=15.9", "衣類の着脱=18.2", "てんかん>=1"]}, {"k": 6, "n": 213, "p": 0.95, "conds": ["座位保持=15.9", "移乗=15.9", "てんかん>=1"]}, {"k": 6, "n": 214, "p": 0.987, "conds": ["食事=23.9", "視力 >=25.5", "視力 <=28.3"]}, {"k": 6, "n": 215, "p": 0.857, "conds": ["生活機能2>=69.3", "てんかん>=1", "生活リズム=5"]}, {"k": 6, "n": 216, "p": 1.0, "conds": ["生活機能1>=37.6", "生活機能1<=59.9", "生活機能2>=50.7", "生活機能2 <=74", "行動A<=40.2", "移乗<=6.6", "衣類の着脱=0", "麻痺>=8.2", "生活社会<=3"]}];
+const DEFINED = {"こだわり": "E53", "じょくそう": "E9", "じょくそうの処置": "E80", "そううつ": "E64", "てんかん": "E101", "ひとりで出たがる": "E46", "カテーテル": "E81", "コミュニケーション": "E33", "ストーマの管理": "E73", "モニター測定": "E79", "レスピレーター": "E75", "不安定な行動": "E55", "不潔行為": "E49", "不適切な行為": "E58", "両足立位": "E5", "中心静脈栄養": "E71", "二軸精神": "E102", "二軸能力": "E103", "交通手段": "E26", "他人を傷つける": "E57", "作話": "E36", "健康栄養": "E19", "入浴": "E16", "危険の認識": "E32", "反復": "E62", "収集癖": "E47", "口腔清潔": "E17", "同じ話": "E40", "嚥下": "E10", "外出して戻れない": "E45", "多動行動停止": "E54", "多飲水過飲水": "E61", "大声奇声": "E41", "寝返り": "E2", "対人不安緊張": "E65", "座位保持": "E4", "徘徊": "E43", "応用日常": "B26", "意思決定": "E30", "意欲": "E66", "感情": "E37", "感覚過敏鈍麻": "E63", "拘縮他": "E87", "拘縮肘": "E84", "拘縮肘右": "E98", "拘縮肘左": "E97", "拘縮股": "E85", "拘縮股右": "E96", "拘縮股左": "E95", "拘縮肩": "E83", "拘縮肩右": "E94", "拘縮肩左": "E93", "拘縮膝": "E86", "拘縮膝右": "E100", "拘縮膝左": "E99", "掃除": "E23", "排便": "E13", "排尿": "E12", "支援の拒否": "E42", "昼夜逆転": "E38", "暴言暴行": "E39", "歩行": "E6", "気管切開の処置": "E76", "洗濯": "E24", "点滴の管理": "E70", "片足立位": "E8", "物や衣類を壊す": "E48", "物忘れ": "E51", "特別医療": "B81", "生活リズム": "E105", "生活保清": "E106", "生活対人": "E109", "生活服薬": "E108", "生活機能1": "B13", "生活機能2": "B19", "生活社会": "E110", "生活金銭": "E107", "生活食事": "E104", "異食行動": "E50", "疼痛の看護": "E77", "移乗": "E14", "移動": "E15", "突発的な行動": "E59", "立ち上がり": "E7", "経管栄養": "E78", "聴力": "E21", "自らを傷つける": "E56", "自己の過大評価": "E69", "落ち着き": "E44", "薬": "E27", "行動A": "B52", "行動B": "B63", "行動C": "B69", "衣類の着脱": "E18", "被害拒否": "E35", "視力": "E20", "視聴覚": "B21", "話がまとまらない": "E67", "認知": "B34", "説明の理解": "E34", "読み書き": "E31", "調理": "E22", "買い物": "E25", "起き上がり": "E3", "起居動作": "B8", "透析": "E72", "過食反すう": "E60", "酸素療法": "E74", "金銭": "E28", "集中力": "E68", "集団への不適応": "E52", "電話等": "E29", "食事": "E11", "麻痺": "E82", "麻痺その他": "E92", "麻痺右上": "E89", "麻痺右下": "E91", "麻痺左上": "E88", "麻痺左下": "E90", "麻痺拘縮": "B87"};
+const FORMULAS = {"E2": "=IF(F2=\"\",\"\",CHOOSE(F2,0,7.8,10.4,14.8))", "E3": "=IF(F3=\"\",\"\",CHOOSE(F3,0,6.2,8.9,15))", "E4": "=IF(F4=\"\",\"\",CHOOSE(F4,0,6.8,11.6,15.9))", "E5": "=IF(F5=\"\",\"\",CHOOSE(F5,0,7.2,9.4,14.5))", "E6": "=IF(F6=\"\",\"\",CHOOSE(F6,0,5.4,7.7,13.6))", "E7": "=IF(F7=\"\",\"\",CHOOSE(F7,0,5.1,7.7,14.8))", "B8": "=SUM(E2:E8)", "E8": "=IF(F8=\"\",\"\",CHOOSE(F8,0,2.8,3.4,11.4))", "E9": "=IF(F9=\"\",\"\",CHOOSE(F9,0,10.9))", "E10": "=IF(F10=\"\",\"\",CHOOSE(F10,0,13.5,25.2))", "E11": "=IF(F11=\"\",\"\",CHOOSE(F11,0,14.4,23.9))", "E12": "=IF(F12=\"\",\"\",CHOOSE(F12,0,11.6,20.1))", "B13": "=SUM(E9:E13)", "E13": "=IF(F13=\"\",\"\",CHOOSE(F13,0,10.9,19.9))", "E14": "=IF(F14=\"\",\"\",CHOOSE(F14,0,6.6,10.7,15.9))", "E15": "=IF(F15=\"\",\"\",CHOOSE(F15,0,5.8,10.8,17.1))", "E16": "=IF(F16=\"\",\"\",CHOOSE(F16,0,6.1, 16.2))", "E17": "=IF(F17=\"\",\"\",CHOOSE(F17,0,6.9, 15.9))", "E18": "=IF(F18=\"\",\"\",CHOOSE(F18,0 ,6.9,12,18.2))", "B19": "=SUM(E14:E19)", "E19": "=IF(F19=\"\",\"\",CHOOSE(F19,0,9.3,16.7))", "E20": "=IF(F20=\"\",\"\",CHOOSE(F20,0,2.8,7.3,25.5,28.3,48.9))", "B21": "=SUM(E20:E21)", "E21": "=IF(F21=\"\",\"\",CHOOSE(F21,0,6.4,9.1,9.1,9.1,51.1))", "E22": "=IF(F22=\"\",\"\",CHOOSE(F22,0 ,9.4,20.2))", "E23": "=IF(F23=\"\",\"\",CHOOSE(F23,0 ,6.7,20.9))", "E24": "=IF(F24=\"\",\"\",CHOOSE(F24,0 ,7 ,20.5))", "E25": "=IF(F25=\"\",\"\",CHOOSE(F25,0 ,7.9, 19.5))", "B26": "=SUM(E22:E26)", "E26": "=IF(F26=\"\",\"\",CHOOSE(F26,0 , 6.9, 18.9))", "E27": "=IF(F27=\"\",\"\",CHOOSE(F27,0 , 3.3, 11))", "E28": "=IF(F28=\"\",\"\",CHOOSE(F28,0 , 1.4, 9.5))", "E29": "=IF(F29=\"\",\"\",CHOOSE(F29,0 , 2.6, 10.7))", "E30": "=IF(F30=\"\",\"\",CHOOSE(F30,0 , 9.1, 15.6))", "E31": "=IF(F31=\"\",\"\",CHOOSE(F31,0 , 4.1, 11.7))", "E32": "=IF(F32=\"\",\"\",CHOOSE(F32,0 , 4.1, 11.7))", "E33": "=IF(F33=\"\",\"\",CHOOSE(F33,0 , 4.1, 5.5, 11, 14.5))", "B34": "=SUM(E27:E34)", "E34": "=IF(F34=\"\",\"\",CHOOSE(F34,0 , 15.3, 15.3))", "E35": "=IF(F35=\"\",\"\",CHOOSE(F35,0 , 1.9, 2.1, 3.3, 4.6))", "E36": "=IF(F36=\"\",\"\",CHOOSE(F36,0 , 2.1, 2.1, 3.9, 5.3))", "E37": "=IF(F37=\"\",\"\",CHOOSE(F37,0 , 2.1, 2.6, 3.7, 5.4))", "E38": "=IF(F38=\"\",\"\",CHOOSE(F38,0 ,2.1,2.9,3.5,3.5 ))", "E39": "=IF(F39=\"\",\"\",CHOOSE(F39,0 ,2.6,3, 4.4, 6.2 ))", "E40": "=IF(F40=\"\",\"\",CHOOSE(F40,0 ,2.1, 2.4, 3.3, 4.8 ))", "E41": "=IF(F41=\"\",\"\",CHOOSE(F41,0, 2.7, 3, 4.1, 6  ))", "E42": "=IF(F42=\"\",\"\",CHOOSE(F42,0 , 2.8, 3.4, 4.3, 5.9 ))", "E43": "=IF(F43=\"\",\"\",CHOOSE(F43,0, 3.7, 3.8, 4.4, 6  ))", "E44": "=IF(F44=\"\",\"\",CHOOSE(F44,0 ,4.4, 5, 5.5, 7 ))", "E45": "=IF(F45=\"\",\"\",CHOOSE(F45,0 ,3.3, 4.3, 4.3, 5  ))", "E46": "=IF(F46=\"\",\"\",CHOOSE(F46,0, 5, 5.4, 6.1, 7  ))", "E47": "=IF(F47=\"\",\"\",CHOOSE(F47,0, 3.8, 4.1, 4.5, 5.7  ))", "E48": "=IF(F48=\"\",\"\",CHOOSE(F48,0, 4.3, 5, 5.8, 7.1  ))", "E49": "=IF(F49=\"\",\"\",CHOOSE(F49,0, 4.9, 5.5, 5.5, 6.6  ))", "E50": "=IF(F50=\"\",\"\",CHOOSE(F50,0, 5.1, 5.1, 6.1, 6.2  ))", "E51": "=IF(F51=\"\",\"\",CHOOSE(F51,0,0.6, 0.7, 1, 2.1  ))", "B52": "=SUM(E35:E52)", "E52": "=IF(F52=\"\",\"\",CHOOSE(F52,0, 3.1, 3.4, 4.8, 5.6  ))", "E53": "=IF(F53=\"\",\"\",CHOOSE(F53,0, 1.9, 2.6, 3.6, 6.2   ))", "E54": "=IF(F54=\"\",\"\",CHOOSE(F54,0, 3.2, 3.5, 5.6, 9.1  ))", "E55": "=IF(F55=\"\",\"\",CHOOSE(F55,0, 2.3, 3.5, 6.3, 10  ))", "E56": "=IF(F56=\"\",\"\",CHOOSE(F56,0, 3.5, 4.9, 6.9, 9.2  ))", "E57": "=IF(F57=\"\",\"\",CHOOSE(F57,0, 3.5, 4.6, 7.2, 11  ))", "E58": "=IF(F58=\"\",\"\",CHOOSE(F58,0, 4.4, 5.5, 6.7, 9.9  ))", "E59": "=IF(F59=\"\",\"\",CHOOSE(F59,0, 5.5, 8.3, 10.7, 12.7  ))", "E60": "=IF(F60=\"\",\"\",CHOOSE(F60,0, 4.2, 4.5, 4.9, 7  ))", "E61": "=IF(F61=\"\",\"\",CHOOSE(F61,0, 3.6, 4.4, 6.8, 9.1  ))", "E62": "=IF(F62=\"\",\"\",CHOOSE(F62,0, 3.4, 4, 4.1, 6.7  ))", "B63": "=SUM(E53:E63)", "E63": "=IF(F63=\"\",\"\",CHOOSE(F63,0, 9.1  ))", "E64": "=IF(F64=\"\",\"\",CHOOSE(F64,0, 12.3, 14.2, 15.2, 19.1  ))", "E65": "=IF(F65=\"\",\"\",CHOOSE(F65,0, 17.3, 19, 19.6, 20.8  ))", "E66": "=IF(F66=\"\",\"\",CHOOSE(F66,0, 15.3, 15.7, 15.9, 16.2  ))", "E67": "=IF(F67=\"\",\"\",CHOOSE(F67,0, 13.4, 13.4, 13.5, 13.5  ))", "E68": "=IF(F68=\"\",\"\",CHOOSE(F68,0, 13.6, 13.6, 13.6, 13.6  ))", "B69": "=SUM(E64:E69)", "E69": "=IF(F69=\"\",\"\",CHOOSE(F69,0, 13.8, 13.9, 15.3, 16.8  ))", "E70": "=IF(F70=\"\",\"\",CHOOSE(F70,0, 5.8 ))", "E71": "=IF(F71=\"\",\"\",CHOOSE(F71,0, 16.1 ))", "E72": "=IF(F72=\"\",\"\",CHOOSE(F72,0, 0.2 ))", "E73": "=IF(F73=\"\",\"\",CHOOSE(F73,0, 1.7 ))", "E74": "=IF(F74=\"\",\"\",CHOOSE(F74,0, 10.2  ))", "E75": "=IF(F75=\"\",\"\",CHOOSE(F75,0, 16.9  ))", "E76": "=IF(F76=\"\",\"\",CHOOSE(F76,0, 14.9 ))", "E77": "=IF(F77=\"\",\"\",CHOOSE(F77,0, 1.2 ))", "E78": "=IF(F78=\"\",\"\",CHOOSE(F78,0, 8.6 ))", "E79": "=IF(F79=\"\",\"\",CHOOSE(F79,0, 15.9 ))", "E80": "=IF(F80=\"\",\"\",CHOOSE(F80,0,3.7  ))", "B81": "=SUM(E70:E81)", "E81": "=IF(F81=\"\",\"\",CHOOSE(F81,0, 4.8  ))", "E82": "=IF(F82=\"\",\"\",CHOOSE(F82,0, 2.9, 4.9, 8.2, 13.9  ))", "E83": "=IF(F83=\"\",\"\",CHOOSE(F83,0, 18.6  ))", "E84": "=IF(F84=\"\",\"\",CHOOSE(F84,0, 19.6  ))", "E85": "=IF(F85=\"\",\"\",CHOOSE(F85,0, 18 ))", "E86": "=IF(F86=\"\",\"\",CHOOSE(F86,0, 17.2  ))", "B87": "=SUM(E82:E87)", "E87": "=IF(F87=\"\",\"\",CHOOSE(F87,0, 12.7 ))", "E88": "=IF(F88=\"\",\"\",CHOOSE(F88,0, 2,3,4 ))", "E89": "=IF(F89=\"\",\"\",CHOOSE(F89,0, 2,3,4 ))", "E90": "=IF(F90=\"\",\"\",CHOOSE(F90,0, 2,3,4 ))", "E91": "=IF(F91=\"\",\"\",CHOOSE(F91,0, 2,3,4 ))", "E92": "=IF(F92=\"\",\"\",CHOOSE(F92,0, 2,3,4 ))", "E93": "=IF(F93=\"\",\"\",CHOOSE(F93,0, 2,3,4 ))", "E94": "=IF(F94=\"\",\"\",CHOOSE(F94,0, 2,3,4 ))", "E95": "=IF(F95=\"\",\"\",CHOOSE(F95,0, 2,3,4 ))", "E96": "=IF(F96=\"\",\"\",CHOOSE(F96,0, 2,3,4 ))", "E97": "=IF(F97=\"\",\"\",CHOOSE(F97,0, 2,3,4 ))", "E98": "=IF(F98=\"\",\"\",CHOOSE(F98,0, 2,3,4 ))", "E99": "=IF(F99=\"\",\"\",CHOOSE(F99,0, 2,3,4 ))", "E100": "=IF(F100=\"\",\"\",CHOOSE(F100,0, 2,3,4 ))", "E101": "=IF(F101=\"\",\"\",CHOOSE(F101,0,1, 1.5, 2 ))", "E102": "=IF(F102=\"\",\"\",CHOOSE(F102,0, 2,3,4,5,6 ))", "E103": "=IF(F103=\"\",\"\",CHOOSE(F103,0, 2,3,4,5 ))", "E104": "=IF(F104=\"\",\"\",CHOOSE(F104,0, 2,3,4,5 ))", "E105": "=IF(F105=\"\",\"\",CHOOSE(F105,0, 2,3,4,5 ))", "E106": "=IF(F106=\"\",\"\",CHOOSE(F106,0, 2,3,4,5 ))", "E107": "=IF(F107=\"\",\"\",CHOOSE(F107,0, 2,3,4,5 ))", "E108": "=IF(F108=\"\",\"\",CHOOSE(F108,0, 2,3,4,5 ))", "E109": "=IF(F109=\"\",\"\",CHOOSE(F109,0, 2,3,4,5 ))", "E110": "=IF(F110=\"\",\"\",CHOOSE(F110,0, 2,3,4,5 ))"};
+const VALUES = {"C1": "項目", "D1": "略称", "E1": "点数", "F1": "選択番号\n入力", "G1": "メ\nモ", "H1": "区分判定", "A2": 1, "B2": "起居動作", "C2": "寝返り", "D2": "寝返り", "F2": 1, "H2": "１　支援が不要", "C3": "起き上がり", "D3": "起き上がり", "F3": 1, "H3": "１　支援が不要", "C4": "座位保持", "D4": "座位保持", "F4": 1, "H4": "１　支援が不要", "C5": "両足立位", "D5": "両足立位", "F5": 1, "H5": "１　支援が不要", "C6": "歩行", "D6": "歩行", "F6": 1, "H6": "１　支援が不要", "C7": "立ち上がり", "D7": "立ち上がり", "F7": 1, "H7": "１　支援が不要", "C8": "片足立位", "D8": "片足立位", "F8": 1, "H8": "１　支援が不要", "A9": 2, "B9": "生活機能 I", "C9": "じょくそう", "D9": "じょくそう", "F9": 1, "H9": "１　ない", "C10": "嚥下", "D10": "嚥下", "F10": 1, "H10": "１　支援が不要", "C11": "食事", "D11": "食事", "F11": 1, "H11": "１　支援が不要", "C12": "排尿", "D12": "排尿", "F12": 1, "H12": "１　支援が不要", "C13": "排便", "D13": "排便", "F13": 1, "H13": "１　支援が不要", "A14": 3, "B14": "生活機能 II", "C14": "移乗", "D14": "移乗", "F14": 1, "H14": "１　支援が不要", "C15": "移動", "D15": "移動", "F15": 1, "H15": "１　支援が不要", "C16": "入浴", "D16": "入浴", "F16": 1, "H16": "１　支援が不要", "C17": "口腔清潔", "D17": "口腔清潔", "F17": 1, "H17": "１　支援が不要", "C18": "衣類の着脱", "D18": "衣類の着脱", "F18": 1, "H18": "１　支援が不要", "C19": "健康・栄養管理", "D19": "健康栄養", "F19": 1, "H19": "１　支援が不要", "A20": 4, "B20": "視聴覚", "C20": "視力", "D20": "視力", "F20": 1, "H20": "１　支障がない ", "C21": "聴力", "D21": "聴力", "F21": 1, "H21": "１　支障がない ", "A22": 5, "B22": "応用日常生活動作", "C22": "調理", "D22": "調理", "F22": 1, "H22": "１　支援が不要", "C23": "掃除", "D23": "掃除", "F23": 1, "H23": "１　支援が不要", "C24": "洗濯", "D24": "洗濯", "F24": 1, "H24": "１　支援が不要", "C25": "買い物", "D25": "買い物", "F25": 1, "H25": "１　支援が不要", "C26": "交通手段", "D26": "交通手段", "F26": 1, "H26": "１　支援が不要", "A27": 6, "B27": "認知機能", "C27": "薬の管理", "D27": "薬", "F27": 1, "H27": "１　支援が不要", "C28": "金銭の管理", "D28": "金銭", "F28": 1, "H28": "１　支援が不要", "C29": "電話等", "D29": "電話等", "F29": 1, "H29": "１　支援が不要", "C30": "日常の意思決定", "D30": "意思決定", "F30": 1, "H30": "１　支援が不要", "C31": "読み書き", "D31": "読み書き", "F31": 1, "H31": "１　支援が不要", "C32": "危険の認識", "D32": "危険の認識", "F32": 1, "H32": "１　支援が不要", "C33": "コミュニケーション", "D33": "コミュニケーション", "F33": 1, "H33": "１　支障がない ", "C34": "説明の理解", "D34": "説明の理解", "F34": 1, "H34": "１　理解できる", "A35": 7, "B35": "行動上の障害　A群", "C35": "被害的・拒否的", "D35": "被害拒否", "F35": 1, "H35": "１　支援が不要", "C36": "作話", "D36": "作話", "F36": 1, "H36": "１　支援が不要", "C37": "感情が不安定", "D37": "感情が不安定", "F37": 1, "H37": "１　支援が不要", "C38": "昼夜逆転", "D38": "昼夜逆転", "F38": 1, "H38": "１　支援が不要", "C39": "暴言暴行", "D39": "暴言暴行", "F39": 1, "H39": "１　支援が不要", "C40": "同じ話をする", "D40": "同じ話", "F40": 1, "H40": "１　支援が不要", "C41": "大声・奇声を出す", "D41": "大声奇声", "F41": 1, "H41": "１　支援が不要", "C42": "支援の拒否", "D42": "支援の拒否", "F42": 1, "H42": "１　支援が不要", "C43": "徘徊", "D43": "徘徊", "F43": 1, "H43": "１　支援が不要", "C44": "落ち着きがない", "D44": "落ち着き", "F44": 1, "H44": "１　支援が不要", "C45": "外出して戻れない", "D45": "外出して戻れない", "F45": 1, "H45": "１　支援が不要", "C46": "1人で出たがる", "D46": "ひとりで出たがる", "F46": 1, "H46": "１　支援が不要", "C47": "収集癖", "D47": "収集癖", "F47": 1, "H47": "１　支援が不要", "C48": "物や衣類を壊す", "D48": "物や衣類を壊す", "F48": 1, "H48": "１　支援が不要", "C49": "不潔行為", "D49": "不潔行為", "F49": 1, "H49": "１　支援が不要", "C50": "異食行動", "D50": "異食行動", "F50": 1, "H50": "１　支援が不要", "C51": "ひどい物忘れ", "D51": "物忘れ", "F51": 1, "H51": "１　支援が不要", "C52": "集団への不適応", "D52": "集団への不適応", "F52": 1, "H52": "１　支援が不要", "A53": 8, "B53": "行動上の障害　B群", "C53": "こだわり", "D53": "こだわり", "F53": 1, "H53": "１　支援が不要", "C54": "多動・行動停止", "D54": "多動行動停止", "F54": 1, "H54": "１　支援が不要", "C55": "不安定な行動", "D55": "不安定な行動", "F55": 1, "H55": "１　支援が不要", "C56": "自らを傷つける", "D56": "自らを傷つける", "F56": 1, "H56": "１　支援が不要", "C57": "他人を傷つける", "D57": "他人を傷つける", "F57": 1, "H57": "１　支援が不要", "C58": "不適切な行為", "D58": "不適切な行為", "F58": 1, "H58": "１　支援が不要", "C59": "突発的な行動", "D59": "突発的な行動", "F59": 1, "H59": "１　支援が不要", "C60": "過食・反すう等", "D60": "過食反すう", "F60": 1, "H60": "１　支援が不要", "C61": "多飲水・過飲水", "D61": "多飲水過飲水", "F61": 1, "H61": "１　支援が不要", "C62": "反復的行動", "D62": "反復", "F62": 1, "H62": "１　支援が不要", "C63": "感覚過敏・鈍麻", "D63": "感覚過敏鈍麻", "F63": 1, "H63": "１　ない", "A64": 9, "B64": "行動上の障害　C群", "C64": "躁うつ状態", "D64": "そううつ", "F64": 1, "H64": "１　支援が不要", "C65": "対人不安緊張", "D65": "対人不安緊張", "F65": 1, "H65": "１　支援が不要", "C66": "意欲が乏しい", "D66": "意欲", "F66": 1, "H66": "１　支援が不要", "C67": "話がまとまらない", "D67": "話がまとまらない", "F67": 1, "H67": "１　支援が不要", "C68": "集中力が続かない", "D68": "集中力", "F68": 1, "H68": "１　支援が不要", "C69": "自己の過大評価", "D69": "自己の過大評価", "F69": 1, "H69": "１　支援が不要", "A70": 10, "B70": "特別な医療", "C70": "点滴の管理", "D70": "点滴の管理", "F70": 1, "H70": "１　ない", "C71": "中心静脈栄養", "D71": "中心静脈栄養", "F71": 1, "H71": "１　ない", "C72": "透析", "D72": "透析", "F72": 1, "H72": "１　ない", "C73": "ストーマの管理", "D73": "ストーマの管理", "F73": 1, "H73": "１　ない", "C74": "酸素療法", "D74": "酸素療法", "F74": 1, "H74": "１　ない", "C75": "レスピレーター", "D75": "レスピレーター", "F75": 1, "H75": "１　ない", "C76": "気管切開の処置", "D76": "気管切開の処置", "F76": 1, "H76": "１　ない", "C77": "疼痛の看護", "D77": "疼痛の看護", "F77": 1, "H77": "１　ない", "C78": "経管栄養", "D78": "経管栄養", "F78": 1, "H78": "１　ない", "C79": "モニター測定", "D79": "モニター測定", "F79": 1, "H79": "１　ない", "C80": "じょくそうの処置", "D80": "じょくそうの処置", "F80": 1, "H80": "１　ない", "C81": "カテーテル", "D81": "カテーテル", "F81": 1, "H81": "１　ない", "A82": 11, "B82": "麻痺・拘縮", "C82": "麻痺", "D82": "麻痺", "F82": 1, "H82": "１　ない", "C83": "拘縮　肩関節", "D83": "拘縮肩", "F83": 1, "H83": "１　ない", "C84": "拘縮　肘関節", "D84": "拘縮肘", "F84": 1, "H84": "１　ない", "C85": "拘縮　股関節", "D85": "拘縮股", "F85": 1, "H85": "１　ない", "C86": "拘縮　膝関節", "D86": "拘縮膝", "F86": 1, "H86": "１　ない", "C87": "拘縮　その他", "D87": "拘縮他", "F87": 1, "H87": "１　ない", "A88": 12, "B88": "その他の医師意見書項目", "C88": "麻痺　左上肢", "D88": "麻痺左上", "F88": 1, "H88": "１　ない", "C89": "麻痺　右上肢", "D89": "麻痺右上", "F89": 1, "H89": "１　ない", "C90": "麻痺　左下肢", "D90": "麻痺左下", "F90": 1, "H90": "１　ない", "C91": "麻痺　右下肢", "D91": "麻痺右下", "F91": 1, "H91": "１　ない", "C92": "麻痺　その他", "D92": "麻痺その他", "F92": 1, "H92": "１　ない", "C93": "拘縮　肩　左", "D93": "拘縮肩左", "F93": 1, "H93": "１　ない", "C94": "拘縮　肩　右", "D94": "拘縮肩右", "F94": 1, "H94": "１　ない", "C95": "拘縮　股　左", "D95": "拘縮股左", "F95": 1, "H95": "１　ない", "C96": "拘縮　股　右", "D96": "拘縮股右", "F96": 1, "H96": "１　ない", "C97": "拘縮　肘　左", "D97": "拘縮肘左", "F97": 1, "H97": "１　ない", "C98": "拘縮　肘　右", "D98": "拘縮肘右", "F98": 1, "H98": "１　ない", "C99": "拘縮　膝　左", "D99": "拘縮膝左", "F99": 1, "H99": "１　ない", "C100": "拘縮　膝　右", "D100": "拘縮膝右", "F100": 1, "H100": "１　ない", "C101": "てんかん", "D101": "てんかん", "F101": 1, "H101": "１　ない", "C102": "二軸　精神症状", "D102": "二軸精神", "F102": 1, "H102": 1, "C103": "二軸　能力障害", "D103": "二軸能力", "F103": 1, "H103": 1, "C104": "生活　食事", "D104": "生活食事", "F104": 1, "H104": 1, "C105": "生活　生活リズム", "D105": "生活リズム", "F105": 1, "H105": 1, "C106": "生活　保清", "D106": "生活保清", "F106": 1, "H106": 1, "C107": "生活　金銭管理", "D107": "生活金銭", "F107": 1, "H107": 1, "C108": "生活　服薬管理", "D108": "生活服薬", "F108": 1, "H108": 1, "C109": "生活　対人関係", "D109": "生活対人", "F109": 1, "H109": 1, "C110": "生活　社会適応", "D110": "生活社会", "F110": 1, "H110": 1};
+
+const LS_KEY_V1 = "yatagarasu015_interview_v1";
+const LS_KEY = "yatagarasu015_interview_v2";
+const $ = (id)=>document.getElementById(id);
+
+function nowDateStr(){
+  const d=new Date(); const mm=String(d.getMonth()+1).padStart(2,"0"); const dd=String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+$("date").value = nowDateStr();
+
+// --- Site updated date (GitHub Pages等) ---
+function formatYMD(d){
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+async function updateSiteUpdatedLabel(){
+  const el = document.getElementById("uiLastUpdated");
+  if(!el) return;
+  const label = "サイト更新日（アップデート）：";
+
+  // 1) Try document.lastModified (often backed by Last-Modified header)
+  try{
+    const lm0 = document.lastModified;
+    if(lm0){
+      const d0 = new Date(lm0);
+      if(!Number.isNaN(d0.getTime())){
+        el.textContent = label + formatYMD(d0);
+        return;
+      }
+    }
+  }catch(e){}
+
+  // 2) Fallback: HEAD request to read Last-Modified header
+  try{
+    const base = String(location.href || "").replace(/#.*$/, "");
+    const url = base + (base.includes("?") ? "&" : "?") + "v=" + Date.now();
+    const res = await fetch(url, { method: "HEAD", cache: "no-store" });
+    const lm = res.headers.get("last-modified") || res.headers.get("Last-Modified");
+    if(lm){
+      const d = new Date(lm);
+      if(!Number.isNaN(d.getTime())){
+        el.textContent = label + formatYMD(d);
+        return;
+      }
+    }
+  }catch(e){}
+
+  // 3) Last resort: show today's date (device)
+  el.textContent = label + nowDateStr();
+}
+// Run on load (non-blocking)
+updateSiteUpdatedLabel();
+
+
+const LABELS = {
+  physical: [
+    ["1","1．支援が不要"],
+    ["2","2．見守り等の支援が必要"],
+    ["3","3．部分的な支援が必要"],
+    ["4","4．全面的な支援が必要"],
+  ],
+  daily: [
+    ["1","1．支援が不要"],
+    ["2","2．部分的な支援が必要"],
+    ["3","3．全面的な支援が必要"],
+  ],
+  behavior: [
+    ["1","1．支援が不要"],
+    ["2","2．稀に支援が必要"],
+    ["3","3．月に1回以上の支援が必要"],
+    ["4","4．週に1回以上の支援が必要"],
+    ["5","5．ほぼ毎日（週に5日以上）の支援が必要"],
+  ],
+  comm: [
+    ["1","1．支援が不要"],
+    ["2","2．支援・配慮が必要"],
+    ["3","3．判断できない／著しく困難"],
+  ],
+  medical: [
+    ["1","1．ない"],
+    ["2","2．ある"],
+  ],
+  extra: [
+    ["1","1．なし／該当なし"],
+    ["2","2．軽度"],
+    ["3","3．中等度"],
+    ["4","4．重度"],
+    ["5","5．最重度"],
+    ["6","6．その他"],
+  ]
+};
+
+// item固有の選択肢（Excel準拠）を優先して返す： [[value,label], ...]
+function labelPairsFor(it, cat){
+  if(it && Array.isArray(it.labels) && it.labels.length){
+    return it.labels.map((t,i)=>[String(i+1), String(t)]);
+  }
+  let labels = (LABELS && (LABELS[cat] || LABELS.extra)) || [];
+  if(cat==="extra" && it && it.optCount){
+    const n = Math.max(2, Math.min(6, Number(it.optCount)));
+    labels = (LABELS.extra||[]).slice(0,n);
+  }
+  return labels;
+}
+
+
+const ITEM_GUIDE = {
+  "01": {
+    "title": "1-1 寝返り",
+    "def": "ベッド上で仰向け↔横向きなど、体位を自力で変える動作。反動やベッド柵などの工夫も含め、実生活での可否でみます。",
+    "obs": [
+      "支持物（ベッド柵・ひも等）があればできるか",
+      "体幹・上肢で体を回せるか",
+      "途中で止まる／痛みでできない場面があるか",
+      "日による変動（できたりできなかったり）があるか"
+    ],
+    "ask": [
+      "ベッド上で向きを変えるとき、手を借りますか？",
+      "柵やひもがないと寝返りできませんか？"
+    ],
+    "memo": "例：ベッド柵があれば自力で寝返り可能。柵がない環境では介助が必要。"
+  },
+  "02": {
+    "title": "1-2 起き上がり",
+    "def": "仰向け等から上体を起こして座る動作（起き上がって座位になるまで）。座位保持そのものは別項目です。",
+    "obs": [
+      "腕で支えて起き上がれるか",
+      "手すり・柵があれば可能か",
+      "途中でふらつく／息切れで休憩が必要か",
+      "環境が変わると難しくなるか"
+    ],
+    "ask": [
+      "布団やベッドから起き上がる時に手を貸しますか？",
+      "柵があると起き上がれますか？"
+    ],
+    "memo": "例：ベッド柵を握れば起き上がり可能。柵がないと介助が必要。"
+  },
+  "03": {
+    "title": "1-3 座位保持",
+    "def": "椅子やベッド端座位などで、座った姿勢を保つこと。起き上がる動作ではなく“座っていられるか”をみます。",
+    "obs": [
+      "手をつかずに座位を保てる時間",
+      "体幹が崩れて倒れそうになるか",
+      "ベルト・背もたれ等の支持が必要か",
+      "注意がそれると姿勢が崩れるか"
+    ],
+    "ask": [
+      "椅子に座っている時、よく体が傾きますか？",
+      "背もたれがないと座っていられませんか？"
+    ],
+    "memo": "例：背もたれがないと体幹が崩れ転倒リスク。座位保持は見守りが必要。"
+  },
+  "04": {
+    "title": "1-6 両足での立位保持（両足立位）",
+    "def": "両足で立った姿勢を保つこと。立ち上がる動作（立ち上がり）や歩行とは分けて評価します。",
+    "obs": [
+      "支持物なしで立位保持できるか",
+      "手すり等につかまれば保持できるか",
+      "ふらつき・転倒リスク",
+      "片足が床につかない場合は“片足立位”の状況も記載"
+    ],
+    "ask": [
+      "洗面など立ったままできますか？手すりは使いますか？",
+      "立っているとふらついて壁に手をつくことは？"
+    ],
+    "memo": "例：手すり支持で立位保持は可能。支持物なしではふらつき強く見守りが必要。"
+  },
+  "05": {
+    "title": "1-8 歩行",
+    "def": "屋内等で歩いて移動できるか。杖・歩行器・手引きなど、実際に使っている補助具を前提に判断します。",
+    "obs": [
+      "補助具（杖・歩行器）で自立できるか",
+      "手引き・見守りが必要か",
+      "方向転換・段差で危険が増すか",
+      "医療上の制限（歩行制限）がある場合は理由を特記事項へ"
+    ],
+    "ask": [
+      "家の中は一人で歩けますか？外では？",
+      "転びそうになる場面はありますか？"
+    ],
+    "memo": "例：屋内は歩行器で自立。外出時はふらつきあり手引き見守り。"
+  },
+  "06": {
+    "title": "1-5 立ち上がり",
+    "def": "椅子やベッド端から立ち上がる動作。立位保持や歩行ではなく“立つ瞬間”を評価します。",
+    "obs": [
+      "手すり・机等につかまれば立てるか",
+      "立つときに介助で身体を支える必要があるか",
+      "立ち上がり直後のふらつき",
+      "反復で疲労しやすいか"
+    ],
+    "ask": [
+      "椅子から立つとき、手を貸しますか？",
+      "つかまる場所がないと立てませんか？"
+    ],
+    "memo": "例：机につかまれば立てるが、つかまれない環境では介助が必要。"
+  },
+  "07": {
+    "title": "1-7 片足での立位保持（片足立位）",
+    "def": "片足で体重を支える（バランス）能力。靴下・ズボン・浴槽またぎ等で必要になります。",
+    "obs": [
+      "片脚支持が可能か（左右差）",
+      "支持物があれば可能か",
+      "段差・浴槽またぎで危険が出るか",
+      "痛みや拘縮で片足が使えない場合の実態"
+    ],
+    "ask": [
+      "靴下は立ったまま履けますか？座って履きますか？",
+      "浴槽をまたぐときに付き添いが必要ですか？"
+    ],
+    "memo": "例：片足立位は困難。更衣は座位で実施。浴槽またぎは見守り必須。"
+  },
+  "08": {
+    "title": "1-11 じょくそう",
+    "def": "褥瘡（床ずれ）の有無と、観察や処置など支援の必要性をみます。見えない・確認できない場合は状況を特記事項へ。",
+    "obs": [
+      "褥瘡の部位・程度（疑い含む）",
+      "処置や受診の有無・頻度",
+      "本人が確認を拒否／視認できない場合の理由",
+      "体位変換や皮膚観察の支援が必要か"
+    ],
+    "ask": [
+      "床ずれがあると言われたことはありますか？どこですか？",
+      "処置は誰がどのくらいの頻度でしていますか？"
+    ],
+    "memo": "例：臀部に褥瘡あり。処置は訪看が週◯回、日々は職員が観察と体位調整。"
+  },
+  "09": {
+    "title": "1-12 えん下（嚥下）",
+    "def": "飲み込みの状態（むせ・誤嚥リスク）と支援の必要性。経管栄養などで経口摂取できない場合もここに反映します。",
+    "obs": [
+      "むせ込み・咳込みの有無",
+      "食形態の調整（刻み・とろみ）",
+      "食事時の姿勢・ペース調整の必要",
+      "経管栄養・中心静脈栄養等の有無と理由（特記事項へ）"
+    ],
+    "ask": [
+      "水やお茶でむせますか？",
+      "とろみや刻み食にしていますか？"
+    ],
+    "memo": "例：水分でむせあり。とろみ付与と一口量の声かけで見守りが必要。"
+  },
+  "10": {
+    "title": "2-1 食事",
+    "def": "食事の“準備〜摂取〜後片付けの一連”のうち、本人がどこまで行えるか。食べ物を口へ運ぶ、飲み物を運ぶ等も含めます。",
+    "obs": [
+      "箸・スプーン操作、飲み物を口へ運ぶ",
+      "介助が必要な工程（刻み・配膳・声かけ等）",
+      "見守り（むせ・早食い・誤嚥）",
+      "経管栄養等で全面支援となる場合"
+    ],
+    "ask": [
+      "自分で食べ始められますか？途中で止まりますか？",
+      "食べこぼしの掃除や後片付けは誰がしますか？"
+    ],
+    "memo": "例：自力摂取可能だが早食いでむせあり。ペース調整の声かけで見守り。"
+  },
+  "11": {
+    "title": "2-4 排尿",
+    "def": "排尿に関する一連（トイレへ行く、着脱、排尿、後始末、汚した場合の処理等）をどこまで自力で行えるか。留置カテ等の状況も含みます。",
+    "obs": [
+      "移動・移乗・着脱・清拭のどこが支援必要か",
+      "失禁や汚染時の後始末",
+      "留置カテーテル等の使用状況",
+      "時間誘導（尿意が乏しい）などの支援の有無"
+    ],
+    "ask": [
+      "トイレの後始末（拭き取り・水洗）は一人でできますか？",
+      "尿意が分かりにくく時間で誘導していますか？"
+    ],
+    "memo": "例：排尿は誘導と後始末の声かけが必要。汚染時は職員が清拭・清掃を実施。"
+  },
+  "12": {
+    "title": "2-5 排便",
+    "def": "排便の一連（トイレ、着脱、排便、清拭、汚染時の処理等）を評価。人工肛門・月経処理など関連する後始末も含めて整理します。",
+    "obs": [
+      "便意の把握とタイミング",
+      "清拭が不十分でやり直しが必要か",
+      "汚染した衣類・トイレ清掃の支援",
+      "人工肛門等がある場合の後始末"
+    ],
+    "ask": [
+      "拭き取りが不十分で衣類が汚れることはありますか？",
+      "便が出た後の処理は一人でできますか？"
+    ],
+    "memo": "例：清拭が不十分で職員がやり直し。排便後は見守りと一部介助が必要。"
+  },
+  "13": {
+    "title": "1-4 移乗",
+    "def": "ベッド⇄車いす、椅子⇄立位など、身体を移し替える動作。歩行能力とは別に、乗り移り動作の介助量をみます。",
+    "obs": [
+      "ブレーキ・フットレスト等の操作理解",
+      "支えなしで移れるか／身体介助が必要か",
+      "滑落・転倒リスク",
+      "寝たきりで移乗自体が困難な場合"
+    ],
+    "ask": [
+      "ベッドから車いすへ移る時に手を貸しますか？",
+      "乗り移り中にヒヤリがありますか？"
+    ],
+    "memo": "例：移乗は一部介助。立ち上がり時に身体支持が必要で転倒予防の見守り。"
+  },
+  "14": {
+    "title": "1-9 移動",
+    "def": "目的地まで移動できるか（歩行だけでなく車いす操作等も含む）。屋内・敷居等の段差対応もポイントになります。",
+    "obs": [
+      "自走（車いす）や歩行で一人移動できるか",
+      "段差・敷居で介助（押す等）が必要か",
+      "誘導・見守りが必要か（迷子・衝動外出）",
+      "初めての場所で困難になるか"
+    ],
+    "ask": [
+      "居室から食堂まで一人で行けますか？",
+      "段差やドアで手助けが必要ですか？"
+    ],
+    "memo": "例：屋内は車いす自走可能。敷居の段差は介助が必要で見守りあり。"
+  },
+  "15": {
+    "title": "2-3 入浴",
+    "def": "入浴の一連（準備・脱衣、浴室出入り、洗体洗髪、浴槽、後片付け）で必要な支援を整理します。更衣は関連するが、入浴内での支援として確認します。",
+    "obs": [
+      "浴室出入り・浴槽またぎの安全",
+      "洗体洗髪の遂行",
+      "温度調整・転倒リスク",
+      "一連のどこが見守り／介助かを分解"
+    ],
+    "ask": [
+      "浴槽をまたぐ時に危なくないですか？",
+      "洗体・洗髪はどこまで自分でできますか？"
+    ],
+    "memo": "例：洗体は自立だが出入りでふらつきあり同室見守り。浴槽またぎは一部介助。"
+  },
+  "16": {
+    "title": "2-2 口腔清潔",
+    "def": "歯みがき等の口腔清潔の一連（歯ブラシ準備、みがく、うがい、義歯の出し入れ・洗浄、片付け、みがき残し確認等）を評価します。",
+    "obs": [
+      "歯みがき動作ができるか",
+      "うがい・口腔洗浄剤の使用",
+      "義歯の管理（出し入れ・洗浄）",
+      "みがき残し確認などの支援"
+    ],
+    "ask": [
+      "歯みがきは自分でできますか？仕上げは必要ですか？",
+      "義歯の洗浄は誰がしていますか？"
+    ],
+    "memo": "例：歯みがきは可能だが、みがき残しが多く仕上げの声かけ・確認が必要。"
+  },
+  "17": {
+    "title": "1-10 衣服の着脱（衣類の着脱）",
+    "def": "衣服の着脱の一連（選ぶ、着る、ボタン・ファスナー操作、脱ぐ、片付け）で必要な支援をみます。できる衣類とできない衣類の差は特記事項へ。",
+    "obs": [
+      "上衣/下衣、ボタン等で難易度差",
+      "立位更衣で転倒リスクがあるか",
+      "衣類選択ができるか（季節・場面）",
+      "時間が極端にかかる／途中で止まるか"
+    ],
+    "ask": [
+      "ボタン付きの服は自分で着られますか？",
+      "着替えを選ぶ時に助言が必要ですか？"
+    ],
+    "memo": "例：Tシャツは自立。ボタン付き衣類は介助が必要で、実生活では支援あり。"
+  },
+  "18": {
+    "title": "2-6 健康・栄養管理",
+    "def": "体調管理や制限食、医師指示に基づく対応などを自分で行えるか。通院そのものではなく“日々の管理”の支援量を評価します。",
+    "obs": [
+      "服薬・受診指示への対応（理解と実行）",
+      "食事制限・治療食の継続",
+      "体調変化の訴え・自己管理",
+      "易疲労で休憩が頻回に必要な場合"
+    ],
+    "ask": [
+      "体調が悪い時に自分で伝えられますか？",
+      "制限食は守れますか？支援はありますか？"
+    ],
+    "memo": "例：糖尿病食の自己管理が難しく、職員が内容確認と声かけで支援。"
+  },
+  "19": {
+    "title": "3-1 視力",
+    "def": "見え方を確認する項目。視力確認表等で“どの程度見えるか”を確認し、視野障害などは特記事項に整理します。",
+    "obs": [
+      "視力確認表での見え方（距離を統一）",
+      "眼鏡等の使用状況（使用している状態で判断）",
+      "視野欠損・狭窄・複視など視力以外の障害",
+      "日による変動や疲労で低下する場合"
+    ],
+    "ask": [
+      "眼鏡は普段使っていますか？",
+      "見える範囲が狭い・ぶつかることはありますか？"
+    ],
+    "memo": "例：矯正視力は保たれるが視野狭窄あり。歩行時にぶつかりやすく見守りが必要。"
+  },
+  "20": {
+    "title": "3-2 聴力",
+    "def": "聞こえ方を確認する項目。補聴器等を使っている場合は“使用した状態”で判断し、状況は特記事項へ。",
+    "obs": [
+      "通常の声量での反応（距離と環境を統一）",
+      "補聴器等の使用状況（使用して判断）",
+      "聞き返し・誤解が多いか",
+      "意思疎通が難しい場合は理由（理解・認知等）を整理"
+    ],
+    "ask": [
+      "補聴器は普段つけていますか？",
+      "呼びかけに気づかないことはありますか？"
+    ],
+    "memo": "例：補聴器を使用すれば会話可能。未装用時は呼びかけに反応乏しく、声かけ工夫が必要。"
+  },
+  "21": {
+    "title": "2-12 調理",
+    "def": "献立を考える→食材準備→加熱・味付け→盛付け→片付けまで、調理の一連行為にどこまで支援が必要か。",
+    "obs": [
+      "火・刃物・熱湯など安全面（消し忘れ/切創/火傷）を含めて確認。",
+      "手順（順序）や時間管理、同時進行（鍋/フライパン等）ができるか。",
+      "衛生（手洗い、食材の保存・生焼け回避）や後片付けまでできるか。"
+    ],
+    "ask": [
+      "普段どんな料理を、どこまで一人でできますか？（レンジだけ/包丁使用など）",
+      "火の消し忘れ・生焼け・包丁の扱いなど、見守りが必要な場面は？",
+      "支援の内容は？（声かけ/手順提示/材料準備/付き添い/全面実施）"
+    ],
+    "memo": "例）火の消し忘れがあるため調理中は見守りが必要。材料の下ごしらえは職員が準備。頻度：毎日。具体例：＿＿。"
+  },
+  "22": {
+    "title": "2-13 掃除",
+    "def": "掃除の準備→実施→片付け（ゴミ捨て・整理整頓を含む）に支援が必要か。",
+    "obs": [
+      "掃除道具の準備・片付け、ゴミの分別/搬出までできるか。",
+      "汚れの認識（どこを掃除すべきか）と、手順の継続ができるか。",
+      "転倒リスク（濡れた床/段差）や、洗剤等の誤使用がないか。"
+    ],
+    "ask": [
+      "部屋のどの範囲をどの頻度で掃除できますか？途中で止まることは？",
+      "指示があればできる？それとも一緒にやる必要がある？",
+      "見守りが必要な理由は？（転倒/洗剤/ゴミ出し/物の紛失など）"
+    ],
+    "memo": "例）掃除を始めても途中で中断し放置するため、声かけと一部介助が必要。ゴミ出しは同行。頻度：週＿＿回。"
+  },
+  "23": {
+    "title": "2-14 洗濯",
+    "def": "洗濯物の仕分け→洗濯機操作→干す/乾燥→取り込み→畳む・収納まで支援が必要か。",
+    "obs": [
+      "洗濯機の操作（投入・洗剤量・コース選択）を誤らずにできるか。",
+      "干す/取り込む/畳む/収納までの継続と、衣類の管理ができるか。",
+      "天候確認や乾燥不十分による臭い・衛生面への配慮ができるか。"
+    ],
+    "ask": [
+      "洗濯機は一人で回せますか？洗剤の入れ過ぎ/入れ忘れは？",
+      "干す・取り込む・畳むのどこで支援が必要ですか？",
+      "紛失や取り違え、濡れたまま放置などはありますか？"
+    ],
+    "memo": "例）洗剤量の判断が難しく、職員が準備し本人は投入のみ。干す工程は見守り。頻度：週＿＿回。"
+  },
+  "24": {
+    "title": "2-15 買い物",
+    "def": "必要な物を選ぶ→店内で探す→支払い→持ち帰りまで、安全に買い物ができるか。",
+    "obs": [
+      "必要な物を思い出す/メモを使うなど、目的を保てるか。",
+      "金銭の扱い（支払い・釣銭確認）や、衝動買いの有無。",
+      "外出時の安全（交通・迷子・トラブル対応）も含めて確認。"
+    ],
+    "ask": [
+      "一人で買い物に行けますか？道順や店内で迷うことは？",
+      "支払いのミス（不足/過払い/釣銭確認）や衝動買いは？",
+      "支援が必要なら、同行/見守り/事前準備（買い物リスト等）は？"
+    ],
+    "memo": "例）衝動買いが多く金銭管理が難しいため、買い物は同行し購入品を一緒に確認。頻度：週＿＿回。"
+  },
+  "25": {
+    "title": "2-16 交通手段の利用（交通手段）",
+    "def": "公共交通機関等を利用して目的地へ移動し、迷わず安全に帰れるかを確認。",
+    "obs": [
+      "時刻表・乗り換え・料金支払いなど手順の理解ができるか。",
+      "道に迷ったときに連絡/相談できるか、パニックにならないか。",
+      "交通事故・乗り過ごし・置き忘れなどのリスクがないか。"
+    ],
+    "ask": [
+      "一人でバス/電車に乗れますか？乗り換えや料金は？",
+      "迷ったときはどうしますか？連絡手段（電話等）は使えますか？",
+      "同行が必要な理由は？（迷子/パニック/事故/対人トラブルなど）"
+    ],
+    "memo": "例）乗り過ごしがあり帰宅できなくなるため、外出時は原則同行。必要時は位置確認し迎え。頻度：＿＿。"
+  },
+  "26": {
+    "title": "2-7 薬の管理",
+    "def": "処方薬の保管・服薬のタイミング管理・残薬確認など、自己管理に支援が必要か。",
+    "obs": [
+      "飲み忘れ/飲み間違い（回数・量・時間帯）がないか。",
+      "薬の保管（誤飲防止/他者混同）と、残薬・受診日の管理。",
+      "副作用や体調変化に気づき、職員へ伝えられるか。"
+    ],
+    "ask": [
+      "服薬は自分で忘れずにできますか？取り違えは？",
+      "薬の保管はどこで、誰が管理していますか？",
+      "副作用や体調変化があったときの対応（報告/受診）は？"
+    ],
+    "memo": "例）自己管理では飲み忘れが頻回のため、薬は事務所管理。職員が手渡しし内服確認。"
+  },
+  "27": {
+    "title": "2-8 金銭の管理",
+    "def": "収支の把握、支払い、財布や通帳の管理など、金銭面の自己管理に支援が必要か。",
+    "obs": [
+      "支出のコントロール（浪費/衝動買い/借金等）と、必要経費の優先。",
+      "現金・カード・通帳の紛失/盗難リスク、暗証番号の管理。",
+      "支払い（家賃・公共料金等）や期限管理ができるか。"
+    ],
+    "ask": [
+      "お金の残高や支出を把握できますか？困る場面は？",
+      "支払いの遅れや滞納、無計画な出費はありますか？",
+      "支援している場合、どの範囲を誰が管理していますか？"
+    ],
+    "memo": "例）衝動買いで生活費が不足するため、金銭は職員が一部預かり。必要時に小分けで手渡し。"
+  },
+  "28": {
+    "title": "2-9 電話等の利用（電話等）",
+    "def": "電話・メール等を使って必要な連絡ができるか（緊急時の連絡も含む）。",
+    "obs": [
+      "用件を整理して伝える/聞き取ることができるか。",
+      "詐欺・勧誘への対応や、架電/受電時のトラブルリスク。",
+      "緊急時に助けを求める連絡ができるか。"
+    ],
+    "ask": [
+      "電話は一人でかけられますか？用件が伝わらない場面は？",
+      "知らない相手からの電話や勧誘への対応はどうしていますか？",
+      "困ったときに職員や家族へ連絡できますか？"
+    ],
+    "memo": "例）用件が整理できず混乱するため、電話は職員が同席し要点をメモして支援。"
+  },
+  "29": {
+    "title": "2-10 日常の意思決定",
+    "def": "日常生活の選択（食事、服装、外出、受診等）を状況に応じて判断できるか。",
+    "obs": [
+      "選択肢の比較（メリット/デメリット）や、危険回避の判断ができるか。",
+      "気分やこだわりで判断が極端になり生活に支障が出ないか。",
+      "判断に時間がかかる/決められない場合の支援が必要か。"
+    ],
+    "ask": [
+      "日常の選択で迷うことはありますか？（食事/服装/予定など）",
+      "危険な選択をしてしまうことは？（無理な外出/受診拒否等）",
+      "支援している場合、どんな声かけや選択肢提示をしていますか？"
+    ],
+    "memo": "例）自分で決められず固まるため、選択肢を2つに絞って提示し意思決定を支援。頻度：＿＿。"
+  },
+  "30": {
+    "title": "3-5 読み書き",
+    "def": "日常生活に必要な読み書き（表示・書類・メモ等）がどこまでできるか。",
+    "obs": [
+      "文字の大きさ/量によって読める範囲が変わらないか（補助具も含む）。",
+      "重要情報（注意書き、期限、住所、金額等）を読み取れるか。",
+      "書く場合、氏名・住所・簡単な記入ができるか。"
+    ],
+    "ask": [
+      "何が読めますか？（掲示、時刻表、説明書、請求書など）",
+      "書類の記入はどこまでできますか？代筆が必要ですか？",
+      "読み間違い/書き間違いで困った経験はありますか？"
+    ],
+    "memo": "例）小さい文字が読めず重要事項を見落とすため、職員が読み上げて確認。書類は代筆し本人確認を実施。"
+  },
+  "31": {
+    "title": "2-11 危険の認識",
+    "def": "生活場面の危険（火・刃物・交通・対人トラブル等）を察知し回避できるか。",
+    "obs": [
+      "危険に気づかない/過小評価して近づくなどがないか。",
+      "危険を感じたときに助けを求める/その場を離れる行動が取れるか。",
+      "認知症状や精神症状で判断がぶれる場合は具体例を確認。"
+    ],
+    "ask": [
+      "危ないと感じたとき、どんな行動を取れますか？",
+      "過去に事故やヒヤリハット（火、転倒、交通、対人）がありましたか？",
+      "支援が必要なら、どの場面で見守り・声かけをしていますか？"
+    ],
+    "memo": "例）交通量の多い道路へ注意なく出るため、外出時は同行し都度声かけ。ヒヤリ：＿＿。"
+  },
+  "32": {
+    "title": "3-3 コミュニケーション",
+    "def": "意思を伝える・相手の話を理解するなど、対人コミュニケーションの困りごとを確認。",
+    "obs": [
+      "言葉/ジェスチャー/筆談など、本人が使える手段と理解度を確認。",
+      "相手の表情・場の空気の読み取りが難しくトラブルにならないか。",
+      "話題の切替や、要求の伝え方（攻撃的/一方的）も確認。"
+    ],
+    "ask": [
+      "困ったときに助けを求められますか？どんな伝え方ですか？",
+      "会話が成り立たず誤解・トラブルになった経験はありますか？",
+      "支援方法は？（通訳的支援/言い換え/メモ/環境調整）"
+    ],
+    "memo": "例）本人の表現が伝わりにくく誤解が生じるため、職員が要点を言い換えて仲介。頻度：＿＿。"
+  },
+  "33": {
+    "title": "3-4 説明の理解",
+    "def": "説明（ルール・手順・注意事項）を理解し、行動に移せるかを確認。",
+    "obs": [
+      "一度に多く言われると理解できない/忘れる場合があるか。",
+      "抽象的な説明より、具体例・手順化・視覚化が必要か。",
+      "理解の確認（復唱/やってみる）をしないと誤解が残らないか。"
+    ],
+    "ask": [
+      "説明はどの程度なら理解できますか？（短文なら/図があれば等）",
+      "注意事項を守れない場面は？（服薬、火の元、外出ルール等）",
+      "支援している方法は？（メモ/手順書/チェックリスト等）"
+    ],
+    "memo": "例）口頭説明だけでは忘れるため、要点を紙に書き視覚化。手順はチェックリストで確認。"
+  },
+  "34": {
+    "title": "4-1 被害的・拒否的",
+    "def": "被害的に受け取る・疑いが強い等により、支援や関わりを拒否して生活に支障が出るか。",
+    "obs": [
+      "妄想的な訴えや誤解（被害感）が強い場面があるかを確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "拒否の内容は？（支援拒否/受診拒否/服薬拒否/入浴拒否など）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）職員の声かけを『監視されている』と受け取り拒否。頻度：週＿＿回。対応：落ち着くまで距離を取り、時間を置いて再提案。"
+  },
+  "35": {
+    "title": "4-2 作話",
+    "def": "事実と異なる話をすることで、支援や対人関係に支障が出るか。",
+    "obs": [
+      "作話が本人の意図（虚勢/不安/混乱）によるものか、状況を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "どんな内容の作話が多いですか？（金銭/被害/出来事など）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）事実と異なる出来事を訴え周囲とトラブル。頻度：月＿＿回。対応：事実確認を行い、否定せず整理して説明。"
+  },
+  "36": {
+    "title": "4-3 感情が不安定",
+    "def": "感情の起伏が大きく、泣く・怒る等で日常生活や対人面に支障が出るか。",
+    "obs": [
+      "気分変動の幅（急な落ち込み/易怒性）と、持続時間を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "感情が崩れやすい場面は？（注意された時/予定変更/対人刺激）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）予定変更で激しく怒り大声。頻度：週＿＿回。対応：事前説明と選択肢提示、クールダウンの場へ誘導。"
+  },
+  "37": {
+    "title": "4-4 昼夜逆転",
+    "def": "睡眠リズムの乱れにより、日中の活動や支援受け入れに支障があるか。",
+    "obs": [
+      "就寝・起床時刻、夜間覚醒、日中の眠気の有無を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "夜間の過ごし方は？（徘徊/騒音/スマホ等）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）夜間覚醒し居室外へ出る。日中は起床できず通院を欠席。対応：生活リズム調整、医療と連携。"
+  },
+  "38": {
+    "title": "4-5 暴言暴行",
+    "def": "暴言・暴力により本人や周囲の安全確保が必要となるか。",
+    "obs": [
+      "対象（職員/他利用者/物）と程度（脅し/叩く/蹴る等）、怪我の有無を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "前兆やトリガーは？（要求が通らない/音/対人距離）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）要求が通らないと他利用者へ暴言。月＿＿回。対応：距離確保、2名対応、落ち着くまで別室。必要時は医療連絡。"
+  },
+  "39": {
+    "title": "4-6 同じ話をする",
+    "def": "同じ話題を繰り返し、支援や対人関係に支障があるか。",
+    "obs": [
+      "反復の程度（短時間に何度も/長時間）と、止めた際の反応を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "話題が固定する内容は？不安やこだわりが背景にありますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）同じ確認を繰り返し職員対応が長時間化。頻度：ほぼ毎日。対応：確認用メモを作り指差しで対応。"
+  },
+  "40": {
+    "title": "4-7 大声・奇声を出す",
+    "def": "大声や奇声があり、周囲への配慮や安全面で支援が必要か。",
+    "obs": [
+      "時間帯（夜間/日中）と場所、近隣・他利用者への影響を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "静かにしてほしい声かけで落ち着きますか？逆に悪化しますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）夜間に奇声で他利用者が不眠。週＿＿回。対応：別室誘導、安心刺激（音楽等）、医療と相談。"
+  },
+  "41": {
+    "title": "4-8 支援の拒否",
+    "def": "必要な支援（介助・健康管理等）を拒否し、生活維持に支障があるか。",
+    "obs": [
+      "拒否の対象（入浴/服薬/受診/清掃等）と理由（不安/被害感/こだわり）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "拒否が続いた場合のリスクは？（衛生悪化/症状増悪/事故）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）服薬を拒否し症状悪化。頻度：月＿＿回。対応：本人の不安を聞き、選択肢提示し再提案。医療と連携。"
+  },
+  "42": {
+    "title": "4-9 徘徊",
+    "def": "目的なく歩き回る/離棟する等で、安全確保のため支援が必要か。",
+    "obs": [
+      "時間帯（夜間/早朝）と範囲（敷地外/道路）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "戻って来られますか？声かけで止まりますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）夜間に外へ出ようとする。週＿＿回。対応：見守り強化、施錠確認、落ち着ける活動へ誘導。"
+  },
+  "43": {
+    "title": "4-10 落ち着きがない",
+    "def": "そわそわして着席できない等で、生活や支援に支障があるか。",
+    "obs": [
+      "じっとできない場面（食事/面談/服薬確認等）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "不安や刺激（音/人混み）で増えますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）面談中に席を立ち続け説明が入らない。頻度：週＿＿回。対応：短時間で区切り、休憩を挟む。"
+  },
+  "44": {
+    "title": "4-11 外出して戻れない",
+    "def": "外出すると道に迷う等で帰宅できず、安全確保のため支援が必要か。",
+    "obs": [
+      "行方不明・警察相談・迎え対応の有無など具体的事例を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "どの距離/範囲で戻れなくなりますか？携帯は使えますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）外出後に場所が分からなくなり帰宅不能。月＿＿回。対応：原則同行、位置共有、迷子時は迎え。"
+  },
+  "45": {
+    "title": "4-12 １人で出たがる（1人で出たがる）",
+    "def": "安全面に課題があるにも関わらず一人で外出しようとし、支援が必要か。",
+    "obs": [
+      "外出先・目的・時間帯（衝動的か計画的か）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "止めるとどうなりますか？（興奮/暴言/自傷等）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）衝動的に外出しようとし制止で興奮。頻度：週＿＿回。対応：代替行動提案、外出は同行/時間を決める。"
+  },
+  "46": {
+    "title": "4-13 収集癖",
+    "def": "物を集め続けることで生活環境や対人関係に支障が出るか。",
+    "obs": [
+      "集める対象（ゴミ/チラシ/食品等）と保管状況（衛生・火災リスク）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "片付けの提案でトラブルになりますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）チラシを大量に溜め込み居室が歩けない。対応：一緒に分類、量の上限を決める。頻度：＿＿。"
+  },
+  "47": {
+    "title": "4-14 物や衣類を壊す",
+    "def": "衝動的に物を壊す/破るなどがあり、安全確保や環境調整が必要か。",
+    "obs": [
+      "破損の対象（家電/ガラス/衣類）と危険（けが）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "壊す前兆は？（イライラ/要求不満/感覚過敏等）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）興奮時に物を投げ破損。月＿＿回。対応：危険物撤去、距離確保、クールダウン支援。"
+  },
+  "48": {
+    "title": "4-15 不潔行為",
+    "def": "排泄物に触る、汚れたまま過ごす等で、衛生面の支援が必要か。",
+    "obs": [
+      "内容（便弄り/汚物放置/入浴拒否等）と感染・皮膚トラブルのリスクを確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "どの場面で起きますか？（夜間/不安時/便秘時など）",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）便を触る行為があり清潔保持が困難。対応：早めの排泄誘導、環境調整、手洗い支援。頻度：＿＿。"
+  },
+  "49": {
+    "title": "4-16 異食行動",
+    "def": "食べ物以外を口に入れる/飲み込むなど、生命危険がある行動があるか。",
+    "obs": [
+      "対象物（紙/プラスチック/タバコ等）と誤嚥・中毒リスクを確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "いつ起きますか？（空腹/不安/刺激不足）予防策は？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）紙を口に入れ誤嚥リスク。週＿＿回。対応：危険物の管理、代替物提供、見守り強化。"
+  },
+  "50": {
+    "title": "4-17 ひどい物忘れ",
+    "def": "物忘れが強く、生活上の安全や支援継続に影響があるか。",
+    "obs": [
+      "忘れる内容（火の元/戸締り/服薬/場所）と事故リスクを確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "同じ説明が必要な頻度は？メモや仕組みで補えますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）火の元を忘れガスをつけっぱなし。対応：IH化、使用時見守り、チェック表。頻度：＿＿。"
+  },
+  "51": {
+    "title": "4-33 集団への不適応",
+    "def": "集団場面でのルール適応が難しく、トラブル回避の支援が必要か。",
+    "obs": [
+      "食堂・行事など集団場面での問題（割り込み/大声/衝突）を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "人数が増えると悪化しますか？どんな配慮で落ち着きますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）集団場面で他者と衝突しやすい。対応：席配置調整、少人数から参加、事前説明。頻度：＿＿。"
+  },
+  "52": {
+    "title": "4-18 こだわり",
+    "def": "こだわりが強く、予定変更やルール逸脱で生活に支障が出るか。",
+    "obs": [
+      "こだわりの内容（順番/時間/物の配置/手順）と影響を確認。",
+      "頻度（稀/月1以上/週1以上/ほぼ毎日）と、発生時間帯・持続時間を整理。",
+      "きっかけ（環境変化・要求不満・体調・対人刺激など）と、危険性/周囲への影響を確認。",
+      "対応に必要な支援量（声かけ/環境調整/付き添い/制止/通院連携など）を記録。"
+    ],
+    "ask": [
+      "予定変更でパニックになりますか？予告や代替案で緩和しますか？",
+      "直近1か月でどれくらいありましたか？具体的なエピソードは？",
+      "起きた時、どんな支援が必要でしたか？（人数・時間・方法）",
+      "予防策（ルーティン、事前説明、場所変更、服薬調整等）はありますか？"
+    ],
+    "memo": "例）物の配置が変わると強い不安で作業停止。対応：事前説明、変更を最小化、代替案提示。"
+  },
+  "53": {
+    "title": "53 多動・行動停止",
+    "def": "落ち着きなく動き回る/多弁になる、または急に固まって動けない等により、生活や安全面で支援が必要か。",
+    "obs": [
+        "多動（動き回る・外出衝動・多弁）と行動停止（フリーズ・手が止まる）のどちらが起きるか、場面と持続時間を確認。",
+        "事故リスク（転倒・飛び出し等）や生活への影響（就労/通所・睡眠・食事・入浴）を整理。",
+        "頻度の目安：『稀』=月1回未満／『月1以上』／『週1以上』／『ほぼ毎日（週5日以上）』で直近1か月を基準に評価。",
+        "必要な支援（声かけ、環境調整、手順の分解、付き添い、医療連携）の量と時間を記録。"
+    ],
+    "ask": [
+        "直近1か月でどれくらいありましたか？（回数・時間帯・持続時間）",
+        "多動の時：止めると興奮しますか？安全確保の方法は？",
+        "行動停止の時：声かけで動けますか？手順を小分けにすると進みますか？",
+        "予防策（見通し提示、休憩、刺激調整、服薬調整/受診相談等）はありますか？"
+    ],
+    "memo": "例）そう状態が疑われる時期は多弁で外出が増える／抑うつが強い時は固まり身支度が進まない。支援：見通し提示、段取りの分解、必要時同行。"
+  },
+  "54": {
+    "title": "54 不安定な行動",
+    "def": "気分・体調・対人刺激などで行動の波が大きく、予定遂行や生活の安定に支援が必要か。",
+    "obs": [
+        "良い時/悪い時の差（外出・活動量・睡眠・通所状況）がどの程度か、周期や前兆を確認。",
+        "予定変更・対人刺激・痛み/不調などのトリガーと、起きた後の立て直しに必要な支援を整理。",
+        "支援がないと通所欠席や生活リズムの崩れが継続するか（数日〜1週間以上など）を確認。",
+        "頻度は直近1か月の『支援が必要だった日/場面』で判断（稀=月1回未満）。"
+    ],
+    "ask": [
+        "不調のサイン（睡眠変化、イライラ、引きこもり等）はありますか？",
+        "悪化した時、何ができなくなりますか？（欠席連絡、受診、服薬、食事、入浴など）",
+        "立て直しに必要な支援は？（声かけの頻度、具体的な段取り、付き添い等）",
+        "支援で安定しやすい工夫（ルーティン、見通し提示、休息、調整）はありますか？"
+    ],
+    "memo": "例）調子が良い時は外出が増えるが、不調になると寝込み通所を休みがち。支援：欠席連絡、受診/服薬確認、生活面の声かけ。"
+  },
+  "55": {
+    "title": "55 自らを傷つける",
+    "def": "自傷や自殺念慮等により、安全確保や医療連携を含む支援が必要か。",
+    "obs": [
+        "自傷の有無、前兆（不安・怒り・希死念慮など）、危険度（怪我の程度/救急対応の有無）を確認。",
+        "発生場面（対人トラブル、体調不良、予定変更など）と、再発防止に有効な支援を整理。",
+        "必要な支援（見守り強化、危険物管理、安心できる場所へ誘導、医療・家族等への連絡）の量と時間を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "自傷につながりやすい場面や前兆はありますか？",
+        "起きた時に必要だった対応は？（人数・時間・安全確保）",
+        "危険物の管理や環境調整は必要ですか？",
+        "主治医/訪問看護等との共有・受診相談のルールはありますか？"
+    ],
+    "memo": "例）不安が強い時に自傷が疑われる行動があり、見守りと医療連携が必要。対応：刺激を減らし安全確保、必要時連絡・受診。"
+  },
+  "56": {
+    "title": "56 他人を傷つける",
+    "def": "暴力・威嚇・物を投げる等で他者に危険が及び、トラブル回避の支援が必要か。",
+    "obs": [
+        "対象（特定/不特定）、行動の内容と強度、怪我・被害の有無を確認。",
+        "誘因（注意された、混雑、疲労、痛み、睡眠不足等）と、エスカレート前のサインを整理。",
+        "必要な支援（距離確保、2名対応、環境調整、クールダウン誘導、医療連携）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どんな場面で起きやすいですか？（食堂/共有部/就労先など）",
+        "止めるとさらに興奮しますか？安全確保の方法は？",
+        "落ち着くまでの時間と必要な支援は？",
+        "予防策（席配置、刺激調整、事前説明、服薬調整/受診相談等）はありますか？"
+    ],
+    "memo": "例）不機嫌時に他者へ手が出そうになる。支援：距離確保、職員介入、必要時医療連携。"
+  },
+  "57": {
+    "title": "57 不適切な行為",
+    "def": "場にそぐわない行動（社会的に不適切、迷惑行為等）があり、周囲調整や指導が必要か。",
+    "obs": [
+        "内容（大声・暴言・つきまとい・ルール違反など）と周囲への影響（苦情、対人トラブル）を確認。",
+        "注意・説明が入るか、理解できても繰り返すか（抑制の難しさ）を整理。",
+        "必要な支援（その場の切替、別室誘導、ルールの視覚化、見守り強化）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どんな行為が問題になっていますか？起きる場面は？",
+        "声かけで止まりますか？切替（別活動/別室）で落ち着きますか？",
+        "周囲調整（距離、席、時間帯変更）が必要ですか？",
+        "再発を減らす工夫（ルールの見える化、合図、事前説明等）はありますか？"
+    ],
+    "memo": "例）共有スペースで大声になりトラブル。支援：場所を変える、ルール提示、落ち着くまで見守り。"
+  },
+  "58": {
+    "title": "58 突発的な行動",
+    "def": "衝動的に飛び出す・突然外出する等、予測しにくい行動があり安全確保の支援が必要か。",
+    "obs": [
+        "具体的な行動（突然の外出、飛び出し、無断離棟等）と危険度（交通/迷子/金銭）を確認。",
+        "発生パターン（時間帯・きっかけ）と、制止の難しさ・見守り必要度を整理。",
+        "必要な支援（同行、事前説明、鍵管理、連絡手順、医療連携）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "起きやすい時間帯やきっかけはありますか？",
+        "止めると興奮しますか？安全確保の方法は？",
+        "外出後に戻れる/連絡できる状況ですか？",
+        "予防策（見通し提示、外出計画、同行、環境調整）はありますか？"
+    ],
+    "memo": "例）夜間に衝動的に外出しようとする。支援：声かけ、同行、危険防止のルール化。"
+  },
+  "59": {
+    "title": "59 過食・反すう等",
+    "def": "過食や反すう（食べた物を口に戻す等）があり、健康管理や見守りが必要か。",
+    "obs": [
+        "行動の内容（夜間の買い食い、過食、反すう等）と健康影響（体重変動、体調悪化）を確認。",
+        "誘因（ストレス、気分変動、空腹感、生活リズム）とパターンを整理。",
+        "必要な支援（声かけ、食品管理、食事計画、受診/栄養相談、夜間対応）の量を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "いつ・どのくらいの量で起きますか？（夜間/ストレス時など）",
+        "止めると興奮しますか？代替行動（飲み物、気晴らし）はありますか？",
+        "食品の保管や買い物の支援が必要ですか？",
+        "医療側から注意や指示はありますか？"
+    ],
+    "memo": "例）夜中にコンビニへ頻回に出かけ過食傾向。支援：声かけ、食品管理、生活リズム調整、必要時受診相談。"
+  },
+  "60": {
+    "title": "60 多飲水・過飲水",
+    "def": "短時間に大量に水分を摂取する等で、健康管理上の支援（制限・見守り）が必要か。",
+    "obs": [
+        "飲水量・時間帯・症状（ふらつき等）と、医師からの指示（制限、記録）の有無を確認。",
+        "制限を守れるか、守れない場合のリスクと必要支援（管理、声かけ）を整理。",
+        "必要な支援（飲水記録、提供量調整、受診連携）の量と時間を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どのタイミングで増えますか？（不安時/服薬後/夜間など）",
+        "制限が必要ですか？本人は理解・同意できますか？",
+        "記録や管理はどの程度必要ですか？",
+        "異常時の連絡/受診ルールはありますか？"
+    ],
+    "memo": "例）不安が高い時に飲水が増え、職員が飲水量を記録し調整している。"
+  },
+  "61": {
+    "title": "61 反復的行動",
+    "def": "同じ行動を繰り返す（常同行動）ことで生活に支障が出て、切替や見守りの支援が必要か。",
+    "obs": [
+        "内容（歩き回り、確認行為、同じ手順の繰り返し等）と、生活への影響（睡眠、作業、対人）を確認。",
+        "声かけで止められるか、止めると不安・興奮が増えるかを整理。",
+        "必要な支援（切替提示、環境調整、時間枠設定、代替行動）の量を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どんな行動を、どのくらいの時間繰り返しますか？",
+        "やめるよう言うとどうなりますか？切替は可能ですか？",
+        "落ち着く工夫（タイマー、決まった手順、代替行動）はありますか？",
+        "日常生活（睡眠/通所/入浴等）への影響はありますか？"
+    ],
+    "memo": "例）不安が高いと同じ確認を繰り返し、外出準備が進まない。支援：手順の見える化、切替の声かけ。"
+  },
+  "62": {
+    "title": "62 感覚過敏・鈍麻",
+    "def": "音・光・匂い・触感など刺激への過敏/鈍麻により、生活や対人面で支援が必要か。",
+    "obs": [
+        "刺激の種類（音/光/匂い/触覚）と反応（回避、パニック、固まる等）を確認。",
+        "環境調整（イヤーマフ、照明、衣類素材、場所変更）で改善するかを整理。",
+        "必要な支援（予告、刺激回避、休憩場所の確保、道具の使用）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "苦手な刺激は何ですか？どんな場面で強く出ますか？",
+        "環境調整で改善しますか？（道具の使用など）",
+        "強い反応が出た時の対応（避難場所、声かけ）は？",
+        "通所先や外出先で配慮が必要ですか？"
+    ],
+    "memo": "例）大きな音で不安が強くなり落ち着かない。支援：刺激を減らし別室へ誘導、道具を使用。"
+  },
+  "63": {
+    "title": "63 躁うつ状態",
+    "def": "気分の高揚/抑うつが繰り返され、生活全般（通所・睡眠・対人）に影響し、見守りや医療連携が必要か。",
+    "obs": [
+        "高揚時の特徴（外出増加、多弁、睡眠減少、浪費など）と抑うつ時の特徴（寝込み、活動低下、対人回避）を確認。",
+        "症状により通所欠席、服薬不安定、生活リズム崩れが生じるかを整理。",
+        "必要な支援（受診・服薬の声かけ、生活面の声かけ、連絡支援、危険予防）を記録。",
+        "頻度は『支援が必要となる状態が出る頻度』で直近1か月を基準に評価。"
+    ],
+    "ask": [
+        "高揚/抑うつの周期や前兆はありますか？",
+        "状態が悪い時、どの生活項目で支援が必要になりますか？",
+        "服薬や受診のフォローはどの程度必要ですか？",
+        "緊急時（悪化時）の連絡・受診ルールはありますか？"
+    ],
+    "memo": "例）高揚時は外出が増え多弁、抑うつ時は寝込み通所困難。支援：受診/服薬確認、生活面の声かけ、状況共有。"
+  },
+  "64": {
+    "title": "64 対人不安緊張",
+    "def": "人との関わりで強い不安や緊張が出て、回避や生活上の支障があり支援が必要か。",
+    "obs": [
+        "不安が出る相手/場面（初対面、集団、電話、就労先等）と症状（硬直、回避、過緊張）を確認。",
+        "不安で手続き・受診・通所などが実施できない場面があるかを整理。",
+        "必要な支援（付き添い、仲介、見通し説明、少人数対応、段階的練習）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どんな場面で不安が強くなりますか？（人数/場所/相手）",
+        "不安が強い時、意思疎通はできますか？（うなずき/短文など）",
+        "支援があるとできることは？（同行、事前説明、代行連絡等）",
+        "落ち着く工夫（時間帯、席、合図、休憩）はありますか？"
+    ],
+    "memo": "例）初めての場所や集団が苦手で不安が強く、職員が予定を整理し同行すると実施できる。"
+  },
+  "65": {
+    "title": "65 意欲が乏しい",
+    "def": "意欲低下により自発的に動けず、日課や生活行動（通所・身支度等）で継続的な声かけ支援が必要か。",
+    "obs": [
+        "起床、身支度、食事、入浴、服薬、通所連絡など『始められない/続かない』項目を確認。",
+        "抑うつ・痛み・睡眠障害など背景要因と、支援で改善する範囲を整理。",
+        "必要な支援（具体的指示、段取り提示、時間設定、見守り、代行連絡）の頻度を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "不調時にできなくなることは何ですか？（起床/通所/入浴等）",
+        "声かけはどの程度必要ですか？（毎回/複数回/付き添い）",
+        "予定やタスクを整理すると動けますか？",
+        "医療（受診・服薬）との関連はありますか？"
+    ],
+    "memo": "例）抑うつが定期的に訪れ、通院/服薬、欠席連絡、食事・入浴など生活面の声かけが必要。"
+  },
+  "66": {
+    "title": "66 話がまとまらない",
+    "def": "話題が飛ぶ、要点がまとまらない等で意思疎通や予定調整に支援が必要か（躁状態で目立つこともある）。",
+    "obs": [
+        "会話は成立するか（理解・応答はできるが脱線が多い等）を確認。",
+        "予定・金銭・手続きなど、情報整理が必要な場面で支障が出るかを整理。",
+        "支援（要点の整理、メモ化、選択肢を絞る、短い質問で確認）の必要度を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "話題が次々変わる/多弁になるのはどんな時ですか？（気分の高揚時など）",
+        "意思疎通はできますか？（質問に答えられる、指示が通る等）",
+        "職員が整理すると予定や手続きは進みますか？",
+        "落ち着く工夫（休憩、環境刺激調整、時間を区切る）はありますか？"
+    ],
+    "memo": "例）躁状態時に多弁で話題が飛び、予定整理が難しい。支援：職員が要点を整理しながら対応。"
+  },
+  "67": {
+    "title": "67 集中力が続かない",
+    "def": "注意がそれやすく、作業や日課が続かないため、見守りや声かけなどの支援が必要か。",
+    "obs": [
+        "集中が切れる場面（作業、服薬、金銭、手続き等）と結果（中断、ミス、遅れ）を確認。",
+        "疲労・睡眠・気分変動・痛み等の影響と、環境調整で改善するかを整理。",
+        "必要な支援（手順分解、短時間目標、休憩、再開の声かけ）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "どの作業で集中が続きませんか？どのくらいで切れますか？",
+        "短く区切る/休憩を入れると続けられますか？",
+        "環境（音、人、スマホ）で変わりますか？",
+        "生活（睡眠・体調・痛み）との関連はありますか？"
+    ],
+    "memo": "例）作業中に注意がそれやすく中断が多い。支援：タスクを小分け、再開の声かけ。"
+  },
+  "68": {
+    "title": "68 自己の過大評価",
+    "def": "自分の能力や体調を過大に見積もり、無理な計画や行動につながって支援が必要か（躁状態で目立つことがある）。",
+    "obs": [
+        "無理な計画（過剰な外出/買い物/約束）やリスク判断の甘さがあるかを確認。",
+        "指摘への反応（受け入れ/反発）と、トラブル（浪費、対人衝突、疲労悪化）の有無を整理。",
+        "必要な支援（計画の現実化、金銭/予定の共同管理、休息の促し、医療連携）を記録。",
+        "頻度は直近1か月で評価（稀=月1回未満）。"
+    ],
+    "ask": [
+        "調子が良い時に無理な予定を入れますか？その後反動はありますか？",
+        "職員が予定や金銭を一緒に整理するとトラブルは減りますか？",
+        "指摘された時の受け止め方は？",
+        "悪化時の受診・服薬・休息の調整はできますか？"
+    ],
+    "memo": "例）気分高揚時に過密な外出計画を立て疲労で悪化。支援：予定の調整、休息の促し、必要時医療連携。"
+  },
+
+  "69": {
+    "title": "5-1 点滴の管理",
+    "def": "点滴（末梢静脈）の管理が必要か（準備・滴下管理・漏れ/感染の観察など）。",
+    "obs": [
+      "実施の有無（施設/医療機関）、実施者（看護師等）と頻度を確認。",
+      "刺入部の腫れ・痛み・発赤、滴下不良、ルート抜去のリスクを確認。",
+      "体調変化（発熱、アレルギー等）時の対応手順があるか。"
+    ],
+    "ask": [
+      "点滴はいつ、どこで、誰が行っていますか？頻度は？",
+      "自己抜去や触ってしまうことはありますか？",
+      "異常時の連絡先・受診手順は整っていますか？"
+    ],
+    "memo": "例）点滴実施：＿＿（期間/頻度）。刺入部の観察とルート自己抜去防止の見守りが必要。"
+  },
+  "70": {
+    "title": "5-2 中心静脈栄養",
+    "def": "中心静脈栄養（CV、ポート等）の管理が必要か（感染予防・ルート管理）。",
+    "obs": [
+      "デバイス種類（CV/ポート）と交換・管理手順（消毒、ドレッシング）を確認。",
+      "感染兆候（発熱、発赤、疼痛）や閉塞、自己抜去のリスクを確認。",
+      "緊急時（発熱/漏れ）の対応（受診/連絡）を確認。"
+    ],
+    "ask": [
+      "中心静脈栄養は実施していますか？実施者・頻度は？",
+      "自己抜去や触ってしまうことはありますか？",
+      "感染兆候が出たときの連絡・受診ルールは？"
+    ],
+    "memo": "例）CV管理あり。消毒・固定が必要で、自己抜去防止の見守りを実施。異常時は主治医へ連絡。"
+  },
+  "71": {
+    "title": "5-3 透析",
+    "def": "透析（血液透析/腹膜透析）に関する支援が必要か（通院、自己管理、観察）。",
+    "obs": [
+      "透析の種類と実施スケジュール、通院手段・付き添いの有無を確認。",
+      "シャント/出口部の観察、体重・血圧など自己管理の状況を確認。",
+      "食事・水分制限の遵守状況と、体調変化時の対応を確認。"
+    ],
+    "ask": [
+      "透析は週何回ですか？通院は一人で可能ですか？",
+      "体重・血圧などの自己管理はできていますか？",
+      "制限が守れない場合の支援（声かけ/記録/医療連携）は？"
+    ],
+    "memo": "例）透析通院は同行が必要。体重・飲水管理が難しく職員が記録支援。"
+  },
+  "72": {
+    "title": "5-4 ストーマの処置（人工肛門の処置）（ストーマの管理）",
+    "def": "ストーマ（人工肛門等）の処置・管理が必要か（装具交換、皮膚ケアなど）。",
+    "obs": [
+      "装具交換の頻度、実施者、必要物品の管理を確認。",
+      "皮膚トラブル（発赤/びらん）や漏れ、臭気への対応を確認。",
+      "本人が触ってしまう/自己処置が難しい場合の見守りを確認。"
+    ],
+    "ask": [
+      "装具交換は誰が、どの頻度で行っていますか？",
+      "皮膚トラブルや漏れが起きたときの対応は？",
+      "夜間など緊急時の連絡・受診体制は？"
+    ],
+    "memo": "例）装具交換は看護師が実施。漏れ時は職員が清拭・交換準備を支援。皮膚状態を記録。"
+  },
+  "73": {
+    "title": "5-5 酸素療法",
+    "def": "在宅酸素療法の管理が必要か（流量管理、機器管理、火気注意）。",
+    "obs": [
+      "処方流量・使用時間（常時/夜間）と機器（ボンベ/濃縮器）を確認。",
+      "火気厳禁・転倒（チューブ）・乾燥など安全面を確認。",
+      "呼吸状態の変化（SpO2低下、息苦しさ）時の対応を確認。"
+    ],
+    "ask": [
+      "酸素はいつ使用しますか？流量は誰が管理していますか？",
+      "火気や転倒など安全対策は取れていますか？",
+      "苦しくなったときの対応（医療連絡/救急）は？"
+    ],
+    "memo": "例）夜間のみ酸素使用。流量設定は職員が確認し、火気注意を徹底。SpO2低下時は主治医へ連絡。"
+  },
+  "74": {
+    "title": "5-6 レスピレーター（人工呼吸器）（レスピレーター）",
+    "def": "人工呼吸器（レスピレーター）の管理が必要か（設定確認、回路、アラーム対応）。",
+    "obs": [
+      "機器の種類、設定、アラーム対応手順、バックアップ電源を確認。",
+      "回路の外れ・加湿・分泌物など呼吸状態の観察が必要か。",
+      "緊急時（停止/アラーム）の連絡・救急手順を確認。"
+    ],
+    "ask": [
+      "人工呼吸器は常時ですか？誰が管理していますか？",
+      "アラームが鳴ったときの対応手順は共有されていますか？",
+      "停電時の対応（バッテリー/手動換気等）は？"
+    ],
+    "memo": "例）レスピ管理あり。アラーム対応手順を掲示し、夜間も観察。停電時はバッテリーに切替。"
+  },
+  "75": {
+    "title": "5-7 気管切開の処置",
+    "def": "気管切開部の処置（吸引、カニューレ管理、皮膚ケア等）が必要か。",
+    "obs": [
+      "吸引の頻度、カニューレ交換・固定、皮膚トラブルの有無を確認。",
+      "痰詰まりや抜去など緊急リスクと、対応手順を確認。",
+      "必要物品（吸引器、予備カニューレ等）の管理を確認。"
+    ],
+    "ask": [
+      "吸引は誰がどの頻度で行っていますか？",
+      "痰詰まりや自己抜去のリスクはありますか？",
+      "緊急時の連絡先・搬送手順は決まっていますか？"
+    ],
+    "memo": "例）気切あり。吸引は＿＿回/日。皮膚発赤あり処置継続。痰詰まり時は救急要請ルールあり。"
+  },
+  "76": {
+    "title": "5-8 疼痛の看護",
+    "def": "慢性的な痛み等があり、観察・緩和ケア（服薬/体位調整等）の支援が必要か。",
+    "obs": [
+      "痛みの部位・程度・増悪因子と、緩和方法（薬/冷温/体位）を確認。",
+      "痛みによる活動低下・睡眠障害・気分への影響を確認。",
+      "薬の副作用や頓服使用状況、医療連携を確認。"
+    ],
+    "ask": [
+      "痛みはいつ強いですか？どんな対応で楽になりますか？",
+      "頓服は自己判断で使えますか？管理は？",
+      "痛みで生活動作ができない場面はありますか？"
+    ],
+    "memo": "例）腰痛で夜間不眠。体位調整と温罨法を実施。頓服は職員が管理し使用状況を記録。"
+  },
+  "77": {
+    "title": "5-9 経管栄養",
+    "def": "経管栄養（胃ろう等）の管理が必要か（注入、衛生、皮膚観察）。",
+    "obs": [
+      "注入方法（ボーラス/持続）、頻度、実施者と手順を確認。",
+      "誤嚥・嘔吐、漏れ、皮膚トラブル（発赤/肉芽）を確認。",
+      "器具洗浄・衛生管理、緊急時（閉塞/抜去）の対応を確認。"
+    ],
+    "ask": [
+      "注入は誰が、どの頻度で行っていますか？",
+      "嘔吐や誤嚥、漏れが起きたときの対応は？",
+      "閉塞や抜去時の連絡・受診ルールは？"
+    ],
+    "memo": "例）胃ろう注入：＿＿回/日。注入前後の体位と観察が必要。皮膚発赤がありケア継続。"
+  },
+  "78": {
+    "title": "5-10 モニター測定（血圧、心拍、酸素飽和度等）（モニター測定）",
+    "def": "血圧・脈拍・SpO2などのモニター測定や記録が必要か。",
+    "obs": [
+      "測定項目（血圧/体温/SpO2等）、頻度、異常値基準を確認。",
+      "本人が測定できるか、職員測定が必要かを確認。",
+      "異常時の連絡（主治医/救急）と記録の運用を確認。"
+    ],
+    "ask": [
+      "何をどの頻度で測っていますか？（毎日/週○回）",
+      "異常値が出た場合の対応手順は？",
+      "測定・記録は誰が担当していますか？"
+    ],
+    "memo": "例）毎朝SpO2と血圧を測定し記録。基準以下で主治医へ連絡。"
+  },
+  "79": {
+    "title": "5-11 じょくそうの処置",
+    "def": "褥瘡（じょくそう）の処置や予防（体位変換等）が必要か。",
+    "obs": [
+      "部位・重症度、処置内容（軟膏/被覆材）と頻度を確認。",
+      "体位変換、除圧、栄養状態など予防策の実施状況を確認。",
+      "感染兆候（発赤拡大、滲出、発熱）時の医療連携を確認。"
+    ],
+    "ask": [
+      "褥瘡はどこにありますか？処置は誰がどの頻度で？",
+      "体位変換や除圧具は使用していますか？",
+      "悪化時の受診・連絡ルールは？"
+    ],
+    "memo": "例）仙骨部褥瘡あり。被覆材交換：＿＿回/週。体位変換：＿＿時間ごと。状態を写真/記録で管理。"
+  },
+  "80": {
+    "title": "5-12 カテーテル",
+    "def": "尿道留置カテーテル等の管理が必要か（固定、尿量観察、感染予防）。",
+    "obs": [
+      "種類（留置/自己導尿など）と管理方法（固定、バッグ交換）を確認。",
+      "尿量・色・混濁・発熱など感染兆候の観察を確認。",
+      "抜去や屈曲による尿閉リスク、皮膚トラブルを確認。"
+    ],
+    "ask": [
+      "カテーテルの種類と交換頻度は？誰が管理していますか？",
+      "尿の状態変化があったときの対応（連絡/受診）は？",
+      "自己抜去や触ってしまうことはありますか？"
+    ],
+    "memo": "例）留置カテ管理あり。尿量・混濁を毎日観察し記録。発熱時は主治医へ連絡。自己抜去防止の見守り。"
+  }
+};
+
+const CATEGORY_EXPLAIN = {"physical": {"title": "身体介助（動作・姿勢）", "desc": "身体の動作や姿勢保持に関する項目です。実際に『どこまで自力でできるか』『安全に継続できるか』を、普段の生活場面で判断します。", "observe": ["支持物（手すり・壁・机）が必要か", "立ち上がり・保持・移動の一連動作ができるか", "ふらつき・転倒・疲労による低下", "時間帯や体調で差が出るか"], "hear": ["一人でやると危ない場面はありますか？", "職員が近くにいないと不安になりますか？"], "memo": "例：立位保持は可能だが、立ち上がり時にふらつきがあり職員の支えが必要。"}, "daily": {"title": "日常生活", "desc": "食事・入浴・更衣・排泄・金銭管理など、生活の一連の行為について評価します。『できる／できない』だけでなく、見守りや部分介助が必要かを見ます。", "observe": ["手順を理解して最後まで実行できるか", "誤り（順序違い・失敗）が起きるか", "衛生・安全面の問題が出るか"], "hear": ["声かけがあればできますか？", "途中で止まってしまうことはありますか？"], "memo": "例：入浴は洗体は自立だが、出入り時に転倒リスクがあり見守りが必要。"}, "behavior": {"title": "行動障害", "desc": "生活に影響する行動面の課題について、頻度と支援量で評価します。『出ていない＝不要』ではなく、予防的支援の有無も重要です。", "observe": ["行動の頻度（稀／月1回以上／週1回以上／ほぼ毎日）", "周囲への影響（事故・対人トラブル）", "未然防止のための支援（見守り・環境調整）"], "hear": ["最近どのくらいの頻度で起きていますか？", "起きないようにしている工夫はありますか？"], "memo": "例：逸走は見られていないが、常時施錠と職員の声かけで予防している。"}, "comm": {"title": "意思疎通", "desc": "説明理解や意思表示がどの程度できるかを評価します。言語だけでなく、表情・行動・代替手段も含めて判断します。", "observe": ["指示や説明を理解できるか", "困りごとを伝えられるか", "誤解によるトラブルがあるか"], "hear": ["分からない時はどう伝えますか？"], "memo": "例：簡単な説明は理解可能だが、複数指示は混乱しやすい。"}, "medical": {"title": "特別な医療", "desc": "医療的ケアの有無と、日常的な管理・支援が必要かを評価します。実施者と頻度が重要です。", "observe": ["医療的処置の内容", "実施者（本人・職員・医療職）", "緊急時対応の必要性"], "hear": ["誰がどのタイミングで行っていますか？"], "memo": "例：服薬は職員が事務所で一包化薬を手渡し、内服確認を実施。"}};
+
+const TERMS = {"両足立位": {"tags": ["移動・姿勢", "身体機能"], "desc": "両足で立った姿勢を保持できることを指します（例：数秒〜数十秒、ふらつきの有無）。「支えなしで可能」か「手すり・机など支持物が必要」かで支援量の評価が変わりやすいです。", "points": ["支持物なしで立てるか（手を離して立位保持）", "立位保持時間（目安：5秒/10秒/30秒など）", "ふらつき・転倒リスク（立ち直り反応）", "立ち上がり時に介助が必要か（椅子→立位）", "夜間・疲労時に低下するか（時間帯差）"], "hearing": ["立ったまま着替え・洗面ができますか？手すりは使いますか？", "立つときに手を引く必要がありますか？", "ふらついて壁に手をつくことはありますか？"], "memo": ["例：洗面時は手すり支持で立位保持。支持物なしではふらつきあり転倒リスク。", "例：椅子からの立ち上がりは見守り。立位保持は10秒程度可能。"]}, "片足立位": {"tags": ["移動・姿勢", "転倒リスク"], "desc": "片足で体重を支える動作（バランス能力の指標）。靴下を履く、ズボンを上げる、段差をまたぐ等で必要になります。できない場合は転倒予防の見守りや支持が必要になりやすいです。", "points": ["片脚支持が一瞬でも可能か（0〜数秒）", "支持物があれば可能か（手すり・壁）", "段差・浴槽またぎで危険が出るか", "左右差（利き足・麻痺側）"], "hearing": ["靴下を立ったまま履けますか？座って履きますか？", "浴槽をまたぐときに付き添いが必要ですか？"], "memo": ["例：片足立位は困難。更衣は座位で実施。浴槽またぎは職員見守り必須。"]}, "見守り": {"tags": ["支援区分", "介助レベル"], "desc": "本人は基本的に実施できるが、転倒・事故・誤り（手順/判断）を防ぐために職員が近くで観察し、必要時に声かけ・介入できる状態。『離席できない』程度かどうかも支援量の差になります。", "points": ["目を離すと事故につながるか（離席可否）", "声かけがあれば継続できるか", "危険行動（火気、外出、服薬誤り）"], "memo": ["例：入浴は本人実施可能だが、転倒リスクのため脱衣〜洗体は同室見守り。"]}, "一部介助": {"tags": ["支援区分", "介助レベル"], "desc": "動作の一部に介助が必要（例：立ち上がりだけ支える、ズボン上げだけ手伝う、手順の一部を代行）。どの工程に介助が必要かを具体化すると特記事項が強くなります。", "points": ["どの工程ができないか（開始/継続/終了）", "身体介助か、認知・判断の支援か", "介助がないと完了できないか"], "memo": ["例：更衣は上衣は自立、下衣はバランス不安定で職員が支えながら実施。"]}, "全面介助": {"tags": ["支援区分", "介助レベル"], "desc": "本人のみでは実施困難で、ほぼ全工程を職員が介助・代行する状態。安全確保（転倒・誤嚥等）や拒否・行動障害のために複数名対応になる場合もここに含めて整理すると分かりやすいです。", "points": ["代行の範囲（全工程/ほぼ全工程）", "安全上の理由（誤嚥・転倒・自傷他害）", "複数名介助の有無"], "memo": ["例：入浴は洗体・洗髪・出入りまで職員が全面介助。浴室内で転倒リスク高い。"]}};
+
+let state = {
+  resident:"",
+  date: nowDateStr(),
+  interview:"",
+  answers: Object.fromEntries([...BASE80, ...EXTRAS].map(it=>["F"+it.row, null])),
+  memos: Object.fromEntries([...BASE80, ...EXTRAS].map(it=>["F"+it.row, ""])),
+};
+
+function catFor(it){
+  return it.cat || "daily";
+}
+function catLabel(cat){
+  return {
+    physical:"身体介助",
+    daily:"日常生活",
+    behavior:"行動障害",
+    comm:"意思疎通",
+    medical:"特別な医療",
+    extra:"追加"
+  }[cat] || cat;
+}
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+function itemGuideHtml(it){
+  const g = ITEM_GUIDE[it.code];
+  if(!g) return "";
+  const obs = (g.obs||[]).map(x=>`・${escapeHtml(x)}`).join("<br>");
+  const ask = (g.ask||[]).map(x=>`・${escapeHtml(x)}`).join("<br>");
+  return `
+    <div class="help"><b>この質問は何を見ている？</b><br>${escapeHtml(g.def||"")}</div>
+    ${obs?`<div class="help"><b>観察ポイント</b><br>${obs}</div>`:""}
+    ${ask?`<div class="help"><b>聞き取り例</b><br>${ask}</div>`:""}
+    ${g.memo?`<div class="help"><b>根拠メモ例</b><br>${escapeHtml(g.memo)}</div>`:""}
+    <div class="help"><b>参照</b><br>${escapeHtml(g.title||"")}</div>
+  `;
+}
+
+
+function fullQuestionDesc(it){
+  // ✅ 80項目ごとの個別ガイド（ITEM_GUIDE）があればそれを最優先で表示
+  const ghtml = itemGuideHtml(it);
+  if(ghtml){
+    return `
+      <details class="help" style="margin-top:6px">
+        <summary>この質問の見方・判断ポイント</summary>
+        <div style="margin-top:6px">${ghtml}</div>
+      </details>
+    `;
+  }
+
+  // 予備：カテゴリ共通ガイド（個別が未定義のときのみ）
+  const map = CATEGORY_EXPLAIN[it.cat] || null;
+  if(!map) return "";
+  return `
+    <details class="help" style="margin-top:6px">
+      <summary>この質問の見方・判断ポイント</summary>
+      <div style="margin-top:6px">
+        <b>${map.title}</b><br>
+        ${map.desc}<br><br>
+        <b>観察ポイント</b><br>
+        ${map.observe.map(x=>"・"+x).join("<br>")}<br><br>
+        <b>聞き取り例</b><br>
+        ${map.hear.map(x=>"・"+x).join("<br>")}<br><br>
+        <b>根拠メモ例</b><br>
+        ${map.memo}
+      </div>
+    </details>
+  `;
+}
+
+function itemExtraDesc(name){
+  if(!name) return "";
+  const hits = [];
+  for(const k of Object.keys(TERMS)){
+    if(String(name).includes(k)) hits.push(k);
+  }
+  if(!hits.length) return "";
+  // show first 2 terms
+  const show = hits.slice(0,2).map(k=>`「${k}」`).join("、");
+  return `用語: ${show}（上部の「用語説明」から詳細確認できます）`;
+}
+function highSupport(it, v){
+  const cat=catFor(it);
+  if(v==null) return false;
+  const n=Number(v);
+  if(cat==="physical") return n>=3;
+  if(cat==="daily") return n>=3;
+  if(cat==="behavior") return n>=4;
+  if(cat==="comm") return n>=2;
+  if(cat==="medical") return n>=2;
+  return n>=3;
+}
+
+function renderList(list, mountId){
+  const q=($("q").value||"").trim().toLowerCase();
+  const show=$("showFilter").value;
+
+  const wrap=$(mountId);
+  const html=list.filter(it=>{
+      const code = (it.code||"").toLowerCase();
+      const name = (it.name||"").toLowerCase();
+      const hit = !q || name.includes(q) || code.includes(q);
+      const v = state.answers["F"+it.row];
+      const miss = (v==null);
+      const hitShow = (show==="all") || (show==="missing" && miss) || (show==="high" && highSupport(it,v));
+      return hit && hitShow;
+    }).map(it=>{
+      const key="F"+it.row;
+      const v=state.answers[key];
+      const memo=state.memos[key]||"";
+      const cat=catFor(it);
+      const need = (v!=null) && (Number(v)>=2);
+
+      const labels = labelPairsFor(it, cat);
+      const opts = labels.map(([val,lab])=>{
+        const optNeed = String(val)!=="1";
+        return `
+        <label class="opt ${optNeed?'need-opt':''}">
+          <input type="radio" name="${key}" value="${val}" ${String(v)===String(val)?"checked":""}>
+          <div><div class="t">${lab}</div></div>
+        </label>
+      `;
+      }).join("");
+
+      return `
+        <div class="item ${need?'need-card':''}" data-row="${it.row}">
+          <div class="top">
+            <div>
+              <div class="code">${it.code?it.code:""} <span class="small">${escapeHtml(it.group||"")}</span></div>
+              <div class="name">${escapeHtml(it.name)}</div>
+              ${itemExtraDesc(it.name)?`<div class="desc">${escapeHtml(itemExtraDesc(it.name))}</div>`:""}${fullQuestionDesc(it)}
+              <div class="grp">${escapeHtml(catLabel(cat))}</div>
+            </div>
+            <div class="pill ${need?'need-badge':''}">${v==null?'<span class="warn">未入力</span>':(need?'<span class="warn">支援あり</span>':'<span class="ok">支援なし</span>')}</div>
+          </div>
+          <div class="opts">${opts}</div>
+          <label style="margin-top:8px">根拠メモ（特記事項向け）</label>
+          <input class="memo" placeholder="例：頻度・状況・支援者・リスクを書いておくと強い" value="${escapeHtml(memo)}" />
+        </div>
+      `;
+    }).join("");
+  wrap.innerHTML = html || `<div class="muted">（該当なし）</div>`;
+
+  wrap.querySelectorAll("input[type=radio]").forEach(inp=>{
+    inp.addEventListener("change", e=>{
+      const key=e.target.name;
+      state.answers[key]=Number(e.target.value);
+      updateAll(false);
+    });
+  });
+  wrap.querySelectorAll("input.memo").forEach(inp=>{
+    const row=inp.closest(".item").getAttribute("data-row");
+    const key="F"+row;
+    inp.addEventListener("input", e=>{
+      state.memos[key]=e.target.value||"";
+      scheduleAutoSave();
+    });
+  });
+}
+
+function calcMissing(){
+  const miss = BASE80.filter(it=>state.answers["F"+it.row]==null);
+  $("kpiMissing").textContent = miss.length;
+  $("missingList").innerHTML = miss.slice(0,30).map(it=>`・${it.code} ${escapeHtml(it.name)}`).join("<br>") || `<span class="ok">未入力なし</span>`;
+}
+
+/* ====== 八咫烏015 計算エンジン（最小Excel評価器） ====== */
+const cache = new Map();
+
+function getCell(addr){
+  if(cache.has(addr)) return cache.get(addr);
+  if(/^F\d+$/.test(addr)){
+    const v = state.answers[addr];
+    const out = (v==null ? 0 : v);
+    cache.set(addr, out);
+    return out;
+  }
+  if(Object.prototype.hasOwnProperty.call(FORMULAS, addr)){
+    const v = evalFormula(FORMULAS[addr]);
+    cache.set(addr, v);
+    return v;
+  }
+  if(Object.prototype.hasOwnProperty.call(VALUES, addr)){
+    cache.set(addr, VALUES[addr]);
+    return VALUES[addr];
+  }
+  cache.set(addr, 0);
+  return 0;
+}
+
+function getNamed(name){
+  const ref = DEFINED[name];
+  if(!ref) return 0;
+  return Number(getCell(ref)) || 0;
+}
+
+function rangeCells(a,b){
+  const colToNum = (c)=> c.split("").reduce((n,ch)=> n*26 + (ch.charCodeAt(0)-64), 0);
+  const numToCol = (n)=>{let s=""; while(n>0){let r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26);} return s;};
+  const parse = (s)=>{const m=/^([A-Z]+)(\d+)$/.exec(s); return {c:m[1], r:+m[2]};};
+  const A=parse(a), B=parse(b);
+  const c1=colToNum(A.c), c2=colToNum(B.c);
+  const out=[];
+  for(let rr=A.r; rr<=B.r; rr++) for(let cc=c1; cc<=c2; cc++) out.push(`${numToCol(cc)}${rr}`);
+  return out;
+}
+
+function splitTop(s){
+  const out=[]; let cur=""; let depth=0; let inq=false;
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(ch==='"'){inq=!inq; cur+=ch; continue;}
+    if(inq){cur+=ch; continue;}
+    if(ch==="(") depth++;
+    if(ch===")") depth--;
+    if(ch==="," && depth===0){out.push(cur.trim()); cur=""; continue;}
+    cur+=ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+function isBlank(v){
+  // 本ツールでは回答値が 1〜(最大6) なので、0 は「未入力」とみなしてOK
+  return v==null || v===0 || v==="";
+}
+
+function evalCond(cond){
+  const s=String(cond||"").trim();
+  // IF の条件でよく出る「Fxx=""」/「Fxx<>""」を特別扱い（"" を含む式は evalExpr では弾かれるため）
+  const m=s.match(/^(\$?[A-Z]{1,3}\$?\d+|F\d+)\s*(=|<>)\s*\"\"\s*$/i);
+  if(m){
+    const cell=m[1].replaceAll("$","");
+    const v=getCell(cell);
+    const blank=isBlank(v);
+    return (m[2]==="=") ? blank : !blank;
+  }
+  // それ以外は "" を 0 として扱って数式評価
+  return !!evalExpr(s.replace(/""/g,"0"));
+}
+
+function evalAtom(x){
+  const t=String(x||"").trim();
+  if(/^IF\(/i.test(t) || /^CHOOSE\(/i.test(t)) return evalFormula("=" + t);
+  return evalExpr(t);
+}
+
+function evalFormula(f){
+  let s=(f||"").trim();
+  if(s.startsWith("=")) s=s.slice(1);
+
+  s = s.replace(/SUM\((\$?[A-Z]{1,3}\$?\d+):(\$?[A-Z]{1,3}\$?\d+)\)/gi, (_,a,b)=>{
+    a=a.replaceAll("$",""); b=b.replaceAll("$","");
+    const cells=rangeCells(a,b);
+    const sum=cells.reduce((t,addr)=> t + (Number(getCell(addr))||0), 0);
+    return String(sum);
+  });
+
+  if(/^IF\(/i.test(s)){
+    const inner=s.slice(3,-1);
+    const parts=splitTop(inner);
+    const ok = !!evalCond(parts[0]);
+    return ok ? evalAtom(parts[1]) : evalAtom(parts[2]);
+  }
+
+  if(/^CHOOSE\(/i.test(s)){
+    const inner=s.slice(7,-1);
+    const parts=splitTop(inner);
+    const idx=Math.floor(Number(evalAtom(parts[0]))||0);
+    const arr=parts.slice(1).map(x=>Number(evalAtom(x))||0);
+    if(idx<=0) return 0;
+    return arr[idx-1] ?? 0;
+  }
+
+  return evalExpr(s);
+}
+
+function evalExpr(expr){
+  let e=String(expr).trim();
+  if(e==="") return 0;
+
+  e = e.replace(/\$?([A-Z]{1,3})\$?(\d+)/g, (_,c,r)=> String(getCell(`${c}${r}`)));
+  e = e.replace(/\bF(\d+)\b/g, (_,r)=> String(getCell(`F${r}`)));
+
+  e = e.replace(/[A-Za-z\u3040-\u30FF\u4E00-\u9FFFー][A-Za-z0-9_\u3040-\u30FF\u4E00-\u9FFFー]*/g, (m)=>{
+    if(m==="IF"||m==="CHOOSE"||m==="SUM") return m;
+    const key = m.replace(/[ \t　]/g,"");
+    if(Object.prototype.hasOwnProperty.call(DEFINED,m)) return String(getNamed(m));
+    if(key!==m && Object.prototype.hasOwnProperty.call(DEFINED,key)) return String(getNamed(key));
+    return m;
+  });
+
+  e = e.replace(/""/g, "0");
+
+  e = e.replace(/([^<>])=([^=])/g, "$1==$2");
+
+  if(!/^[0-9eE\.+\-*/()\s<>=!]+$/.test(e)) return 0;
+
+  try{
+    // eslint-disable-next-line no-new-func
+    return Function(`"use strict";return (${e});`)();
+  }catch{
+    return 0;
+  }
+}
+
+function parseCond(c){
+  const s=String(c||"").trim();
+  if(s==="1") return {type:"true"};
+  const m=s.match(/^([\u3040-\u30FF\u4E00-\u9FFFーA-Za-z_][\u3040-\u30FF\u4E00-\u9FFFーA-Za-z0-9_]*)\s*(<=|>=|<|>|=)\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if(!m) return {type:"expr", raw:s};
+  return {type:"cmp", v:m[1], op:m[2], num:Number(m[3])};
+}
+
+function getVarVal(name){
+  if(Object.prototype.hasOwnProperty.call(DEFINED, name)) return Number(getNamed(name))||0;
+  if(/^[A-Z]{1,3}\d+$/.test(name)) return Number(getCell(name))||0;
+  return Number(evalExpr(name))||0;
+}
+
+function clamp01(x){ return x<0?0:(x>1?1:x); }
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
+function checkCond(cond){
+  const pc=parseCond(cond);
+  if(pc.type==="true") return {ok:true, dist:0, signed:1, scale:1, text:"1", val:null};
+  if(pc.type==="expr"){
+    const ok=!!evalExpr(pc.raw);
+    return {ok, dist: ok?0:1, signed: ok?1:-1, scale:1, text:pc.raw, val:null};
+  }
+  const val=getVarVal(pc.v);
+  const num=pc.num;
+  let ok=false, dist=0, signed=0;
+  if(pc.op==="<="){ signed = num - val; ok = signed>=0; dist = ok?0:(-signed); }
+  else if(pc.op==="<"){ signed = num - val; ok = signed>0; dist = ok?0:(-signed + 1e-9); }
+  else if(pc.op===">="){ signed = val - num; ok = signed>=0; dist = ok?0:(-signed); }
+  else if(pc.op===">"){ signed = val - num; ok = signed>0; dist = ok?0:(-signed + 1e-9); }
+  else if(pc.op==="="){ const d=Math.abs(val-num); signed = -d; ok = d < 1e-9; dist = d; }
+  const scale = Math.max(1, Math.abs(num)*0.15, 1.5);
+  return {ok, dist, signed, scale, v:pc.v, op:pc.op, num, val, text:`${pc.v}${pc.op}${num}`};
+}
+
+function condProb(info){
+  if(info.text==="1") return 1;
+  if(info.op==="="){
+    const d = Math.abs((Number(info.val)||0)-(Number(info.num)||0));
+    const s = Math.max(0.8, Math.abs(Number(info.num)||0)*0.12, 0.8);
+    return Math.exp(-d/s);
+  }
+  const x = (Number(info.signed)||0) / (Number(info.scale)||1);
+  return clamp01(sigmoid(x));
+}
+
+function scoreAllRules(){
+  // returns array of {r, okAll, unsat, avgDist, logLike, condLen, checks}
+  const scored=[];
+  for(const r of RULES){
+    const conds=(r.conds||[]).filter(x=>String(x).trim()!=="1");
+    let unsat=0, distSum=0, logLike=0;
+    const checks=[];
+    for(const c of conds){
+      const info=checkCond(c);
+      checks.push(info);
+      if(!info.ok) unsat++;
+      distSum += (Number(info.dist)||0);
+      const q = condProb(info);
+      logLike += Math.log(Math.max(1e-9, q));
+    }
+    const total=Math.max(1, conds.length);
+    const avgDist = distSum / total;
+
+    // incorporate p (区分等該当可能性): 0〜1の想定
+    const p0 = Math.max(1e-6, Math.min(1-1e-6, Number(r.p)||0));
+    const logit = Math.log(p0/(1-p0));
+    logLike += 0.35*logit;
+
+    // specificity bonus
+    logLike += 0.02*total;
+
+    scored.push({r, okAll:(unsat===0), unsat, avgDist, logLike, condLen:total, checks});
+  }
+  return scored;
+}
+
+function calcKubunPercentFromScored(scored, topN=40, temp=0.9){
+  const sumBy=Object.create(null);
+  if(!scored || !scored.length) return {};
+  const sorted=scored.slice().sort((a,b)=>b.logLike-a.logLike).slice(0, topN);
+  const max=sorted[0]?.logLike ?? 0;
+  let Z=0;
+  for(const s of sorted){
+    const w = Math.exp((s.logLike - max)/temp);
+    const k = s.r.k;
+    sumBy[k]=(sumBy[k]||0)+w;
+    Z += w;
+  }
+  const out=Object.create(null);
+  for(const k of [0,1,2,3,4,5,6]) out[k]=0;
+  for(const k of Object.keys(sumBy)){
+    out[k]= Z>0 ? (sumBy[k]/Z*100) : 0;
+  }
+  return out;
+}
+
+function renderKubunPercent(dist){
+  const levels = Object.keys(dist)
+    .map(k=>Number(k))
+    .sort((a,b)=>a-b);
+
+  const rows = levels
+    .sort((a,b)=>(dist[b]||0)-(dist[a]||0))
+    .map(k=>{
+      const p = dist[k] || 0;
+      const w = Math.max(0, Math.min(100, p));
+      return `
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+          <span style="width:52px">${(k===0) ? "非該当" : ("区分"+k)}</span>
+          <div style="flex:1;height:10px;background:var(--bd);border-radius:999px;overflow:hidden">
+            <div style="width:${w}%;height:100%;background:var(--pri)"></div>
+          </div>
+          <span class="mono" style="width:64px;text-align:right">${p.toFixed(1)}%</span>
+        </div>
+      `;
+    }).join("");
+
+  return rows || "—";
+}
+
+
+function estimate(){
+  cache.clear();
+
+  const scored = scoreAllRules();
+  if(!scored.length){
+    $("kpiKubun").textContent = "—";
+    $("kpiLogic").textContent = "—";
+    $("kpiP").textContent = "—";
+    const distEl2 = document.getElementById("kpiDist");
+    if(distEl2) distEl2.textContent = "—";
+    $("why").innerHTML = `<span class="warn">ロジックが読み込めませんでした。</span>`;
+    return;
+  }
+
+  // 区分別（推定割合・参考）
+  const dist = calcKubunPercentFromScored(scored, 40, 0.9);
+  const distEl = document.getElementById("kpiDist");
+  if(distEl) distEl.innerHTML = renderKubunPercent(dist);
+
+  const exact = scored.filter(s=>s.okAll);
+
+  const pickBy = (arr)=> arr.slice().sort((a,b)=>{
+    const ap=Number(a.r.p)||0, bp=Number(b.r.p)||0;
+    if(bp!==ap) return bp-ap;           // ① pが高い
+    const ak=Number(a.r.k)||0, bk=Number(b.r.k)||0;
+    if(bk!==ak) return bk-ak;           // ② 同値なら支援の大きい区分（k）
+    const an=Number(a.r.n)||0, bn=Number(b.r.n)||0;
+    return bn-an;                       // ③ 同区分なら番号が大きい
+  })[0];
+
+  let bestS=null;
+  let approx=false;
+
+  if(exact.length){
+    bestS = pickBy(exact);
+  } else {
+    approx=true;
+    bestS = scored.slice().sort((a,b)=>{
+      if(a.unsat!==b.unsat) return a.unsat-b.unsat;
+      if(a.avgDist!==b.avgDist) return a.avgDist-b.avgDist;
+      // 近いもの同士なら p/k/n で整列
+      const ap=Number(a.r.p)||0, bp=Number(b.r.p)||0;
+      if(bp!==ap) return bp-ap;
+      const ak=Number(a.r.k)||0, bk=Number(b.r.k)||0;
+      if(bk!==ak) return bk-ak;
+      const an=Number(a.r.n)||0, bn=Number(b.r.n)||0;
+      return bn-an;
+    })[0];
+  }
+
+  if(!bestS){
+    $("kpiKubun").textContent = "—";
+    $("kpiLogic").textContent = "—";
+    $("kpiP").textContent = "—";
+    $("why").innerHTML = `<span class="warn">一致するロジックなし（未入力が多い可能性）</span>`;
+    return;
+  }
+
+  const best = bestS.r;
+
+  $("kpiKubun").textContent = (Number(best.k)===0) ? "非該当" : ("区分" + String(best.k));
+  $("kpiLogic").textContent = `${best.n}${approx ? "（近似）" : ""}`;
+  $("kpiP").textContent = (best.p!=null ? (Number(best.p)*100).toFixed(1) + "%" : "—");
+
+  // 判定根拠：各条件のOK/NGと実値
+  const conds = (best.conds||[]).filter(x=>String(x).trim()!=="1");
+  let okCount=0;
+  const rows = conds.map(c=>{
+    const info=checkCond(c);
+    if(info.ok) okCount++;
+    const cls = info.ok ? "ok" : "ng";
+    const badge = info.ok ? "OK" : "NG";
+    const valText = (info.v!=null) ? `<span class="mono">（${info.v}=${Number(info.val).toFixed(1)}）</span>` : "";
+    return `<div class="why ${cls}"><span class="badge ${cls}">${badge}</span><span class="mono">${escapeHtml(info.text)}</span>${valText}</div>`;
+  }).join("");
+
+  const head = approx
+    ? `<div class="warn">完全一致ロジックが無かったため、最も近いロジックで推定しています（公式判定の保証はありません）。一致：${okCount}/${Math.max(1,conds.length)}</div>`
+    : `<div class="muted">完全一致：${exact.length}件（採用：p優先→区分→番号）／該当条件：${okCount}/${Math.max(1,conds.length)}</div>`;
+
+  $("why").innerHTML = head + rows;
+
+  // 主要集計値（確認用）
+  const keys=["生活機能1","生活機能2","応用日常","行動A","行動B","行動C","特別医療","二軸精神","二軸能力"];
+  const kv = keys.map(k=>`<div class="kv"><div class="k">${k}</div><div class="v mono">${Number(getVarVal(k)).toFixed(1)}</div></div>`).join("");
+  const box = `<div class="kvs">${kv}</div>`;
+  $("why").innerHTML += box;
+}
+
+function buildDraft(){
+  const lines=[];
+  lines.push("【特記事項（下書き）】");
+  lines.push("");
+  lines.push("■生活状況・支援実態（聞き取り）");
+  lines.push((state.interview||"（未記入）").trim() || "（未記入）");
+  lines.push("");
+  lines.push("■支援が重い／頻度が高い項目（根拠メモつき）");
+  const picks = BASE80.filter(it=>highSupport(it, state.answers["F"+it.row])).map(it=>{
+    const v=state.answers["F"+it.row];
+    const memo=(state.memos["F"+it.row]||"").trim();
+    return `・${it.code} ${it.name}：${v}${memo?`（根拠：${memo}）`:""}`;
+  });
+  lines.push(picks.length? picks.join("\n") : "（該当なし）");
+  lines.push("");
+  lines.push("■不足項目");
+  const miss = BASE80.filter(it=>state.answers["F"+it.row]==null).map(it=>`${it.code} ${it.name}`);
+  lines.push(miss.length? miss.join("、 ") : "なし");
+  return lines.join("\n");
+}
+
+
+
+  // Enterキーで意図せず「保存」や「リセット」等が発火して入力が消えるのを防ぐ（textarea / contenteditable は除外）
+  document.addEventListener("keydown", (e)=>{
+    if (e.key !== "Enter") return;
+    const t = e.target;
+    if (!t) return;
+    const tag = (t.tagName || "").toLowerCase();
+    const isTextArea = tag === "textarea";
+    const isEditable = !!t.isContentEditable;
+    if (isTextArea || isEditable) return; // 改行OK
+    // Enter は「既定ボタンのクリック」や「意図しない submit」を誘発しやすいので抑止
+    e.preventDefault();
+  }, true);
+
+  // もし将来 form を入れても Enter で submit されないようにする
+  document.addEventListener("submit", (e)=>{ e.preventDefault(); }, true);
+/* ====== 追加：入力→state 同期（保存で消える問題の対策） ====== */
+function syncFromTopInputs(){
+  // 画面上の入力を state に反映（保存時に空で上書きされないように）
+  const elResident = $("resident");
+  const elDate = $("date");
+  const elInterview = $("interview");
+  const elDraft = $("draft");
+  if (elResident) state.resident = (elResident.value || "").trim();
+  if (elDate) state.date = (elDate.value || "").trim() || state.date;
+  if (elInterview) state.interview = (elInterview.value || "").trim();
+  if (elDraft) state.draft = (elDraft.value || "");
+}
+
+function syncFromListInputs(){
+  // renderList() 側の oninput / onchange で都度 state を更新しているため、ここは保険。
+  // 何かあっても state を壊さないように、必要最小限にしておく。
+}
+/* ====== /追加 ====== */
+
+function updateAll(rerender=true){
+  syncFromTopInputs();
+  updateSaveStatus();
+  if(rerender){
+renderList(BASE80, "items80");
+    renderList(EXTRAS, "itemsExtra");
+  }
+  calcMissing();
+  estimate();
+  scheduleAutoSave();
+}
+
+
+/* ====== 追加：一括入力（表示中の80項目） ====== */
+function getItemByRow(row){
+  return BASE80.find(x=>Number(x.row)===Number(row)) || EXTRAS.find(x=>Number(x.row)===Number(row)) || null;
+}
+function maxOptionForItem(it){
+  const cat = catFor(it);
+  if(cat==="extra" && it.optCount){
+    const n = Math.max(2, Math.min(6, Number(it.optCount)));
+    return n;
+  }
+  const labels = LABELS[cat] || LABELS.extra;
+  return labels.length || 5;
+}
+function bulkApply80(mode, desired){
+  const wrap = $("items80");
+  if(!wrap) return;
+  desired = Number(desired||0);
+  if(!Number.isFinite(desired) || desired<=0){ alert("一括入力する数字（1〜5）を選んでください"); return; }
+  const cards = Array.from(wrap.querySelectorAll(".item[data-row]"));
+  if(!cards.length){ alert("表示中の項目がありません"); return; }
+
+  let count=0;
+  for(const card of cards){
+    const row = Number(card.getAttribute("data-row"));
+    const key = "F"+row;
+    if(mode==="missing" && state.answers[key]!=null) continue;
+    const it = getItemByRow(row);
+    if(!it) continue;
+    const max = maxOptionForItem(it);
+    const v = Math.max(1, Math.min(max, desired));
+    state.answers[key]=v;
+    count++;
+  }
+  updateAll(true);
+  alert(`${count}件を一括設定しました`);
+}
+
+/* 追加：範囲指定一括入力（例：54-68,12-14） */
+function normalizeRangeSpec(s){
+  if(!s) return "";
+  // 全角数字→半角
+  s = String(s).replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30));
+  // いろいろな区切り→ハイフン
+  s = s.replace(/[－—−〜～]/g, "-").replace(/から/g, "-").replace(/to/ig, "-");
+  // 余計な空白除去
+  s = s.replace(/\s+/g, "");
+  return s;
+}
+function parseRangeCodes(spec){
+  spec = normalizeRangeSpec(spec);
+  if(!spec) return [];
+  const parts = spec.split(/[，、,;]+/).map(x=>x.trim()).filter(Boolean);
+  const set = new Set();
+  for(const p of parts){
+    if(!p) continue;
+    if(p.includes("-")){
+      const [a,b] = p.split("-").filter(Boolean);
+      let s = parseInt(a,10), e = parseInt(b,10);
+      if(!Number.isFinite(s) || !Number.isFinite(e)) continue;
+      if(s>e){ const tmp=s; s=e; e=tmp; }
+      for(let n=s; n<=e; n++) set.add(n);
+    }else{
+      const n = parseInt(p,10);
+      if(Number.isFinite(n)) set.add(n);
+    }
+  }
+  return Array.from(set).filter(n=>n>=1 && n<=80).sort((x,y)=>x-y);
+}
+function getItemByCode(codeNum){
+  const s = String(codeNum).padStart(2,"0");
+  return BASE80.find(it => it.code === s) || null;
+}
+function bulkApplyRange(mode, desired){
+  desired = Number(desired||0);
+  if(!Number.isFinite(desired) || desired<=0){ alert("一括入力する数字（1〜5）を選んでください"); return; }
+
+  const spec = ($("bulkRange")?.value || "").trim();
+  const codes = parseRangeCodes(spec);
+  if(!codes.length){ alert("範囲を入力してください（例：54-68,12-14）"); return; }
+
+  let count=0, miss=0;
+  for(const c of codes){
+    const it = getItemByCode(c);
+    if(!it){ miss++; continue; }
+    const row = Number(it.row);
+    const key = "F"+row;
+    if(mode==="missing" && state.answers[key]!=null) continue;
+    const max = maxOptionForItem(it);
+    const v = Math.max(1, Math.min(max, desired));
+    state.answers[key]=v;
+    count++;
+  }
+  updateAll(true);
+  const extra = miss? `（範囲内に存在しない番号 ${miss}件は無視しました）` : "";
+  alert(`${count}件を一括設定しました${extra}`);
+}
+/* ====== /追加 ====== */
+
+
+
+$("resident").addEventListener("input", ()=>updateAll(false));
+$("date").addEventListener("change", ()=>updateAll(false));
+$("interview").addEventListener("input", ()=>{ state.interview=$("interview").value||""; scheduleAutoSave(); });
+$("q").addEventListener("input", ()=>updateAll(true));
+$("showFilter").addEventListener("change", ()=>updateAll(true));
+
+const __btnBulkMissing = $("btnBulkMissing");
+if(__btnBulkMissing) __btnBulkMissing.addEventListener("click", ()=>bulkApply80("missing"));
+
+const __btnBulkAll = $("btnBulkAll");
+if(__btnBulkAll) __btnBulkAll.addEventListener("click", ()=>{
+  if(confirm("表示中の項目をすべて上書きします。よろしいですか？")){
+    bulkApply80("all");
+  }
+});
+
+const __btnBulkRangeMissing = $("btnBulkRangeMissing");
+if(__btnBulkRangeMissing) __btnBulkRangeMissing.addEventListener("click", ()=>bulkApplyRange("missing"));
+
+const __btnBulkRangeAll = $("btnBulkRangeAll");
+if(__btnBulkRangeAll) __btnBulkRangeAll.addEventListener("click", ()=>{
+  if(confirm("指定した範囲の項目をすべて上書きします。よろしいですか？")){
+    bulkApplyRange("all");
+  }
+});
+
+// 一括入力：数字ボタン（1〜5）で、指定範囲（空欄なら表示中）へ適用
+(function(){
+  function applyByChip(desired){
+    desired = Number(desired||0);
+    if(!Number.isFinite(desired) || desired<=0) return;
+    const spec = ($("bulkRange")?.value || "").trim();
+    const hasRange = normalizeRangeSpec(spec).length>0;
+
+    if(hasRange){
+      if(confirm(`指定した範囲を「${desired}」で上書きします。よろしいですか？`)){
+        bulkApplyRange("all", desired);
+        updateAll(true);
+        scheduleAutoSave();
+      }
+    }else{
+      if(confirm(`表示中の項目を「${desired}」で上書きします。よろしいですか？`)){
+        bulkApply80("all", desired);
+        updateAll(true);
+        scheduleAutoSave();
+      }
+    }
+  }
+
+  document.querySelectorAll("[data-bulk]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const v = Number(btn.getAttribute("data-bulk")||"");
+      applyByChip(v);
+    });
+  });
+})();
+$("btnDraft").addEventListener("click", ()=>{ const t = buildDraft(); $("draft").value = t; state.draft = t; updateSaveStatus(); scheduleAutoSave(); });
+$("btnCopyDraft").addEventListener("click", async ()=>{
+  try{ await navigator.clipboard.writeText($("draft").value||""); alert("コピーしました"); }
+  catch{ alert("コピーに失敗しました"); }
+});
+
+  // ----------------------------
+  // 保存/復元（ローカル保存）
+  // ----------------------------
+  function safeGet(key){
+    try { return localStorage.getItem(key); } catch(e){ return null; }
+  }
+  function safeSet(key, val){
+    try { localStorage.setItem(key, val); return true; } catch(e){ return false; }
+  }
+  
+  // ----------------------------
+  // 自動保存（入力のたびにローカルへ退避）
+  // ----------------------------
+  let __autoSaveTimer = null;
+  let __autoSaveDisabled = false;
+
+  function buildSavePayload(isAuto){
+    // 画面→state 同期（トップ欄）
+    try{ syncFromTopInputs(); }catch(_){}
+    return Object.assign({}, state, {
+      version: 2,
+      savedAt: new Date().toISOString(),
+      autosaved: !!isAuto
+    });
+  }
+
+  function tryAutoSaveNow(){
+    if(__autoSaveDisabled) return false;
+    const payload = buildSavePayload(true);
+    const ok = safeSet(LS_KEY, JSON.stringify(payload));
+    if(ok){
+      // 状態側にも反映しておく（表示・エクスポートで揃える）
+      state.savedAt = payload.savedAt;
+      // 画面表示（次の updateAll で「最終保存」に戻る）
+      const dt = new Date(payload.savedAt);
+      setSaveStatus("自動保存: " + (isNaN(dt.getTime()) ? payload.savedAt : dt.toLocaleString()));
+      return true;
+    }
+    __autoSaveDisabled = true;
+    setSaveStatus("自動保存OFF（ブラウザの保存領域が使えません）");
+    return false;
+  }
+
+  function scheduleAutoSave(){
+    if(__autoSaveDisabled) return;
+    if(__autoSaveTimer) clearTimeout(__autoSaveTimer);
+    __autoSaveTimer = setTimeout(()=>{ try{ tryAutoSaveNow(); }catch(_){} }, 600);
+  }
+
+  // ページを閉じる/更新する直前にも退避
+  window.addEventListener("beforeunload", ()=>{ try{ tryAutoSaveNow(); }catch(_){} });
+function setSaveStatus(msg){
+    const el = document.getElementById("saveStatus");
+    if(!el) return;
+    el.textContent = msg || "";
+  }
+  function loadSavedState(){
+    const raw = safeGet(LS_KEY) || safeGet(LS_KEY_V1);
+    if(!raw) return null;
+    try { return JSON.parse(raw); } catch(e){ return null; }
+  }
+  function mergeSavedIntoState(saved){
+    if(!saved || typeof saved !== "object") return;
+    if(typeof saved.resident === "string") state.resident = saved.resident;
+    if(typeof saved.date === "string") state.date = saved.date;
+    if(typeof saved.interview === "string") state.interview = saved.interview;
+    if(typeof saved.draft === "string") state.draft = saved.draft;
+    if(saved.answers && typeof saved.answers === "object"){
+      state.answers = Object.assign({}, state.answers, saved.answers);
+    }
+    if(saved.memos && typeof saved.memos === "object"){
+      state.memos = Object.assign({}, state.memos, saved.memos);
+    }
+    if(typeof saved.savedAt === "string") state.savedAt = saved.savedAt;
+  }
+  function applyStateToTopInputs(){
+    const r = document.getElementById("resident");
+    const d = document.getElementById("date");
+    const i = document.getElementById("interview");
+    const ta = document.getElementById("draft");
+    if(r) r.value = state.resident || "";
+    if(d) d.value = state.date || "";
+    if(i) i.value = state.interview || "";
+    if(ta) ta.value = state.draft || "";
+  }
+  function updateSaveStatus(){
+    const saved = loadSavedState();
+    if(saved && saved.savedAt){
+      const dt = new Date(saved.savedAt);
+      if(!isNaN(dt.getTime())) setSaveStatus("最終保存: " + dt.toLocaleString());
+      else setSaveStatus("最終保存: " + saved.savedAt);
+    }else if(saved){
+      setSaveStatus("保存データあり");
+    }else{
+      setSaveStatus("");
+    }
+  }
+  function exportStateToFile(obj){
+    const payload = obj || state;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeResident = (payload.resident || "data").replace(/[\\/:*?"<>|]/g, "_");
+    const safeDate = (payload.date || "").replace(/[\\/:*?"<>|]/g, "_");
+    a.href = url;
+    a.download = `審査会サマリー_${safeResident}_${safeDate}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+  function restoreFromLocalStorage(){
+    const saved = loadSavedState();
+    if(!saved) return;
+    mergeSavedIntoState(saved);
+    applyStateToTopInputs();
+    if(saved.savedAt){
+      const dt = new Date(saved.savedAt);
+      setSaveStatus("復元しました: " + (isNaN(dt.getTime()) ? saved.savedAt : dt.toLocaleString()));
+      setTimeout(updateSaveStatus, 2500);
+    }else{
+      setSaveStatus("復元しました");
+      setTimeout(updateSaveStatus, 2500);
+    }
+  }
+
+  $("btnSave").addEventListener("click", (e) => {
+    e.preventDefault();
+    updateAll(false); // 画面→state を同期
+    const payload = Object.assign({}, state, { version: 2, savedAt: new Date().toISOString() });
+    const ok = safeSet(LS_KEY, JSON.stringify(payload));
+    if(ok){
+      const dt = new Date(payload.savedAt);
+      setSaveStatus("保存しました: " + (isNaN(dt.getTime()) ? payload.savedAt : dt.toLocaleString()));
+      setTimeout(updateSaveStatus, 2500);
+    }else{
+      // ✅ localStorage が使えない環境（ファイル直開き/制限/プライベートなど）はファイル保存にフォールバック
+      exportStateToFile(payload);
+      alert("ブラウザの保存領域が使えないため、JSONファイルとして保存しました。\n次回は「読み込み(JSON)」で読み込めます。");
+    }
+  });
+
+$("btnReset").addEventListener("click", ()=>{
+  if(!confirm("入力をリセットします。よろしいですか？")) return;
+  state.resident=""; state.date=nowDateStr(); state.interview="";
+  for(const k of Object.keys(state.answers)) state.answers[k]=null;
+  for(const k of Object.keys(state.memos)) state.memos[k]="";
+  $("resident").value=""; $("date").value=state.date; $("interview").value=""; $("draft").value="";
+  updateAll(true);
+});
+
+$("btnExport").addEventListener("click", ()=>{
+    updateAll(false);
+
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download = `kubun_yatagarasu015_${(state.resident||"user").replace(/\s+/g,"_")}_${state.date||nowDateStr()}.json`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+});
+
+$("btnImport").addEventListener("click", ()=>{
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="application/json";
+  inp.onchange=async()=>{
+    const f=inp.files?.[0]; if(!f) return;
+    try{
+      const obj=JSON.parse(await f.text());
+      if(!obj || typeof obj!=="object") throw new Error("bad");
+      if(!obj.answers || !obj.memos) throw new Error("bad");
+      // 取り込んだ内容を state に反映（const state は再代入しない）
+      mergeSavedIntoState(obj);
+      if(typeof obj.answers === "object") state.answers = obj.answers;
+      if(typeof obj.memos === "object") state.memos = obj.memos;
+      if(typeof obj.version === "string") state.version = obj.version;
+      if(typeof obj.updatedAt === "string") state.updatedAt = obj.updatedAt;
+      applyStateToTopInputs();
+      updateAll(true);
+      alert("読み込みしました");
+    }catch(e){ alert("読み込みに失敗しました"); }
+  };
+  inp.click();
+});
+
+restoreFromLocalStorage();
+updateAll(true);
+
+// Excel出力（.xlsx、支援ありを赤）
+function getAnswerLabel(cat, v, it){
+  if(v==null) return "";
+  // item固有（Excel準拠）
+  if(it && Array.isArray(it.labels) && it.labels.length){
+    const i = Number(v) - 1;
+    if(Number.isFinite(i) && i>=0 && i<it.labels.length) return String(it.labels[i]);
+  }
+  const labels = (LABELS && (LABELS[cat] || LABELS.extra)) || [];
+  const hit = labels.find(x=>String(x[0])===String(v));
+  return hit ? hit[1] : String(v);
+}
+function isSupportNeeded(cat, v, it){
+  if(v==null) return false;
+  // 1=支援不要/ない（以降は支援あり）
+  return Number(v) >= 2;
+}
+
+function exportXlsx(){
+  if(typeof XLSX === "undefined"){
+    alert("Excel出力ライブラリの読み込みに失敗しました（通信環境を確認してください）");
+    return;
+  }
+  const resident = ($("resident").value||"").trim();
+  const date = ($("date").value||nowDateStr()).trim();
+  const estKubun = ($("kpiKubun").textContent||"").trim();
+  const logic = ($("kpiLogic").textContent||"").trim();
+  const p = ($("kpiP").textContent||"").trim();
+
+  const overview = [
+    ["利用者", resident],
+    ["日付", date],
+    ["推定区分（八咫烏015）", estKubun],
+    ["該当ロジック", logic],
+    ["p", p],
+    ["聞き取りメモ", ($("interview").value||"").trim()],
+  ];
+  const ws0 = XLSX.utils.aoa_to_sheet(overview);
+
+  const header = ["No","カテゴリ","項目名","回答番号","回答","根拠メモ"];
+  const rows = [header];
+  for(const it of BASE80){
+    const key="F"+it.row;
+    const v=state.answers[key];
+    const cat=catFor(it);
+    rows.push([
+      it.code,
+      catLabel(cat),
+      it.name,
+      v==null? "" : v,
+      getAnswerLabel(cat, v, it),
+      (state.memos[key]||"").trim()
+    ]);
+  }
+  const ws1 = XLSX.utils.aoa_to_sheet(rows);
+
+  const redFill = { patternType:"solid", fgColor:{rgb:"FFFEE2E2"} };
+  const redFont = { color:{rgb:"FFB91C1C"}, bold:true };
+
+  for(let r=1; r<rows.length; r++){
+    const it = BASE80[r-1];
+    const key="F"+it.row;
+    const v=state.answers[key];
+    const cat=catFor(it);
+    if(isSupportNeeded(cat, v)){
+      const addrNum = XLSX.utils.encode_cell({r:r, c:3});
+      const addrLab = XLSX.utils.encode_cell({r:r, c:4});
+      if(ws1[addrNum]) ws1[addrNum].s = { fill:redFill, font:redFont };
+      if(ws1[addrLab]) ws1[addrLab].s = { fill:redFill, font:redFont };
+    }
+  }
+  for(let c=0;c<header.length;c++){
+    const a = XLSX.utils.encode_cell({r:0,c});
+    if(ws1[a]) ws1[a].s = { font:{bold:true} };
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws0, "概要");
+  XLSX.utils.book_append_sheet(wb, ws1, "80項目");
+
+  const filename = `kubun_${resident||"user"}_${date||nowDateStr()}.xlsx`.replace(/\s+/g,"_");
+  XLSX.writeFile(wb, filename);
+}
+$("btnXlsx").addEventListener("click", exportXlsx);
+
+
+function questionSpecific(it){
+  const name = String(it.name||"");
+  const extras = [];
+  const add = (title, arr)=>{
+    if(!arr || !arr.length) return;
+    extras.push(`<div class="help"><b>${escapeHtml(title)}</b><br>${arr.map(x=>"・"+escapeHtml(x)).join("<br>")}</div>`);
+  };
+
+  // 身体・動作
+  if(name.includes("両足立位")){
+    add("観察ポイント", ["支持物なしで立位保持できるか","保持時間（5秒/10秒/30秒など）","ふらつき・転倒リスク","疲労・夜間で低下するか"]);
+    add("聞き取り例", ["洗面や更衣は立ったままできますか？手すりは？","立つときに手を引く必要がありますか？"]);
+    add("根拠メモ例", ["洗面時は手すり支持で立位保持。支持物なしではふらつきあり。"]);
+  }
+  if(name.includes("片足立位") || name.includes("片脚") ){
+    add("観察ポイント", ["片脚支持が可能か（左右差）","浴槽またぎ・段差で危険が出るか","支持物があれば可能か"]);
+    add("聞き取り例", ["靴下を立ったまま履けますか？","浴槽をまたぐ時に付き添いが必要ですか？"]);
+    add("根拠メモ例", ["片足立位困難。更衣は座位で実施。浴槽またぎは見守り必須。"]);
+  }
+  if(name.includes("移乗") || name.includes("乗り移") ){
+    add("観察ポイント", ["ベッド↔車椅子/椅子↔立位で介助が要るか","立ち上がり時のふらつき","ブレーキ・フットレスト操作の理解"]);
+    add("聞き取り例", ["乗り移る時に手を貸す必要がありますか？"]);
+    add("根拠メモ例", ["移乗は一部介助。立ち上がり時に支えが必要。"]);
+  }
+  if(name.includes("歩行") || name.includes("移動") ){
+    add("観察ポイント", ["屋内/屋外の差","杖・歩行器・手引きの有無","段差・方向転換で危険が出るか"]);
+    add("聞き取り例", ["外出時は一人で歩けますか？付き添いは？"]);
+    add("根拠メモ例", ["屋内は自立、屋外はふらつきあり手引き見守り。"]);
+  }
+  if(name.includes("段差") || name.includes("階段") ){
+    add("観察ポイント", ["手すりの必要性","上り下りの安全","急ぐと危険が増すか"]);
+    add("根拠メモ例", ["階段は手すり必須。下りは転倒リスク高く同伴見守り。"]);
+  }
+
+  // 日常生活
+  if(name.includes("食事")){
+    add("観察ポイント", ["咀嚼・嚥下の安全（むせ）","食べる速度・一口量","食形態の工夫の有無"]);
+    add("聞き取り例", ["むせ込みはありますか？飲み込みにくさは？"]);
+    add("根拠メモ例", ["早食い傾向でむせあり。声かけでペース調整し見守り。"]);
+  }
+  if(name.includes("入浴")){
+    add("観察ポイント", ["浴室出入り・浴槽またぎ","洗体洗髪の遂行","温度調整・転倒リスク"]);
+    add("聞き取り例", ["浴槽をまたぐとき危なくないですか？"]);
+    add("根拠メモ例", ["出入り時にふらつきあり同室見守り。洗体は一部介助。"]);
+  }
+  if(name.includes("更衣") || name.includes("着替")){
+    add("観察ポイント", ["上衣/下衣で差があるか","立位で更衣できるか（転倒）","季節衣類の選択ができるか"]);
+    add("根拠メモ例", ["上衣は自立、下衣はバランス不安で支えながら介助。"]);
+  }
+  if(name.includes("排泄") || name.includes("トイレ")){
+    add("観察ポイント", ["移動・着脱・後始末のどこが困難か","失禁・汚染の有無","夜間の支援頻度"]);
+    add("根拠メモ例", ["トイレ誘導と後始末の声かけが必要。夜間1回見守り。"]);
+  }
+  if(name.includes("服薬") || name.includes("内服")){
+    add("観察ポイント", ["自己管理か手渡しか","飲み忘れ・重複のリスク","副作用時の対応"]);
+    add("根拠メモ例", ["薬は事務所で一括管理。職員が手渡しし内服確認。"]);
+  }
+  if(name.includes("金銭") || name.includes("買い物")){
+    add("観察ポイント", ["支払い・釣銭・計画性","衝動買い・浪費","紛失や他者への貸与"]);
+    add("根拠メモ例", ["小口は自己管理だが衝動買いあり。買い物は同行し調整。"]);
+  }
+  if(name.includes("火") || name.includes("ガス") ){
+    add("観察ポイント", ["火の不始末のリスク","誤操作（点火/消火）","台所利用のルール遵守"]);
+    add("根拠メモ例", ["ガス使用は職員同席。火の消し忘れがあり環境調整。"]);
+  }
+
+  // 行動障害
+  const beh = (kw, title, memoEx)=>{
+    if(name.includes(kw)){
+      add("頻度の確認", ["稀／月1回以上／週1回以上／ほぼ毎日で記録","起きる前兆とトリガー","予防的支援（声かけ・環境調整）の有無"]);
+      add("根拠メモ例", [memoEx]);
+    }
+  };
+  beh("逸走","逸走","逸走リスクあり。外出前に声かけ・同行、施錠で予防。");
+  beh("自傷","自傷","自傷が月1回程度。興奮時に発生し、落ち着きの場へ誘導。");
+  beh("他害","他害","対人トラブルあり。職員介入で場面転換し未然防止。");
+  beh("暴言","暴言","暴言が週1回程度。注意される場面で増加し、距離確保と声かけ。");
+  beh("暴力","暴力","衝動的な手が出ることがあり、近接対応と複数名で見守り。");
+  beh("パニック","パニック","不安時にパニック。予告と選択肢提示で軽減。");
+  beh("こだわり","こだわり","こだわり強く変更で不穏。事前説明と手順固定で支援。");
+  beh("昼夜逆転","昼夜逆転","昼夜逆転傾向。夜間覚醒時は声かけ・安全確認が必要。");
+
+  // 意思疎通
+  if(it.cat==="comm"){
+    add("観察ポイント", ["短い一文の指示なら理解可能か","複数指示で混乱するか","意思表示の方法（言語/ジェスチャー/表情）"]);
+    add("根拠メモ例", ["簡単な説明は理解可能だが、複数指示は混乱しやすい。"]);
+  }
+
+  return extras.join("");
+}
+
+function renderGlossaryQuestions(){
+  const q = ($("glossaryQ").value||"").trim();
+  const list = BASE80.filter(it=>{
+    if(!q) return true;
+    const s = `${it.code} ${it.name} ${catLabel(catFor(it))}`;
+    return s.includes(q);
+  });
+
+  $("glossaryListQuestions").innerHTML = list.map(it=>{
+    const cat = catFor(it);
+    const base = CATEGORY_EXPLAIN[cat] || null;
+
+    const baseHtml = (function(){
+      const guideHtml = itemGuideHtml(it);
+      if(guideHtml) return guideHtml;
+      if(!base) return "";
+      return `
+        <div class="help"><b>この質問は何を見ている？</b><br>${escapeHtml(base.desc||"")}</div>
+        <div class="help"><b>観察ポイント</b><br>${(base.observe||[]).map(x=>"・"+escapeHtml(x)).join("<br>")}</div>
+        <div class="help"><b>聞き取り例</b><br>${(base.hear||[]).map(x=>"・"+escapeHtml(x)).join("<br>")}</div>
+        <div class="help"><b>根拠メモ例</b><br>${escapeHtml(base.memo||"")}</div>
+      `;
+    })();
+
+    const spec = questionSpecific(it);
+
+    return `
+      <div class="term">
+        <div class="t">${escapeHtml(it.code)} ${escapeHtml(it.name)}</div>
+        <div class="badges">
+          <span class="badge">${escapeHtml(catLabel(cat))}</span>
+        </div>
+        ${baseHtml}
+        ${spec}
+      </div>
+    `;
+  }).join("") || `<div class="muted" style="margin-top:10px">（該当なし）</div>`;
+}
+
+function renderGlossaryTerms(){
+  const q = ($("glossaryQ").value||"").trim();
+  const keys = Object.keys(TERMS).filter(k=> !q || k.includes(q) || (TERMS[k].desc||"").includes(q));
+  $("glossaryListTerms").innerHTML = keys.map(k=>{
+    const t=TERMS[k];
+    const badges = (t.tags||[]).map(x=>`<span class="badge">${escapeHtml(x)}</span>`).join("");
+    const pts = (t.points||[]).map(x=>`・${escapeHtml(x)}`).join("<br>");
+    const hea = (t.hearing||[]).map(x=>`・${escapeHtml(x)}`).join("<br>");
+    const mem = (t.memo||[]).map(x=>`・${escapeHtml(x)}`).join("<br>");
+    return `
+      <div class="term">
+        <div class="t">${escapeHtml(k)}</div>
+        <div class="badges">${badges}</div>
+        <div class="d">${escapeHtml(t.desc||"")}</div>
+        ${pts?`<div class="help"><b>観察ポイント</b><br>${pts}</div>`:""}
+        ${hea?`<div class="help"><b>聞き取り例</b><br>${hea}</div>`:""}
+        ${mem?`<div class="help"><b>根拠メモ例（特記事項向け）</b><br>${mem}</div>`:""}
+      </div>
+    `;
+  }).join("") || `<div class="muted" style="margin-top:10px">（該当なし）</div>`;
+}
+
+function renderGlossary(){
+  // current tab decides which list to render
+  if(window.__glossaryTab === "terms") renderGlossaryTerms();
+  else renderGlossaryQuestions();
+}
+
+function openGlossary(){
+  $("glossaryModal").classList.add("open");
+  $("glossaryModal").setAttribute("aria-hidden","false");
+  window.__glossaryTab = window.__glossaryTab || "questions";
+  syncGlossaryTabUI();
+  renderGlossary();
+  $("glossaryQ").focus();
+}
+function openGlossary(){
+  $("glossaryModal").classList.add("open");
+  $("glossaryModal").setAttribute("aria-hidden","false");
+  renderGlossary();
+  $("glossaryQ").focus();
+}
+function closeGlossary(){
+  $("glossaryModal").classList.remove("open");
+  $("glossaryModal").setAttribute("aria-hidden","true");
+}
+$("btnGlossary").addEventListener("click", openGlossary);
+
+function syncGlossaryTabUI(){
+  const isTerms = (window.__glossaryTab === "terms");
+  $("tabQuestions").classList.toggle("primary", !isTerms);
+  $("tabTerms").classList.toggle("primary", isTerms);
+  $("glossaryListQuestions").style.display = isTerms ? "none" : "block";
+  $("glossaryListTerms").style.display = isTerms ? "block" : "none";
+}
+$("tabQuestions").addEventListener("click", ()=>{ window.__glossaryTab="questions"; syncGlossaryTabUI(); renderGlossary(); });
+$("tabTerms").addEventListener("click", ()=>{ window.__glossaryTab="terms"; syncGlossaryTabUI(); renderGlossary(); });
+
+$("btnGlossaryClose").addEventListener("click", closeGlossary);
+$("glossaryModal").addEventListener("click", (e)=>{ if(e.target && e.target.id==="glossaryModal") closeGlossary(); });
+$("glossaryQ").addEventListener("input", renderGlossary);
+document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeGlossary(); });
+
+
+// initial render
+renderList(BASE80, "items80");
+renderList(EXTRAS, "itemsExtra");
+updateAll(false);
+
+// ===== PDF出力：支援ありのみ（No 項目名／回答文言／根拠メモ） =====
+function exportPdfSupportOnly(){
+  try{
+    const rows = [];
+    for(const it of BASE80){
+      const key="F"+it.row;
+      const v=state.answers[key];
+      const cat=catFor(it);
+      if(!isSupportNeeded(cat, v, it)) continue; // 支援不要(1)・未入力は除外
+      rows.push({
+        code: it.code || "",
+        name: it.name || "",
+        label: getAnswerLabel(cat, v, it),
+        memo: (state.memos[key]||"").trim()
+      });
+    }
+    if(!rows.length){
+      alert("支援が必要な項目（1以外）がありません。");
+      return;
+    }
+
+    let pa = document.getElementById("printArea");
+if(!pa){
+  pa = document.createElement("div");
+  pa.id="printArea";
+  document.body.appendChild(pa);
+}
+const backup = pa.innerHTML;
+const resident = ($("resident").value||"").trim();
+    const date = ($("date").value||nowDateStr()).trim();
+
+    const head = `障害支援区分（支援あり項目のみ）`;
+    const meta = `利用者：${resident||"（未入力）"}　日付：${date||nowDateStr()}　※出力内容：①項目名 ②回答 ③根拠メモ（支援不要は除外）`;
+
+
+    const interview = ($("interview")?.value || "").trim();
+    const interviewBlock = `
+      <div class="sumSec">
+        <div class="sumH">聞き取りメモ（生活状況・支援実態）</div>
+        <div class="sumP">${escapeHtml(interview || "（未入力）")}</div>
+      </div>
+    `;
+    const body = rows.map(r=>`
+      <div class="row">
+        <div class="line1">${escapeHtml(r.code)}　${escapeHtml(r.name)}</div>
+        <div class="line2">${escapeHtml(r.label||"")}</div>
+        <div class="line3">${escapeHtml(r.memo || "（根拠メモなし）")}</div>
+      </div>
+    `).join("");
+
+    pa.innerHTML = `
+      <div class="printTitle">${escapeHtml(head)}</div>
+      <div class="printMeta">${escapeHtml(meta)}</div>
+      ${interviewBlock}
+      ${body}
+    `;
+    window.print();
+    // 印刷後にprintAreaを消す（環境によりafterprintが動かないことがあるので保険でsetTimeoutも）
+    const cleanup = ()=>{ try{ pa.innerHTML = backup; }catch(e){} window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(cleanup, 1500);
+  }catch(e){
+    alert("PDF出力に失敗しました（ブラウザのコンソールをご確認ください）");
+    console.error(e);
+  }
+}
+
+// ボタン配線（DOMができてから）
+(function(){
+  const btn = document.getElementById("btnPdf");
+  if(!btn) return;
+  btn.addEventListener("click", (ev)=>{
+    try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){}
+    exportPdfSupportOnly();
+  });
+})();
+
+</script>
+
+<div id="printArea"></div>
+
+<!-- ===== 審査会サマリー編集モーダル ===== -->
+<div id="summaryModal" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:9999;">
+  <div style="max-width:980px; margin:24px auto; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);">
+    <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div style="font-weight:800;">審査会向け1枚サマリー（編集）</div>
+      <button id="btnSummaryClose" type="button" onclick="summaryEditClose()">閉じる</button>
+    </div>
+    <div style="font-size:12px; color:#555; margin-bottom:10px;">
+      ※この画面で文章を微調整できます。「PDF出力」でA4縦1枚として印刷（PDF保存）します。
+    </div>
+    <textarea id="summaryText" style="width:100%; min-height:340px; padding:12px; border:1px solid #ddd; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap;"></textarea>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+      <button id="btnSummaryPrint" type="button">PDF出力</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ===== 審査会向け1枚サマリー（A:自動 / B:編集可） v2 =====
+
+// ▼ グローバル関数（onclick用：イベント登録が失敗しても確実に動かす）
+function summaryAutoPDF(){
+  try{
+    if(typeof window.__buildSummaryText !== "function" || typeof window.__printSummary !== "function"){
+      alert("サマリー機能の初期化に失敗しました。ページを再読み込みしてください。");
+      return;
+    }
+    const t = window.__buildSummaryText();
+    window.__printSummary(t);
+  }catch(e){
+    console.error(e);
+    alert("サマリーPDFの作成でエラーが発生しました。コンソールを確認してください。");
+  }
+}
+function summaryEditOpen(){
+  try{
+    if(typeof window.__buildSummaryText !== "function"){
+      alert("サマリー機能の初期化に失敗しました。ページを再読み込みしてください。");
+      return;
+    }
+    const modal = document.getElementById("summaryModal");
+    const ta = document.getElementById("summaryText");
+    if(ta) ta.value = window.__buildSummaryText();
+    if(modal){
+      modal.style.display="block";
+      modal.setAttribute("aria-hidden","false");
+    }
+  }catch(e){
+    console.error(e);
+    alert("編集画面の表示でエラーが発生しました。コンソールを確認してください。");
+  }
+}
+
+function summaryEditClose(){
+  const modal = document.getElementById("summaryModal");
+  if(modal){
+    modal.style.display="none";
+    modal.setAttribute("aria-hidden","true");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAuto = document.getElementById("btnSummaryAuto");
+  const btnEdit = document.getElementById("btnSummaryEdit");
+  const modal   = document.getElementById("summaryModal");
+  const ta      = document.getElementById("summaryText");
+  const btnClose= document.getElementById("btnSummaryClose");
+  const btnPrint= document.getElementById("btnSummaryPrint");
+  const printArea = document.getElementById("printArea");
+
+  if(!btnAuto || !btnEdit || !printArea) return;
+
+  const esc = (typeof escapeHtml === "function")
+    ? escapeHtml
+    : (s)=>String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+  const nowDate = (typeof nowDateStr === "function") ? nowDateStr : ()=>{
+    const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0');
+    return `${y}/${m}/${dd}`;
+  };
+
+  const catForSafe = (it)=>{
+    try{ return (typeof catFor === "function") ? catFor(it) : (it.cat || "extra"); }catch(e){ return it?.cat || "extra"; }
+  };
+
+  const getLabelSafe = (cat, v, it)=>{
+    try{
+      if(typeof getAnswerLabel === "function") return getAnswerLabel(cat, v, it);
+      if(typeof LABELS !== "undefined"){
+        let labels = LABELS[cat] || LABELS.extra || [];
+        if(cat==="extra" && it && it.optCount){
+          const n = Math.max(2, Math.min(6, it.optCount));
+          labels = (LABELS.extra||[]).slice(0,n);
+        }
+        const found = labels.find(x=>String(x[0])===String(v));
+        return found ? found[1] : String(v ?? "");
+      }
+    }catch(e){}
+    return String(v ?? "");
+  };
+
+  function isSupportNeeded(cat, val){
+    if(val==null || val==="") return false;
+    const n = Number(val);
+    if(cat==="medical") return n===2;
+    return n>=2;
+  }
+
+  const KEY_NOS = [18,15,26,27,29,21,22,24,25,33,34];
+
+  function pick(no){
+    if(typeof BASE80 === "undefined") return null;
+    const it = BASE80.find(x=>Number(x.code)===Number(no));
+    if(!it) return null;
+    const key = "F"+it.row;
+    const v = (window.state && state.answers) ? state.answers[key] : "";
+    const memo = (window.state && state.memos) ? (state.memos[key]||"").trim() : "";
+    const cat = catForSafe(it);
+    const need = isSupportNeeded(cat, v);
+    if(!need && !memo) return null;
+    return { no: it.code, name: it.name, memo, label: getLabelSafe(cat, v, it) };
+  }
+
+  function buildSummaryText(){
+    const resident = (document.getElementById("resident")?.value || "").trim();
+    const date = (document.getElementById("date")?.value || "").trim() || nowDate();
+    const items = KEY_NOS.map(pick).filter(Boolean);
+
+    let needCount=0, body=0, life=0, behavior=0;
+    if(typeof BASE80 !== "undefined" && window.state && state.answers){
+      for(const it of BASE80){
+        const key="F"+it.row;
+        const v = state.answers[key];
+        const cat = catForSafe(it);
+        if(isSupportNeeded(cat, v)){
+          needCount++;
+          if(cat==="behavior") behavior++;
+          else if(cat==="life") life++;
+          else if(cat==="body") body++;
+        }
+      }
+    }
+
+    const lines = [];
+    lines.push("■ 生活全体の支援状況（要約）");
+    lines.push("生活は人的支援を前提として成り立っている。");
+    if(items.length){
+      lines.push("主な支援ポイント：");
+      for(const x of items){
+        const t = (x.memo || x.label || "").trim();
+        if(t) lines.push(`- ${String(x.no).padStart(2,'0')} ${x.name}：${t}`);
+      }
+    }
+    lines.push("");
+    lines.push("■ 支援量の概況（参考）");
+    lines.push(`支援が必要な項目数（1以外）：合計 ${needCount} 項目（身体介助 ${body}／日常生活 ${life}／行動障害 ${behavior}）`);
+    lines.push("※一次判定ロジックの再現ではなく、支援実態（頻度・継続性・人手）を要約したもの。");
+    lines.push("");
+    lines.push("■ 支援体制");
+    lines.push("グループホーム職員：日常生活支援、状態観察、声かけ、同行");
+    lines.push("（該当がある場合）訪問看護：服薬確認／保佐人：金銭管理／相談支援：調整・同行");
+    lines.push("");
+    lines.push("■ まとめ");
+    lines.push("上記の支援は一時的なものではなく、症状の波により継続的かつ反復的に必要である。現在の生活は人的支援を前提として成り立っている。");
+
+    return `【審査会向け1枚サマリー】\n利用者名：${resident||"（未入力）"}　／　作成日：${date}\n\n` + lines.join("\n");
+  }
+
+  function renderSummaryToPrintArea(text){
+    const resident = (document.getElementById("resident")?.value || "").trim();
+    const date = (document.getElementById("date")?.value || "").trim() || nowDate();
+
+    const interview = (document.getElementById("interview")?.value || "").trim();
+    const interviewBlock = `<div class="sumSec"><div class="sumH">聞き取りメモ（生活状況・支援実態）</div><div class="sumP">${esc(interview || "（未入力）")}</div></div>`;
+
+    const parts = String(text||"").split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+    const blocks = parts.map(p=>{
+      const lines = p.split("\n");
+      const first = lines[0].trim();
+      const isSec = first.startsWith("■");
+      const h = isSec ? first.replace(/^■\s*/,"") : "";
+      const rest = isSec ? lines.slice(1).join("\n").trim() : p;
+      if(h){
+        return `<div class="sumSec"><div class="sumH">${esc(h)}</div><div class="sumP">${esc(rest)}</div></div>`;
+      }
+      return `<div class="sumSec"><div class="sumP">${esc(p)}</div></div>`;
+    }).join("");
+
+    return `
+      <div class="sumTitle">審査会向け1枚サマリー</div>
+      <div class="sumMeta">利用者名：${esc(resident||"（未入力）")}　／　作成日：${esc(date)}</div>
+      ${interviewBlock}
+      ${blocks}
+    `;
+  }
+
+  function printSummary(text){
+    const backup = printArea.innerHTML;
+    printArea.innerHTML = renderSummaryToPrintArea(text);
+
+    const cleanup = ()=>{ printArea.innerHTML = backup; window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+
+    window.print();
+    setTimeout(cleanup, 1200);
+  }
+
+  // expose for onclick fallback
+  window.__buildSummaryText = buildSummaryText;
+  window.__printSummary = printSummary;
+
+
+  btnAuto.addEventListener("click", (e)=>{
+    e.preventDefault();
+    printSummary(buildSummaryText());
+  });
+
+  btnEdit.addEventListener("click", (e)=>{
+    e.preventDefault();
+    const t = buildSummaryText();
+    if(ta) ta.value = t;
+    if(modal){ modal.style.display="block"; modal.setAttribute("aria-hidden","false"); }
+  });
+
+  if(btnClose && modal){
+    btnClose.addEventListener("click", ()=>{
+      modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+    });
+    modal.addEventListener("click", (ev)=>{
+      if(ev.target===modal){
+        modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+      }
+    });
+  }
+
+  if(btnPrint && modal){
+    btnPrint.addEventListener("click", ()=>{
+      const t = (ta?.value || "").trim();
+      if(!t){ alert("文章が空です。"); return; }
+      modal.style.display="none"; modal.setAttribute("aria-hidden","true");
+      printSummary(t);
+    });
+  }
+});
+</script>
+
+
+
+
+
+
+
+<script>
+/* ENTER_KEY_SUBMIT_GUARD */
+(() => {
+  // Prevent form submit (Enter key) from reloading/clearing the page.
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true);
+
+  // Prevent Enter in text inputs from triggering implicit submit.
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    if (!t) return;
+
+    const tag = (t.tagName || '').toUpperCase();
+
+    // Allow Enter for multiline textarea.
+    if (tag === 'TEXTAREA') return;
+
+    // Allow Enter inside contenteditable areas (for line breaks).
+    if (t.isContentEditable) return;
+
+    // If focus is in a text-like input, stop implicit submit.
+    if (tag === 'INPUT') {
+      const type = (t.getAttribute('type') || 'text').toLowerCase();
+      const nonTextTypes = new Set([
+        'button','submit','checkbox','radio','file','range','color',
+        'date','datetime-local','time','month','week','number'
+      ]);
+      if (!nonTextTypes.has(type)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+})();
+</script>
+
+</body>
+</html>
