@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>障害支援区分 80項目 聞き取り＋八咫烏015推定</title>
 <style>
-:root{--bg:#f3f4f6;--card:#fff;--txt:#111827;--sub:#6b7280;--bd:#e5e7eb;--pri:#2563eb;--ok:#047857;--warn:#b45309;}
+:root{--bg:#f3f4f6;--card:#fff;--txt:#111827;--sub:#6b7280;--muted:#6b7280;--bd:#e5e7eb;--pri:#2563eb;--ok:#047857;--warn:#b45309;}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--txt)}
 header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--bd);padding:10px 14px;z-index:10}
@@ -128,12 +128,14 @@ summary{cursor:pointer;font-weight:700}
 
     .saveStatus{font-size:12px;color:#6b7280;margin-left:10px;white-space:nowrap;}
 
-.why{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);margin:6px 0}
-.why.ok{background:rgba(64,160,90,.08)}
-.why.ng{background:rgba(220,80,80,.08)}
-.badge{font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.14)}
-.badge.ok{background:rgba(64,160,90,.18)}
-.badge.ng{background:rgba(220,80,80,.18)}
+.whyRow{border:1px solid var(--bd);border-radius:12px;padding:8px 10px;margin:6px 0;background:#fff}
+.whyRow.ok{background:rgba(64,160,90,.08)}
+.whyRow.ng{background:rgba(220,80,80,.08)}
+.whyHead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.whyBody{margin-top:6px;color:var(--sub);font-size:12px;line-height:1.55;white-space:pre-wrap}
+.whyBar{display:flex;align-items:center;gap:8px;margin-top:6px}
+.whyBar .bar{flex:1;height:8px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden}
+.whyBar .fill{height:100%;background:var(--pri);border-radius:999px}
 .kvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:12px}
 .kv{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:8px 10px;background:rgba(255,255,255,.04)}
 .kv .k{font-size:12px;color:rgba(255,255,255,.7)}
@@ -170,6 +172,13 @@ summary{cursor:pointer;font-weight:700}
 .distFill{height:100%;background:var(--pri);border-radius:999px}
 .distPct{width:60px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 
+
+
+/* ==== 付図（フロー図） ==== */
+.fig{margin-top:10px;border:1px solid var(--bd);border-radius:12px;padding:10px;background:#fff}
+.figTitle{font-weight:800;font-size:12px;margin:0 0 8px;color:var(--txt)}
+.fig svg{width:100%;height:auto;display:block}
+@media print{.fig{page-break-inside:avoid;break-inside:avoid;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -180,7 +189,7 @@ summary{cursor:pointer;font-weight:700}
     <div class="btns">
       <button id="btnSave" class="primary">端末保存</button>
           <span id="saveStatus" class="saveStatus" aria-live="polite"></span>
-      <span id="uiLastUpdated" class="muted" style="margin-left:8px">最終更新日：--</span>
+      <span id="uiLastUpdated" title="このHTMLファイルの更新日（入力日とは別）" class="muted" style="margin-left:8px">最終更新日：--</span>
       <button id="btnXlsx">Excelで保存</button>
       <button id="btnGlossary">用語説明</button>
         <button id="btnPdf" type="button">PDF出力</button>
@@ -201,12 +210,41 @@ summary{cursor:pointer;font-weight:700}
         障害支援区分の聞き取り内容を整理し、80項目の入力漏れチェック・特記事項の下書き・八咫烏015の推定（一次判定相当）をまとめて行うためのローカルHTMLです。
       </div>
       <div class="muted" id="appLastUpdated" style="margin-top:6px">最終更新日：--</div>
+      <div class="muted" id="appLastUpdatedNote" style="margin-top:4px">※最終更新日は、このHTMLファイルの更新日です（入力日とは別です）。</div>
       <ul class="muted">
         <li><strong>自動保存</strong>：入力は端末内（localStorage）に自動保存されます。共有PCの場合は「読み込み／端末保存」を活用してください。</li>
         <li><strong>保存／読み込み</strong>：JSON形式でデータを保存・復元できます（別端末へ持ち出し可）。</li>
         <li><strong>PDF出力</strong>：審査会用に、入力内容＋聞き取りメモ（生活状況・支援実態）をPDFにまとめます。</li>
         <li><strong>推定区分</strong>：八咫烏015のロジックに基づく参考表示です。<strong>公式判定の保証はありません</strong>（審査会・医師意見書等で変わります）。</li>
       </ul>
+      <div class="fig">
+        <div class="figTitle">付図：処理の流れ</div>
+        <svg viewBox="0 0 920 150" role="img" aria-label="聞き取りから推定までの流れ">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#6b7280"></path>
+            </marker>
+          </defs>
+          <g font-family="sans-serif" font-size="14" fill="#111827">
+            <rect x="20"  y="40" width="170" height="60" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <text x="105" y="75" text-anchor="middle">①聞き取りメモ</text>
+            <rect x="220" y="40" width="190" height="60" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <text x="315" y="75" text-anchor="middle">②80項目入力</text>
+            <rect x="450" y="40" width="200" height="60" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <text x="550" y="68" text-anchor="middle">配点・集計</text>
+            <text x="550" y="88" text-anchor="middle">（12グループ）</text>
+            <rect x="690" y="40" width="210" height="60" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <text x="795" y="68" text-anchor="middle">ロジック照合</text>
+            <text x="795" y="88" text-anchor="middle">→ 区分/根拠</text>
+          </g>
+          <g stroke="#6b7280" stroke-width="2" fill="none" marker-end="url(#arrow)">
+            <line x1="190" y1="70" x2="220" y2="70"/>
+            <line x1="410" y1="70" x2="450" y2="70"/>
+            <line x1="650" y1="70" x2="690" y2="70"/>
+          </g>
+        </svg>
+        <div class="muted" style="margin-top:6px">※入力が不足していると推定がブレやすいので、未入力チェックも活用してください。</div>
+      </div>
     </details>
 
     <div class="toolbar">
@@ -2323,12 +2361,25 @@ function estimate(){
   const distEl = $("kpiDist");
   if(distEl) distEl.innerHTML = "";
 
+  // リセット直後・初期状態（未入力）では、推定結果を出さず 0% 表示にする
+  const anyAnswered = Object.values(state.answers||{}).some(v=>v!=null);
+  if(!anyAnswered){
+    $("kpiKubun").textContent="—";
+    $("kpiLogic").textContent="—";
+    $("kpiP").textContent="—";
+    const whyEl = $("why");
+    if(whyEl){ whyEl.innerHTML=""; whyEl.classList.add("muted"); }
+    if(distEl) distEl.innerHTML = renderKubunPercent({0:0,1:0,2:0,3:0,4:0,5:0,6:0});
+    return;
+  }
+
   const scored = scoreAllRules();
   if(!scored.length){
     $("kpiKubun").textContent="—";
     $("kpiLogic").textContent="—";
     $("kpiP").textContent="—";
-    $("why").innerHTML="";
+    $("why").textContent="—";
+    $("why").classList.add("muted");
     return;
   }
 
@@ -2404,9 +2455,11 @@ function estimate(){
     return `<div class="whyRow ${k.ok?'ok':'ng'}">
       <div class="whyHead"><span class="tag ${k.ok?'ok':'ng'}">${k.ok?'OK':'NG'}</span> <span class="mono">${esc(k.label)}</span></div>
       ${k.detail ? `<div class="whyBody">${esc(k.detail)}</div>` : ``}
-      <div class="whyBar"><div class="fill" style="width:${bar.toFixed(1)}%"></div><span class="small mono">${k.dist.toFixed(3)}</span></div>
+      <div class="whyBar"><div class="bar"><div class="fill" style="width:${bar.toFixed(1)}%"></div></div><span class="small mono">${k.dist.toFixed(3)}</span></div>
     </div>`;
   }).join("");
+  if(kvs.length){ $("why").classList.remove("muted"); }
+  else { $("why").textContent="—"; $("why").classList.add("muted"); }
 }
 
 function buildDraft(){
