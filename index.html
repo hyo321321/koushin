@@ -2362,11 +2362,37 @@ function estimate(){
 
   const exact = scored.filter(s=>s.okAll);
 
-  // 区分別（推定割合・参考）：全ロジックを近似スコア（logLike）で重み付けして算出（旧挙動に合わせる）
-  const dist = calcKubunPercentFromScored(scored, 40, 0.9);
+  // 区分別（推定割合・参考）
+  // ・exact がある時：オールクリアしたロジックだけで p を区分ごとに合算して正規化
+  // ・exact がない時：近似スコア（logLike）で重み付けして正規化
+  const dist = exact.length ? calcKubunPercentFromExact(exact) : calcKubunPercentFromScored(scored, 40, 0.9);
   if(distEl) distEl.innerHTML = renderKubunPercent(dist);
 
+  // 推定区分（kpiKubun）は「推定割合」で一番大きい区分に合わせる
+  let bestK = 0;
+  let bestV = -1;
+  for(let k=0;k<=6;k++){
+    const v = Number((dist||{})[k]) || 0;
+    if(v > bestV){
+      bestV = v;
+      bestK = k;
+    }
+  }
+
   const pickByP = (arr)=> arr.slice().sort((a,b)=>{
+    const ap = Number(a.r.p)||0;
+    const bp = Number(b.r.p)||0;
+    if(bp!==ap) return bp-ap;
+    const ak = Number(a.r.k)||0;
+    const bk = Number(b.r.k)||0;
+    if(bk!==ak) return bk-ak;
+    const an = Number(a.r.n)||0;
+    const bn = Number(b.r.n)||0;
+    return bn-an;
+  })[0];
+
+  const pickByLogLike = (arr)=> arr.slice().sort((a,b)=>{
+    if(b.logLike!==a.logLike) return b.logLike-a.logLike;
     const ap = Number(a.r.p)||0;
     const bp = Number(b.r.p)||0;
     if(bp!==ap) return bp-ap;
@@ -2383,10 +2409,12 @@ function estimate(){
   let approx=false;
 
   if(exact.length){
-    bestS = pickByP(exact);
+    const same = exact.filter(s => (Number(s.r?.k)||0) === bestK);
+    bestS = same.length ? pickByP(same) : pickByP(exact);
   }else{
     approx=true;
-    bestS = scored.slice().sort((a,b)=>{
+    const same = scored.filter(s => (Number(s.r?.k)||0) === bestK);
+    bestS = same.length ? pickByLogLike(same) : scored.slice().sort((a,b)=>{
       if(a.unsat!==b.unsat) return a.unsat-b.unsat;
       if(a.avgDist!==b.avgDist) return a.avgDist-b.avgDist;
       const ap = Number(a.r.p)||0;
