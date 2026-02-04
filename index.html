@@ -171,6 +171,51 @@ summary{cursor:pointer;font-weight:700}
 .distFill{height:100%;background:var(--pri);border-radius:999px}
 .distPct{width:60px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 
+
+/* Floating summary bar (keeps estimate visible while scrolling) */
+body{padding-bottom:calc(92px + env(safe-area-inset-bottom));}
+
+#floatingSummary{
+  position:fixed;
+  left:12px; right:12px; bottom:12px;
+  max-width:520px;
+  margin:0 auto;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  box-shadow:0 10px 28px rgba(0,0,0,.14);
+  z-index:9999;
+  padding:10px 12px;
+}
+#floatingSummary .fsRow{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+#floatingSummary .fsTitle{font-size:14px; font-weight:800; line-height:1.2;}
+#floatingSummary .fsSub{font-size:12px; opacity:.8; margin-top:2px;}
+#floatingSummary .fsBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+#floatingSummary .fsBtns button{
+  padding:6px 10px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.18);
+  background:#f6f6f6;
+  font-size:12px;
+  cursor:pointer;
+}
+#floatingSummary .fsBtns button:active{transform:translateY(1px);}
+#floatingSummary .fsDetail{margin-top:8px; font-size:12px; display:none;}
+#floatingSummary .fsClose{
+  position:absolute; top:8px; right:10px;
+  border:none; background:transparent;
+  font-size:18px; line-height:1;
+  cursor:pointer; opacity:.6;
+}
+#floatingSummary .fsClose:hover{opacity:1;}
+@media (min-width: 900px){
+  #floatingSummary{
+    left:auto; right:14px; bottom:14px;
+    margin:0;
+    max-width:360px;
+  }
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -263,12 +308,26 @@ summary{cursor:pointer;font-weight:700}
         <div class="muted">不足一覧（先頭30件）</div>
         <div id="missingList" class="muted"></div>
       </div>
-      <div class="box">
+      <div class="box" id="kpiBoxEstimate">
         <div class="muted">八咫烏015 推定（一次判定相当）</div>
         <div class="v"><span id="kpiKubun">—</span> <span class="small">(推定)</span></div>
         <div class="muted">該当ロジック：<span class="mono" id="kpiLogic">—</span> / p：<span class="mono" id="kpiP">—</span></div>
         <div class="muted" style="margin-top:6px">区分別（推定割合・参考）</div>
         <div id="kpiDist" style="margin-top:4px"></div>
+        <details style="margin-top:8px">
+          <summary>点数（計算結果の確認）</summary>
+          <div class="muted small" style="margin-top:6px">
+            80項目の回答からExcel換算セル（B列/E列相当）を計算した値です。未入力は0扱いです。
+          </div>
+          <div id="scoreDebug" class="muted" style="margin-top:6px"></div>
+        </details>
+
+        <div class="muted" style="margin-top:8px">推定割合の動き（参考）</div>
+        <select id="distMode" style="width:100%;max-width:320px">
+          <option value="stable">安定（動き少なめ）</option>
+          <option value="normal">標準</option>
+          <option value="sensitive">敏感（動き大きめ）</option>
+        </select>
         <div class="muted">※公式判定の保証はありません（審査会・医師意見書要素は別）</div>
       </div>
     </div>
@@ -1899,6 +1958,46 @@ function fmtPct(pct){
   return n.toFixed(d) + "%";
 }
 
+
+function fmtPt(v){
+  const n = Number(v);
+  if(!isFinite(n)) return "—";
+  const a = Math.abs(n);
+  const d = (a >= 100) ? 0 : (a >= 10) ? 1 : 2;
+  return n.toFixed(d);
+}
+
+function renderScoreDebug(){
+  const el = $("scoreDebug");
+  if(!el) return;
+
+  // cache は estimate() の先頭でクリアされる（=最新回答で計算）
+  const rows = [
+    ["起居動作", "起居動作"],
+    ["生活機能I", "生活機能1"],
+    ["生活機能II", "生活機能2"],
+    ["視聴覚", "視聴覚"],
+    ["応用日常生活動作", "応用日常"],
+    ["認知機能", "認知"],
+    ["行動障害A", "行動A"],
+    ["行動障害B", "行動B"],
+    ["行動障害C", "行動C"],
+    ["特別医療", "特別医療"],
+    ["麻痺・拘縮", "麻痺拘縮"]
+  ];
+
+  let sum = 0;
+  const html = rows.map(([label, key])=>{
+    const v = Number(getNamed(key)) || 0;
+    sum += v;
+    return `<div class="distRow" style="gap:10px">
+      <div class="distLabel" style="min-width:140px">${esc(label)}</div>
+      <div class="distPct mono" style="width:auto;min-width:90px">${fmtPt(v)}</div>
+    </div>`;
+  }).join("");
+
+  el.innerHTML = html + `<div class="muted small" style="margin-top:6px">合計（参考）: <span class="mono">${fmtPt(sum)}</span></div>`;
+}
 function itemGuideHtml(it){
   const g = ITEM_GUIDE[it.code];
   if(!g) return "";
@@ -2268,7 +2367,7 @@ function scoreAllRules(){
     // incorporate p (区分等該当可能性): 0〜1の想定
     const p0 = Math.max(1e-6, Math.min(1-1e-6, Number(r.p)||0));
     const logit = Math.log(p0/(1-p0));
-    logLike += 0.18*logit;
+    logLike += 0.15*logit;
 
     // specificity bonus
     logLike += 0.02*total;
@@ -2278,39 +2377,69 @@ function scoreAllRules(){
   return scored;
 }
 
-function calcKubunPercentFromScored(scored, topN=15, temp=0.45){
+function calcKubunPercentFromScored(scored, topN=55, temp=0.9, focusWidth=4, penaltyExp=0.95, epsFrac=0.004){
   // dist[k] を 0〜1（割合）で返す（表示側で×100）
-  const sumBy=Object.create(null);
+  // 目的：入力の影響で「動く」一方で、1チェックで100%に張り付かないようにする
+  const sumBy = Object.create(null);
   if(!scored || !scored.length) return {};
 
-  // 「最も条件が合っているルール群」に寄せる（動きやすくする）
-  let minUnsat=Infinity;
+  // 最小未充足（条件が合っている度合い）
+  let minUnsat = Infinity;
   for(const s of scored){
     const u = Number(s.unsat);
     if(Number.isFinite(u)) minUnsat = Math.min(minUnsat, u);
   }
-  if(!Number.isFinite(minUnsat)) minUnsat=0;
+  if(!Number.isFinite(minUnsat)) minUnsat = 0;
 
-  const focus = scored.filter(s => (Number(s.unsat)||0) <= minUnsat + 1);
-  const sorted = focus.slice().sort((a,b)=>b.logLike-a.logLike).slice(0, Math.max(1, topN));
+  // フォーカス幅：最小未充足の周辺に寄せる（ただし狭すぎると偏るので自動で少し広げる）
+  let fw = Number(focusWidth);
+  if(!Number.isFinite(fw) || fw < 0) fw = 0;
 
-  const max=sorted[0]?.logLike ?? 0;
-  let Z=0;
+  const need = Math.max(30, Math.min(120, (Number(topN)||55) * 2));
+  let focus = scored.filter(s => (Number(s.unsat)||0) <= minUnsat + fw);
+
+  // 狭すぎたら自動拡張（区分が1つに固まるのを抑える）
+  if(focus.length < need){
+    focus = scored.filter(s => (Number(s.unsat)||0) <= minUnsat + (fw + 2));
+  }
+  if(focus.length < need){
+    focus = scored.filter(s => (Number(s.unsat)||0) <= minUnsat + (fw + 4));
+  }
+  if(!focus.length) focus = scored;
+
+  const sorted = focus
+    .slice()
+    .sort((a,b)=>b.logLike-a.logLike)
+    .slice(0, Math.max(1, Number(topN)||55));
+
+  // softmax（温度）＋ 未充足ペナルティ
+  const max = sorted[0]?.logLike ?? 0;
+  const t = Math.max(1e-6, Number(temp)||1);
+  const pe = Number.isFinite(Number(penaltyExp)) ? Number(penaltyExp) : 0.95;
+
+  let Z = 0;
   for(const s of sorted){
-    const base = Math.exp((s.logLike - max)/Math.max(1e-6, Number(temp)||1));
+    const base = Math.exp((s.logLike - max)/t);
     const u = Number(s.unsat)||0;
-    const penalty = Math.exp(-1.2*u); // 未充足が増えるほど強く減衰
+    const penalty = Math.exp(-pe * u);
     const w = base * penalty;
 
     const k = Number(s.r?.k)||0;
-    sumBy[k]=(sumBy[k]||0)+w;
+    sumBy[k] = (sumBy[k]||0) + w;
     Z += w;
   }
 
-  const out=Object.create(null);
-  for(let k=0;k<=6;k++) out[k]=0;
-  for(const k of Object.keys(sumBy)){
-    out[k]= Z>0 ? (sumBy[k]/Z) : 0;
+  // ゼロ/100%張り付き防止：微小な平滑化（Zの割合で入れる）
+  const K = 7; // 0..6
+  const ef = Number.isFinite(Number(epsFrac)) ? Number(epsFrac) : 0.004;
+  const eps = (Z>0 ? Z*ef : ef);
+
+  const out = Object.create(null);
+  const denom = Z + eps*K;
+
+  for(let k=0;k<=6;k++){
+    const v = (sumBy[k]||0) + eps;
+    out[k] = denom>0 ? (v/denom) : (1/K);
   }
   return out;
 }
@@ -2374,7 +2503,7 @@ function estimate(){
     const de = $("kpiDist");
     if(de) de.innerHTML = "";
     $("why").innerHTML = "";
-    return;
+    syncFloatingFromKPI(); return;
   }
   const scored = scoreAllRules();
   if(!scored.length){
@@ -2382,16 +2511,30 @@ function estimate(){
     $("kpiLogic").textContent="—";
     $("kpiP").textContent="—";
     $("why").innerHTML="";
-    return;
+    syncFloatingFromKPI(); return;
   }
 
   const exact = scored.filter(s=>s.okAll);
 
   // 区分別（推定割合・参考）
-  // ・exact がある時：オールクリアしたロジックだけで p を区分ごとに合算して正規化
-  // ・exact がない時：近似スコア（logLike）で重み付けして正規化
-  const dist = exact.length ? calcKubunPercentFromExact(exact) : calcKubunPercentFromScored(scored, 40, 0.9);
-  if(distEl) distEl.innerHTML = renderKubunPercent(dist);
+  // この表示は「なめらか（近似）」を基本にします（1つの一致で100%になりやすいのを避けるため）。
+  // 厳密一致（オールクリア）がある場合は件数と内訳を補足表示します。
+  let dist;
+  const modeSel = $("distMode");
+  const mode = (localStorage.getItem("distMode") || (modeSel ? modeSel.value : "normal") || "normal");
+
+  if(mode==="stable") dist = calcKubunPercentFromScored(scored, 90, 1.20, 6, 0.65, 0.006);
+  else if(mode==="sensitive") dist = calcKubunPercentFromScored(scored, 60, 0.80, 4, 1.05, 0.003);
+  else dist = calcKubunPercentFromScored(scored, 75, 0.95, 4, 0.95, 0.004);
+
+  let distHtml = distEl ? renderKubunPercent(dist) : "";
+  if(exact.length){
+    const ex = calcKubunPercentFromExact(exact);
+    const top = Object.keys(ex).map(k=>({k:+k, v:+ex[k]})).sort((a,b)=>b.v-a.v).slice(0,3);
+    const topTxt = top.filter(x=>x.v>0).map(x=>`${x.k===0?"非該当":"区分"+x.k} ${fmtPct(x.v*100)}`).join(" / ") || "—";
+    distHtml += `<div class="muted small" style="margin-top:6px">厳密一致: ${exact.length}件（内訳: ${esc(topTxt)}）</div>`;
+  }
+  if(distEl) distEl.innerHTML = distHtml;
 
   // 推定区分（kpiKubun）は「推定割合」で一番大きい区分に合わせる
   let bestK = 0;
@@ -2459,7 +2602,7 @@ function estimate(){
     $("kpiLogic").textContent="—";
     $("kpiP").textContent="—";
     $("why").innerHTML="";
-    return;
+    syncFloatingFromKPI(); return;
   }
 
   const best = bestS.r;
@@ -2488,6 +2631,9 @@ function estimate(){
       <div class="whyBar"><div class="fill" style="width:${bar.toFixed(1)}%"></div><span class="small mono">${k.dist.toFixed(3)}</span></div>
     </div>`;
   }).join("");
+
+  renderScoreDebug();
+  syncFloatingFromKPI();
 }
 
 function buildDraft(){
@@ -3613,6 +3759,116 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }, true);
+})();
+</script>
+
+
+<!-- Floating summary -->
+<div id="floatingSummary" role="status" aria-live="polite">
+  <button type="button" class="fsClose" id="fsClose" aria-label="閉じる">×</button>
+  <div class="fsRow">
+    <div>
+      <div class="fsTitle" id="fsKubun">区分— (推定)</div>
+      <div class="fsSub" id="fsLogicP">該当ロジック：— / p：—</div>
+    </div>
+    <div class="fsBtns">
+      <button type="button" id="fsToggle">詳細</button>
+      <button type="button" id="fsJump">この表示へ</button>
+    </div>
+  </div>
+  <div class="fsDetail" id="fsDetail"></div>
+</div>
+
+
+<script>
+(function(){
+  function syncFloatingFromKPI(){
+    const fs = document.getElementById("floatingSummary");
+    if(!fs) return;
+
+    const hidden = localStorage.getItem("hideFloatingSummary")==="1";
+    fs.style.display = hidden ? "none" : "block";
+    if(hidden) return;
+
+    const kubun = (document.getElementById("kpiKubun")?.textContent || "—").trim();
+    const logic = (document.getElementById("kpiLogic")?.textContent || "—").trim();
+    const p = (document.getElementById("kpiP")?.textContent || "—").trim();
+    const distHTML = document.getElementById("kpiDist")?.innerHTML || "";
+
+    const a = document.getElementById("fsKubun");
+    const b = document.getElementById("fsLogicP");
+    const d = document.getElementById("fsDetail");
+
+    if(a) a.textContent = `${kubun} (推定)`;
+    if(b) b.textContent = `該当ロジック：${logic} / p：${p}`;
+    if(d) d.innerHTML = distHTML || '<span class="muted">（区分別割合は未計算）</span>';
+  }
+
+  // expose so estimate() can call it
+  window.syncFloatingFromKPI = syncFloatingFromKPI;
+
+  function initFloating(){
+    const fs = document.getElementById("floatingSummary");
+    if(!fs) return;
+
+    // restore select
+    const sel = document.getElementById("distMode");
+    if(sel){
+      const saved = localStorage.getItem("distMode");
+      if(saved) sel.value = saved;
+      if(!saved) localStorage.setItem("distMode", sel.value || "normal");
+      sel.addEventListener("change", ()=>{
+        localStorage.setItem("distMode", sel.value);
+        try{ if(typeof estimate==="function") estimate(); }catch(_){}
+      });
+    }
+
+    const btnToggle = document.getElementById("fsToggle");
+    const btnJump = document.getElementById("fsJump");
+    const btnClose = document.getElementById("fsClose");
+    const fsDetail = document.getElementById("fsDetail");
+
+    if(btnToggle && fsDetail){
+      btnToggle.addEventListener("click", ()=>{
+        const isOpen = fsDetail.style.display === "block";
+        fsDetail.style.display = isOpen ? "none" : "block";
+        btnToggle.textContent = isOpen ? "詳細" : "詳細を閉じる";
+      });
+    }
+
+    if(btnJump){
+      btnJump.addEventListener("click", ()=>{
+        const t = document.getElementById("kpiBoxEstimate") || document.getElementById("kpiKubun");
+        if(t && t.scrollIntoView){
+          t.scrollIntoView({behavior:"smooth", block:"start"});
+        }
+      });
+    }
+
+    if(btnClose){
+      btnClose.addEventListener("click", ()=>{
+        localStorage.setItem("hideFloatingSummary","1");
+        fs.style.display = "none";
+      });
+    }
+
+    // if user hid it once, allow show by pressing Shift+R
+    document.addEventListener("keydown", (e)=>{
+      if(e.shiftKey && (e.key==="R" || e.key==="r")){
+        localStorage.removeItem("hideFloatingSummary");
+        fs.style.display = "block";
+        syncFloatingFromKPI();
+      }
+    });
+
+    syncFloatingFromKPI();
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded", initFloating);
+  }else{
+    initFloating();
+  }
 })();
 </script>
 
