@@ -2278,7 +2278,7 @@ function scoreAllRules(){
   return scored;
 }
 
-function calcKubunPercentFromScored(scored, topN=25, temp=0.55){
+function calcKubunPercentFromScored(scored, topN=15, temp=0.45){
   // dist[k] を 0〜1（割合）で返す（表示側で×100）
   const sumBy=Object.create(null);
   if(!scored || !scored.length) return {};
